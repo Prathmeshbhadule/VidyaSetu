@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Star,
   CheckCircle,
+  Video as VideoIcon,
 } from 'lucide-react';
 
 export const StudentHome: React.FC = () => {
@@ -166,75 +167,121 @@ export const StudentHome: React.FC = () => {
       )}
 
       {/* Big Action Tiles (Tablet-First Grid) */}
-      <div className={`grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 ${isSimpleMode ? 'text-lg' : ''}`}>
+      <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 ${isSimpleMode ? 'text-lg' : ''}`}>
         {/* Tile 1: Lessons */}
         <button
           onClick={() => navigate('/student/lessons')}
-          className="flex items-center gap-5 p-6 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 hover:border-orange-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[120px]"
+          className="flex items-center gap-4 p-5 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-50 border-2 border-amber-200 hover:border-orange-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[110px]"
         >
-          <div className="w-16 h-16 rounded-2xl bg-orange-500 text-white flex items-center justify-center text-3xl shadow-md min-w-[64px]">
-            <BookOpen className="w-8 h-8" />
+          <div className="w-14 h-14 rounded-2xl bg-orange-500 text-white flex items-center justify-center text-2xl shadow-md min-w-[56px]">
+            <BookOpen className="w-7 h-7" />
           </div>
           <div>
-            <h3 className="font-black text-xl text-amber-950">
+            <h3 className="font-black text-lg text-amber-950">
               {t('student.myLessons')}
             </h3>
-            <p className="text-xs sm:text-sm text-amber-800 mt-1 font-medium">
-              Read stories, watch video guides, and practice
+            <p className="text-xs text-amber-800 mt-0.5 font-medium">
+              Reading stories & text lessons
             </p>
           </div>
         </button>
 
-        {/* Tile 2: TaRL Level Check (Adaptive Assessment) */}
+        {/* Tile 2: Video Lectures */}
+        <button
+          onClick={() => navigate('/student/videos')}
+          className="flex items-center gap-4 p-5 rounded-3xl bg-gradient-to-br from-purple-50 to-pink-50 border-2 border-purple-200 hover:border-purple-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[110px]"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-600 text-white flex items-center justify-center text-2xl shadow-md min-w-[56px]">
+            <VideoIcon className="w-7 h-7" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-black text-lg text-purple-950">
+                Video Lectures
+              </h3>
+              <span className="bg-purple-200 text-purple-900 text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                240p/360p
+              </span>
+            </div>
+            <p className="text-xs text-purple-800 mt-0.5 font-medium">
+              Offline animated lessons with resume
+            </p>
+          </div>
+        </button>
+
+        {/* Tile 3: Practice Quizzes & Results */}
+        <button
+          onClick={() => navigate('/student/quizzes')}
+          className="flex items-center gap-4 p-5 rounded-3xl bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 hover:border-blue-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[110px]"
+        >
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-600 text-white flex items-center justify-center text-2xl shadow-md min-w-[56px]">
+            <CheckCircle className="w-7 h-7" />
+          </div>
+          <div>
+            <div className="flex items-center gap-1.5">
+              <h3 className="font-black text-lg text-blue-950">
+                Quizzes & Results
+              </h3>
+              <span className="bg-blue-200 text-blue-900 text-[10px] font-black px-1.5 py-0.5 rounded-full">
+                ⭐⭐⭐ Stars
+              </span>
+            </div>
+            <p className="text-xs text-blue-800 mt-0.5 font-medium">
+              Review answers, scores & badges
+            </p>
+          </div>
+        </button>
+
+        {/* Tile 4: TaRL Level Check (Adaptive Assessment) */}
         <button
           onClick={() => navigate('/student/adaptive')}
-          className="flex items-center gap-5 p-6 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 hover:border-emerald-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[120px]"
+          className="flex items-center gap-4 p-5 rounded-3xl bg-gradient-to-br from-emerald-50 to-teal-50 border-2 border-emerald-200 hover:border-emerald-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[110px]"
         >
-          <div className="w-16 h-16 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-3xl shadow-md min-w-[64px]">
-            <GraduationCap className="w-8 h-8" />
+          <div className="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center text-2xl shadow-md min-w-[56px]">
+            <GraduationCap className="w-7 h-7" />
           </div>
           <div>
-            <h3 className="font-black text-xl text-emerald-950">
+            <h3 className="font-black text-lg text-emerald-950">
               {t('student.takeAdaptiveAssessment')}
             </h3>
-            <p className="text-xs sm:text-sm text-emerald-800 mt-1 font-medium">
-              Find your ideal learning level (Level 1 to 5)
+            <p className="text-xs text-emerald-800 mt-0.5 font-medium">
+              TaRL Diagnostic Level Check (1-5)
             </p>
           </div>
         </button>
 
-        {/* Tile 3: Government Schemes */}
+        {/* Tile 5: Government Schemes */}
         <button
           onClick={() => navigate('/schemes')}
-          className="flex items-center gap-5 p-6 rounded-3xl bg-gradient-to-br from-rose-50 to-amber-50 border-2 border-rose-200 hover:border-rose-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[120px]"
+          className="flex items-center gap-4 p-5 rounded-3xl bg-gradient-to-br from-rose-50 to-amber-50 border-2 border-rose-200 hover:border-rose-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[110px]"
         >
-          <div className="w-16 h-16 rounded-2xl bg-rose-500 text-white flex items-center justify-center text-3xl shadow-md min-w-[64px]">
-            <Award className="w-8 h-8" />
+          <div className="w-14 h-14 rounded-2xl bg-rose-500 text-white flex items-center justify-center text-2xl shadow-md min-w-[56px]">
+            <Award className="w-7 h-7" />
           </div>
           <div>
-            <h3 className="font-black text-xl text-rose-950">
+            <h3 className="font-black text-lg text-rose-950">
               {t('student.mySchemes')}
             </h3>
-            <p className="text-xs sm:text-sm text-rose-800 mt-1 font-medium">
-              Scholarships, mid-day meals, bicycles, and checklists
+            <p className="text-xs text-rose-800 mt-0.5 font-medium">
+              Scholarships, uniforms & bicycles
             </p>
           </div>
         </button>
 
-        {/* Tile 4: My Learning Journey */}
+        {/* Tile 6: My Learning Journey */}
         <button
           onClick={() => navigate('/student/progress')}
-          className="flex items-center gap-5 p-6 rounded-3xl bg-gradient-to-br from-indigo-50 to-sky-50 border-2 border-indigo-200 hover:border-indigo-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[120px]"
+          className="flex items-center gap-4 p-5 rounded-3xl bg-gradient-to-br from-indigo-50 to-sky-50 border-2 border-indigo-200 hover:border-indigo-500 shadow-sm hover:shadow-xl active:scale-95 transition-all text-left min-h-[110px]"
         >
-          <div className="w-16 h-16 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-3xl shadow-md min-w-[64px]">
-            <Star className="w-8 h-8 fill-white" />
+          <div className="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-md min-w-[56px]">
+            <Star className="w-7 h-7 fill-white" />
           </div>
           <div>
-            <h3 className="font-black text-xl text-indigo-950">
+            <h3 className="font-black text-lg text-indigo-950">
               {t('student.myProgress')}
             </h3>
-            <p className="text-xs sm:text-sm text-indigo-800 mt-1 font-medium">
-              View your stars, badges, and attendance record
+            <p className="text-xs text-indigo-800 mt-0.5 font-medium">
+              Progress report & printable slip
             </p>
           </div>
         </button>

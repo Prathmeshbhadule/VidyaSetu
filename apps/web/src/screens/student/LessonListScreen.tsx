@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { offlineDb } from '../../db/offline-db.js';
 import { AudioHelpButton } from '../../components/AudioHelpButton.js';
 import { Lesson } from '@vidya-setu/shared';
-import { BookOpen, Sparkles, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { BookOpen, Sparkles, ArrowRight, CheckCircle2, Video as VideoIcon } from 'lucide-react';
 
 export const LessonListScreen: React.FC = () => {
   const { t } = useTranslation();
@@ -39,6 +39,35 @@ export const LessonListScreen: React.FC = () => {
           </p>
         </div>
         <AudioHelpButton text="आपल्या आवडीचा विषय निवडा आणि पाठ वाचण्यास सुरुवात करा." size="sm" />
+      </div>
+
+      {/* Video Lectures Quick Banner */}
+      <div
+        onClick={() => navigate('/student/videos')}
+        className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-2xl p-4 sm:p-5 text-white shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-between gap-4 mb-6"
+      >
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center min-w-[48px]">
+            <VideoIcon className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold uppercase tracking-wider text-purple-200">
+                Offline Video Player
+              </span>
+              <span className="bg-white/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                240p/360p Ready
+              </span>
+            </div>
+            <h3 className="font-black text-base sm:text-lg">
+              Watch Animated Video Lectures (व्हिडिओ व्याख्याने)
+            </h3>
+            <p className="text-xs text-purple-100 font-medium">
+              4 seekable video lessons with resume playback and quiz unlocks
+            </p>
+          </div>
+        </div>
+        <ArrowRight className="w-6 h-6 text-white min-w-[24px]" />
       </div>
 
       {/* Subject Filter Pills */}

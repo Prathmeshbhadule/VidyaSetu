@@ -174,28 +174,38 @@ export const QuizRunnerScreen: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex gap-3">
+          <div className="flex flex-col gap-2.5">
             <button
-              onClick={() => {
-                setCurrentIndex(0);
-                setSelectedAnswers([]);
-                setSelectedOption(null);
-                setIsAnswerRevealed(false);
-                setCompletedResult(null);
-              }}
-              className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-amber-100 text-amber-900 font-bold text-sm hover:bg-amber-200 transition-all min-h-[48px]"
+              onClick={() => navigate('/student/quizzes')}
+              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-sm shadow-md hover:from-emerald-700 hover:to-teal-700 transition-all min-h-[48px]"
             >
-              <RotateCcw className="w-4 h-4" />
-              <span>Retry</span>
+              <Check className="w-4 h-4" />
+              <span>View Detailed Answers & Scorecard (निकाल पहा)</span>
             </button>
 
-            <button
-              onClick={() => navigate('/student/home')}
-              className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-orange-600 text-white font-black text-sm shadow-md hover:bg-orange-700 transition-all min-h-[48px]"
-            >
-              <Home className="w-4 h-4" />
-              <span>Done</span>
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setCurrentIndex(0);
+                  setSelectedAnswers([]);
+                  setSelectedOption(null);
+                  setIsAnswerRevealed(false);
+                  setCompletedResult(null);
+                }}
+                className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-amber-100 text-amber-900 font-bold text-sm hover:bg-amber-200 transition-all min-h-[48px]"
+              >
+                <RotateCcw className="w-4 h-4" />
+                <span>Retry</span>
+              </button>
+
+              <button
+                onClick={() => navigate('/student/home')}
+                className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-orange-600 text-white font-black text-sm shadow-md hover:bg-orange-700 transition-all min-h-[48px]"
+              >
+                <Home className="w-4 h-4" />
+                <span>Home</span>
+              </button>
+            </div>
           </div>
         </div>
       </div>

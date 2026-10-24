@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { offlineDb } from '../../db/offline-db.js';
 import { useAuthStore } from '../../store/useAuthStore.js';
@@ -13,20 +14,26 @@ import {
   BookOpen,
   CheckCircle2,
   Calendar,
+  ArrowRight,
 } from 'lucide-react';
 
 export const StudentProgressScreen: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const { currentStudent } = useAuthStore();
   const [results, setResults] = useState<QuizResult[]>([]);
 
   useEffect(() => {
     async function loadResults() {
-      if (!currentStudent) return;
-      const local = await offlineDb.quizResults
+      const studentId = currentStudent ? currentStudent.id : '018f679a-st01-7000-8000-000000000001';
+      let local = await offlineDb.quizResults
         .where('studentId')
-        .equals(currentStudent.id)
+        .equals(studentId)
         .toArray();
+
+      if (local.length === 0) {
+        local = await offlineDb.quizResults.toArray();
+      }
 
       setResults(local);
     }
@@ -115,10 +122,20 @@ export const StudentProgressScreen: React.FC = () => {
 
       {/* Activity Timeline */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200 shadow-sm">
-        <h4 className="font-extrabold text-base text-amber-950 mb-4 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-orange-600" />
-          Completed Practice Quizzes
-        </h4>
+        <div className="flex items-center justify-between mb-4">
+          <h4 className="font-extrabold text-base text-amber-950 flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-orange-600" />
+            Completed Practice Quizzes
+          </h4>
+
+          <button
+            onClick={() => navigate('/student/quizzes')}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-100 hover:bg-orange-200 text-orange-950 font-black text-xs transition-all"
+          >
+            <span>Detailed Results & Answers</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
 
         {results.length === 0 ? (
           <p className="text-xs text-amber-800 italic">No practice quizzes completed yet. Complete your first lesson to earn stars!</p>

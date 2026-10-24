@@ -6,6 +6,7 @@ import { AudioHelpButton } from '../../components/AudioHelpButton.js';
 import { speechService } from '../../services/speech.js';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { Lesson, Quiz } from '@vidya-setu/shared';
+import { VideoPlayer } from '../../components/VideoPlayer.js';
 import {
   ArrowLeft,
   Volume2,
@@ -14,6 +15,7 @@ import {
   HelpCircle,
   CheckCircle2,
   BookOpen,
+  Video as VideoIcon,
 } from 'lucide-react';
 
 export const LessonReaderScreen: React.FC = () => {
@@ -26,6 +28,7 @@ export const LessonReaderScreen: React.FC = () => {
   const [associatedQuiz, setAssociatedQuiz] = useState<Quiz | null>(null);
   const [isReadingAloud, setIsReadingAloud] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [viewMode, setViewMode] = useState<'text' | 'video'>('video');
 
   useEffect(() => {
     async function fetchLesson() {
@@ -118,9 +121,53 @@ export const LessonReaderScreen: React.FC = () => {
           <h1 className="text-2xl sm:text-3xl font-black text-amber-950 leading-tight">
             {lesson.title}
           </h1>
+
+          {/* Mode Switcher Tabs: Video Lecture vs Reading Text */}
+          <div className="flex items-center gap-2 mt-4 pt-2">
+            <button
+              onClick={() => setViewMode('video')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all min-h-[40px] ${
+                viewMode === 'video'
+                  ? 'bg-orange-600 text-white shadow-md'
+                  : 'bg-amber-100/60 text-amber-900 hover:bg-amber-200'
+              }`}
+            >
+              <VideoIcon className="w-4 h-4" />
+              <span>Watch Video Lecture (व्हिडिओ व्याख्यान)</span>
+            </button>
+
+            <button
+              onClick={() => setViewMode('text')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all min-h-[40px] ${
+                viewMode === 'text'
+                  ? 'bg-orange-600 text-white shadow-md'
+                  : 'bg-amber-100/60 text-amber-900 hover:bg-amber-200'
+              }`}
+            >
+              <BookOpen className="w-4 h-4" />
+              <span>Read Text Lesson (वाचन पाठ)</span>
+            </button>
+          </div>
         </header>
 
-        {/* Content Blocks */}
+        {/* Video Mode */}
+        {viewMode === 'video' && (
+          <div className="mb-6 space-y-4">
+            <VideoPlayer
+              videoId={lesson.id}
+              title={lesson.title}
+              subject={lesson.subject}
+              durationSec={lesson.estimatedMinutes * 60}
+              onComplete={handleMarkComplete}
+            />
+            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs font-medium text-amber-900">
+              💡 <strong>Offline Classroom Tip:</strong> Video plays at 240p/360p resolution. Your playback position is automatically saved so you can resume anytime.
+            </div>
+          </div>
+        )}
+
+        {/* Text Mode (Content Blocks) */}
+        {viewMode === 'text' && (
         <div className="space-y-6 text-slate-800">
           {(lesson.contentBlocks || []).map((block: any, idx: number) => {
             if (block.type === 'HEADING') {
@@ -167,6 +214,7 @@ export const LessonReaderScreen: React.FC = () => {
             );
           })}
         </div>
+        )}
 
         {/* Lesson Footer & Quiz Unlock Action */}
         <div className="mt-10 pt-6 border-t border-amber-100 flex flex-col sm:flex-row items-center justify-between gap-4">

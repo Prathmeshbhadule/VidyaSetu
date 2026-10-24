@@ -11,6 +11,8 @@ import { LessonReaderScreen } from './screens/student/LessonReaderScreen.js';
 import { QuizRunnerScreen } from './screens/student/QuizRunnerScreen.js';
 import { AdaptiveAssessmentScreen } from './screens/student/AdaptiveAssessmentScreen.js';
 import { StudentProgressScreen } from './screens/student/StudentProgressScreen.js';
+import { VideoLecturesScreen } from './screens/student/VideoLecturesScreen.js';
+import { QuizResultsScreen } from './screens/student/QuizResultsScreen.js';
 import { SchemesBrowserScreen } from './screens/schemes/SchemesBrowserScreen.js';
 import { TeacherAttendanceScreen } from './screens/teacher/TeacherAttendanceScreen.js';
 import { TeacherTaRLScreen } from './screens/teacher/TeacherTaRLScreen.js';
@@ -66,6 +68,8 @@ const AppContent: React.FC = () => {
           <Route path="/student/home" element={<StudentHome />} />
           <Route path="/student/lessons" element={<LessonListScreen />} />
           <Route path="/student/lessons/:id" element={<LessonReaderScreen />} />
+          <Route path="/student/videos" element={<VideoLecturesScreen />} />
+          <Route path="/student/quizzes" element={<QuizResultsScreen />} />
           <Route path="/student/quizzes/:id" element={<QuizRunnerScreen />} />
           <Route path="/student/adaptive" element={<AdaptiveAssessmentScreen />} />
           <Route path="/student/progress" element={<StudentProgressScreen />} />

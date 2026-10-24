@@ -13,6 +13,8 @@ import {
   Layers,
   HeartHandshake,
   Bell,
+  Video as VideoIcon,
+  Home,
 } from 'lucide-react';
 
 export const BottomNav: React.FC = () => {
@@ -47,10 +49,11 @@ export const BottomNav: React.FC = () => {
       case 'STUDENT':
       default:
         return [
-          { to: '/student/home', icon: <BookOpen className="w-6 h-6" />, label: t('student.myLessons') },
-          { to: '/student/adaptive', icon: <GraduationCap className="w-6 h-6" />, label: t('student.assessedLevel') },
-          { to: '/schemes', icon: <Award className="w-6 h-6" />, label: t('student.mySchemes') },
-          { to: '/student/progress', icon: <Award className="w-6 h-6" />, label: t('student.myProgress') },
+          { to: '/student/home', icon: <Home className="w-6 h-6" />, label: 'Home' },
+          { to: '/student/videos', icon: <VideoIcon className="w-6 h-6" />, label: 'Videos' },
+          { to: '/student/quizzes', icon: <CheckSquare className="w-6 h-6" />, label: 'Quizzes & Results' },
+          { to: '/student/adaptive', icon: <GraduationCap className="w-6 h-6" />, label: 'Level Check' },
+          { to: '/schemes', icon: <Award className="w-6 h-6" />, label: 'Schemes' },
         ];
     }
   };
