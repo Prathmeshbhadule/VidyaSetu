@@ -7,6 +7,20 @@ export default {
   theme: {
     extend: {
       colors: {
+        pw: {
+          navy: '#0c1024',
+          dark: '#111827',
+          card: '#1e293b',
+          blue: '#2563eb',
+          indigo: '#4f46e5',
+          purple: '#7c3aed',
+          orange: '#ea580c',
+          amber: '#f59e0b',
+          emerald: '#10b981',
+          slate: '#0f172a',
+          surface: '#f8fafc',
+          border: '#e2e8f0',
+        },
         brand: {
           50: '#fffbeb',
           100: '#fef3c7',

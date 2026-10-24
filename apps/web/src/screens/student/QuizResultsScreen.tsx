@@ -275,71 +275,71 @@ export const QuizResultsScreen: React.FC = () => {
   const assessedLevel = currentStudent ? currentStudent.assessedLevel : 2;
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28 space-y-5">
       {/* Top Navigation Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <button
             onClick={() => navigate('/student/home')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs transition-all mb-2 min-h-[36px]"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all mb-2 min-h-[36px]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>{t('common.back')}</span>
+            <span>Back to Classroom (बॅचवर परत जा)</span>
           </button>
-          <h2 className="text-2xl sm:text-3xl font-black text-amber-950 flex items-center gap-2">
-            <CheckCircle2 className="w-7 h-7 text-emerald-600" />
-            <span>Practice Quizzes & Quiz Results (चाचण्या व निकाल)</span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
+            <CheckCircle2 className="w-7 h-7 text-blue-600" />
+            <span>PW Test Series & Scorecards (चाचण्या व निकाल)</span>
           </h2>
-          <p className="text-xs sm:text-sm text-amber-800 font-medium mt-0.5">
-            Track quiz attempts, answer reviews, scores, and star badges
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+            Detailed solution sheets, accuracy analysis, and question reviews
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => window.print()}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs transition-all min-h-[44px]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all min-h-[44px]"
           >
             <Printer className="w-4 h-4" />
-            <span>Print Report</span>
+            <span>Print Scorecard</span>
           </button>
           <AudioHelpButton text="आपले चाचणी निकाल आणि मिळालेले गुण येथे पहा." size="sm" />
         </div>
       </div>
 
       {/* Hero Stats Card */}
-      <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-cyan-700 rounded-3xl p-6 sm:p-8 text-white shadow-xl mb-6 relative overflow-hidden">
+      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden border border-slate-800">
         <div className="absolute right-0 bottom-0 opacity-15 translate-x-6 translate-y-6 pointer-events-none">
           <Sparkles className="w-48 h-48" />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center text-4xl shadow-inner">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-blue-600/30 border border-blue-500/40 flex items-center justify-center text-4xl shadow-inner">
               ⭐
             </div>
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-200">
-                Official Student Scorecard
+              <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
+                Official Student Scorecard • Safar Batch
               </span>
               <h3 className="text-2xl sm:text-3xl font-black">{studentName}</h3>
-              <p className="text-xs text-emerald-100 font-medium mt-0.5">
-                Current Level {assessedLevel} • Overall Accuracy: {overallPercentage}%
+              <p className="text-xs text-slate-300 font-medium mt-0.5">
+                TaRL Level {assessedLevel} Certified • Overall Accuracy: {overallPercentage}%
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-white/20 text-center min-w-[100px]">
-              <span className="text-[11px] font-bold text-emerald-200 uppercase">Quizzes</span>
-              <div className="text-2xl sm:text-3xl font-black text-amber-300 mt-0.5">
+            <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-slate-700 text-center min-w-[100px]">
+              <span className="text-[11px] font-bold text-slate-400 uppercase">DPP Tests</span>
+              <div className="text-2xl sm:text-3xl font-black text-amber-400 mt-0.5">
                 {results.length}
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-white/20 text-center min-w-[100px]">
-              <span className="text-[11px] font-bold text-emerald-200 uppercase">Points</span>
-              <div className="text-2xl sm:text-3xl font-black text-white mt-0.5">
+            <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl p-3 sm:p-4 border border-slate-700 text-center min-w-[100px]">
+              <span className="text-[11px] font-bold text-slate-400 uppercase">Total Points</span>
+              <div className="text-2xl sm:text-3xl font-black text-emerald-400 mt-0.5">
                 {totalScore} / {totalMax}
               </div>
             </div>
@@ -348,13 +348,13 @@ export const QuizResultsScreen: React.FC = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 mb-6 border-b border-amber-200 pb-2">
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
         <button
           onClick={() => setActiveTab('results')}
           className={`px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all min-h-[44px] flex items-center gap-2 ${
             activeTab === 'results'
-              ? 'bg-orange-600 text-white shadow-md'
-              : 'bg-white text-amber-900 border border-amber-200 hover:bg-amber-100/50'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
           }`}
         >
           <Award className="w-4 h-4" />
@@ -365,12 +365,12 @@ export const QuizResultsScreen: React.FC = () => {
           onClick={() => setActiveTab('quizzes')}
           className={`px-5 py-2.5 rounded-xl font-black text-xs sm:text-sm transition-all min-h-[44px] flex items-center gap-2 ${
             activeTab === 'quizzes'
-              ? 'bg-orange-600 text-white shadow-md'
-              : 'bg-white text-amber-900 border border-amber-200 hover:bg-amber-100/50'
+              ? 'bg-blue-600 text-white shadow-md'
+              : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>Available Quizzes ({quizzes.length})</span>
+          <span>Available DPP Tests ({quizzes.length})</span>
         </button>
       </div>
 
@@ -397,28 +397,28 @@ export const QuizResultsScreen: React.FC = () => {
               return (
                 <div
                   key={result.id}
-                  className="bg-white rounded-3xl border-2 border-amber-200 shadow-sm overflow-hidden transition-all hover:border-orange-400"
+                  className="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden transition-all hover:border-blue-400"
                 >
                   {/* Card Header / Summary */}
                   <div
                     onClick={() => setExpandedResultId(isExpanded ? null : result.id)}
-                    className="p-5 sm:p-6 cursor-pointer flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-amber-50/50 to-white"
+                    className="p-5 sm:p-6 cursor-pointer flex flex-wrap items-center justify-between gap-4 bg-gradient-to-r from-slate-50/50 to-white"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-800 font-black text-lg flex items-center justify-center min-w-[48px]">
+                      <div className="w-12 h-12 rounded-2xl bg-blue-50 text-blue-700 font-black text-lg flex items-center justify-center min-w-[48px] border border-blue-200">
                         #{idx + 1}
                       </div>
                       <div>
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="px-2 py-0.5 rounded-full bg-orange-100 text-orange-800 font-extrabold text-[10px] uppercase">
-                            {matchedQuiz?.subject || 'PRACTICE'}
+                          <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 font-extrabold text-[10px] uppercase">
+                            {matchedQuiz?.subject || 'DPP PRACTICE'}
                           </span>
-                          <span className="text-[11px] font-bold text-amber-700 flex items-center gap-1">
-                            <Calendar className="w-3 h-3 text-amber-600" />
+                          <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1">
+                            <Calendar className="w-3 h-3 text-slate-400" />
                             {new Date(result.submittedAt).toLocaleDateString()}
                           </span>
                         </div>
-                        <h4 className="font-black text-amber-950 text-base sm:text-lg">
+                        <h4 className="font-black text-slate-900 text-base sm:text-lg">
                           {matchedQuiz?.title || 'Comprehensive Practice Quiz'}
                         </h4>
                       </div>
@@ -426,7 +426,7 @@ export const QuizResultsScreen: React.FC = () => {
 
                     <div className="flex items-center gap-4">
                       <div className="text-right">
-                        <div className="text-xl sm:text-2xl font-black text-emerald-600">
+                        <div className="text-xl sm:text-2xl font-black text-blue-600">
                           {result.score} / {result.maxScore}
                         </div>
                         <div className="flex items-center justify-end gap-1 text-amber-400 mt-0.5">

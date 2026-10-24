@@ -92,23 +92,23 @@ export const VideoLecturesScreen: React.FC = () => {
     : sampleLectures.filter((item) => item.subject === selectedSubject);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28 space-y-5">
       {/* Top Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <button
             onClick={() => navigate('/student/home')}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs transition-all mb-2 min-h-[36px]"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all mb-2 min-h-[36px]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>{t('common.back')}</span>
+            <span>Back to Classroom (बॅचवर परत जा)</span>
           </button>
-          <h2 className="text-2xl sm:text-3xl font-black text-amber-950 flex items-center gap-2">
-            <VideoIcon className="w-7 h-7 text-orange-600" />
-            <span>Video Lectures (व्हिडिओ व्याख्याने)</span>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
+            <VideoIcon className="w-7 h-7 text-blue-600" />
+            <span>PW Video Lectures (व्हिडिओ व्याख्याने)</span>
           </h2>
-          <p className="text-xs sm:text-sm text-amber-800 font-medium mt-0.5">
-            Offline 240p/360p video lessons with seekable playback and practice quizzes
+          <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
+            Offline 240p/360p video lessons with seekable playback and attached DPP tests
           </p>
         </div>
 
@@ -119,45 +119,47 @@ export const VideoLecturesScreen: React.FC = () => {
 
       {/* Active Video Player Stage */}
       {activeLecture && (
-        <div className="mb-8">
-          <VideoPlayer
-            videoId={activeLecture.id}
-            title={activeLecture.title}
-            subject={activeLecture.subject}
-            durationSec={activeLecture.durationSec}
-            onComplete={() => {
-              // Automatically triggers quiz unlock action
-            }}
-          />
+        <div className="space-y-3">
+          <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950">
+            <VideoPlayer
+              videoId={activeLecture.id}
+              title={activeLecture.title}
+              subject={activeLecture.subject}
+              durationSec={activeLecture.durationSec}
+              onComplete={() => {
+                // Automatically triggers quiz unlock action
+              }}
+            />
+          </div>
 
           {/* Under-Video Lecture Meta */}
-          <div className="bg-white rounded-2xl p-5 border-2 border-amber-200 shadow-sm mt-3 flex flex-wrap items-center justify-between gap-4">
+          <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
             <div>
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 font-extrabold text-[11px] uppercase">
+                <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-black text-[11px] uppercase">
                   {activeLecture.subject}
                 </span>
-                <span className="text-xs font-bold text-amber-700">
+                <span className="text-xs font-bold text-slate-500">
                   Grade {activeLecture.grade} • Level {activeLecture.level}
                 </span>
                 <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  Cached Offline
+                  ● Offline Ready
                 </span>
               </div>
-              <h3 className="text-lg sm:text-xl font-black text-amber-950">
+              <h3 className="text-lg sm:text-xl font-black text-slate-900">
                 {activeLecture.title}
               </h3>
-              <p className="text-xs text-amber-800 font-medium mt-1">
-                {activeLecture.description}
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Faculty: Sunil Patil Sir • Master Teacher
               </p>
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigate(`/student/quizzes/${activeLecture.quizId}`)}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-xs shadow-md transition-all min-h-[44px]"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all min-h-[44px]"
               >
-                <span>Take Practice Quiz</span>
+                <span>Solve DPP Quiz</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -167,8 +169,8 @@ export const VideoLecturesScreen: React.FC = () => {
 
       {/* Subject Filter Tabs */}
       <div className="flex items-center justify-between mb-4">
-        <h4 className="font-black text-lg text-amber-950 flex items-center gap-2">
-          <PlayCircle className="w-5 h-5 text-orange-600" />
+        <h4 className="font-black text-lg text-slate-900 flex items-center gap-2">
+          <PlayCircle className="w-5 h-5 text-blue-600" />
           <span>All Video Lessons ({filteredLectures.length})</span>
         </h4>
 
@@ -179,8 +181,8 @@ export const VideoLecturesScreen: React.FC = () => {
               onClick={() => setSelectedSubject(sub)}
               className={`px-3 py-1.5 rounded-xl text-xs font-extrabold uppercase transition-all min-h-[36px] ${
                 selectedSubject === sub
-                  ? 'bg-orange-600 text-white shadow-sm'
-                  : 'bg-white text-amber-900 border border-amber-200 hover:bg-amber-100/50'
+                  ? 'bg-blue-600 text-white shadow-sm'
+                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
               }`}
             >
               {sub}
@@ -204,39 +206,39 @@ export const VideoLecturesScreen: React.FC = () => {
               }}
               className={`rounded-3xl p-5 border-2 transition-all cursor-pointer flex flex-col justify-between ${
                 isSelected
-                  ? 'bg-amber-100/50 border-orange-500 shadow-md ring-2 ring-orange-400/40'
-                  : 'bg-white border-amber-200 hover:border-orange-400 hover:shadow-lg'
+                  ? 'bg-blue-50/50 border-blue-500 shadow-md ring-2 ring-blue-400/30'
+                  : 'bg-white border-slate-200 hover:border-blue-400 hover:shadow-lg'
               }`}
             >
               <div>
                 <div className="flex items-center justify-between gap-2 mb-2.5">
-                  <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 font-extrabold text-[11px] uppercase">
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-extrabold text-[11px] uppercase">
                     {lecture.subject}
                   </span>
-                  <div className="flex items-center gap-1.5 text-xs text-amber-800 font-bold">
-                    <Clock className="w-3.5 h-3.5 text-orange-600" />
+                  <div className="flex items-center gap-1.5 text-xs text-slate-600 font-bold">
+                    <Clock className="w-3.5 h-3.5 text-blue-600" />
                     <span>~{mins} min</span>
                   </div>
                 </div>
 
-                <h4 className="font-extrabold text-amber-950 text-base leading-snug line-clamp-2">
+                <h4 className="font-extrabold text-slate-900 text-base leading-snug line-clamp-2">
                   {lecture.title}
                 </h4>
 
-                <p className="text-xs text-amber-800 line-clamp-2 mt-1 font-medium">
+                <p className="text-xs text-slate-600 line-clamp-2 mt-1 font-medium">
                   {lecture.description}
                 </p>
               </div>
 
-              <div className="flex items-center justify-between pt-4 mt-4 border-t border-amber-100">
-                <span className="text-[11px] text-amber-700 font-semibold flex items-center gap-1">
-                  <HardDrive className="w-3.5 h-3.5 text-slate-500" />
+              <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
+                <span className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
+                  <HardDrive className="w-3.5 h-3.5 text-slate-400" />
                   {lecture.sizeMb} MB • 240p/360p
                 </span>
 
-                <div className="inline-flex items-center gap-1.5 text-xs font-black text-orange-600">
+                <div className="inline-flex items-center gap-1.5 text-xs font-black text-blue-600">
                   <span>{isSelected ? 'Now Playing' : 'Play Video'}</span>
-                  <PlayCircle className="w-4 h-4 fill-orange-600 text-white" />
+                  <PlayCircle className="w-4 h-4 fill-blue-600 text-white" />
                 </div>
               </div>
             </div>

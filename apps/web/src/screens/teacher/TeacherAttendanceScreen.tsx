@@ -139,11 +139,11 @@ export const TeacherAttendanceScreen: React.FC = () => {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-amber-950 flex items-center gap-2">
-            <CheckSquare className="w-7 h-7 text-orange-600" />
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
+            <CheckSquare className="w-7 h-7 text-blue-600" />
             {t('teacher.markAttendance')}
           </h2>
-          <p className="text-xs sm:text-sm text-amber-800 font-medium mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
             {t('teacher.allPresentByDefault')}
           </p>
         </div>
@@ -163,8 +163,8 @@ export const TeacherAttendanceScreen: React.FC = () => {
               onClick={() => setSelectedDate(dateStr)}
               className={`px-4 py-2 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap min-h-[44px] ${
                 isSelected
-                  ? 'bg-orange-600 text-white shadow-md shadow-orange-600/30'
-                  : 'bg-white text-amber-900 border border-amber-200 hover:bg-amber-100/60'
+                  ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30'
+                  : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
               }`}
             >
               <Calendar className="w-4 h-4" />
@@ -176,29 +176,29 @@ export const TeacherAttendanceScreen: React.FC = () => {
 
       {/* Summary Stats Card */}
       <div className="grid grid-cols-3 gap-3 mb-6">
-        <div className="bg-white rounded-2xl p-4 border border-amber-200 text-center shadow-sm">
-          <span className="text-[11px] uppercase font-extrabold text-amber-700">Present</span>
+        <div className="bg-white rounded-2xl p-4 border border-slate-200 text-center shadow-sm">
+          <span className="text-[11px] uppercase font-extrabold text-slate-500">Present</span>
           <div className="text-2xl font-black text-emerald-600 mt-0.5">{presentCount}</div>
         </div>
-        <div className="bg-white rounded-2xl p-4 border border-amber-200 text-center shadow-sm">
-          <span className="text-[11px] uppercase font-extrabold text-amber-700">Absent</span>
+        <div className="bg-white rounded-2xl p-4 border border-slate-200 text-center shadow-sm">
+          <span className="text-[11px] uppercase font-extrabold text-slate-500">Absent</span>
           <div className="text-2xl font-black text-rose-600 mt-0.5">{absentCount}</div>
         </div>
-        <div className="bg-white rounded-2xl p-4 border border-amber-200 text-center shadow-sm">
-          <span className="text-[11px] uppercase font-extrabold text-amber-700">Attendance %</span>
-          <div className="text-2xl font-black text-amber-950 mt-0.5">{attendancePercentage}%</div>
+        <div className="bg-white rounded-2xl p-4 border border-slate-200 text-center shadow-sm">
+          <span className="text-[11px] uppercase font-extrabold text-slate-500">Attendance %</span>
+          <div className="text-2xl font-black text-slate-900 mt-0.5">{attendancePercentage}%</div>
         </div>
       </div>
 
       {/* Undo Toast */}
       {lastAction && (
-        <div className="mb-4 p-3.5 rounded-2xl bg-amber-900 text-white flex items-center justify-between gap-3 shadow-lg animate-fade-in">
+        <div className="mb-4 p-3.5 rounded-2xl bg-slate-900 text-white flex items-center justify-between gap-3 shadow-lg animate-fade-in">
           <span className="text-xs font-semibold">
             Marked <strong>{lastAction.studentName}</strong> as {attendanceMap[lastAction.studentId]}
           </span>
           <button
             onClick={handleUndo}
-            className="inline-flex items-center gap-1 px-3 py-1 bg-amber-800 hover:bg-amber-700 rounded-lg text-xs font-black min-h-[36px]"
+            className="inline-flex items-center gap-1 px-3 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs font-black min-h-[36px]"
           >
             <RotateCcw className="w-3.5 h-3.5" />
             <span>Undo</span>
@@ -230,10 +230,10 @@ export const TeacherAttendanceScreen: React.FC = () => {
                   {student.name.charAt(0)}
                 </div>
                 <div>
-                  <h4 className="font-black text-amber-950 text-base leading-snug">
+                  <h4 className="font-black text-slate-900 text-base leading-snug">
                     {student.name}
                   </h4>
-                  <p className="text-xs text-amber-700 font-semibold">
+                  <p className="text-xs text-slate-500 font-semibold">
                     Grade {student.grade} • PRN: {student.prn}
                   </p>
                 </div>

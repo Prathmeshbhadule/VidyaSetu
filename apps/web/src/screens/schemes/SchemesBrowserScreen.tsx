@@ -188,9 +188,9 @@ export const SchemesBrowserScreen: React.FC = () => {
   return (
     <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28">
       {/* Disclaimer Banner */}
-      <div className="bg-amber-100/90 border border-amber-300 rounded-2xl p-3.5 mb-6 flex items-start gap-3 shadow-sm">
-        <AlertTriangle className="w-5 h-5 text-amber-700 min-w-[20px] mt-0.5" />
-        <div className="text-xs text-amber-900 leading-relaxed font-medium">
+      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 mb-6 flex items-start gap-3 shadow-sm">
+        <AlertTriangle className="w-5 h-5 text-blue-600 min-w-[20px] mt-0.5" />
+        <div className="text-xs text-blue-900 leading-relaxed font-medium">
           <strong>Official Notice:</strong> {t('schemes.disclaimer')} Always confirm latest rules and eligibility with issuing government offices.
         </div>
       </div>
@@ -198,11 +198,11 @@ export const SchemesBrowserScreen: React.FC = () => {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-amber-950 flex items-center gap-2">
-            <Award className="w-7 h-7 text-rose-600" />
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
+            <Award className="w-7 h-7 text-blue-600" />
             {t('schemes.title')}
           </h2>
-          <p className="text-xs sm:text-sm text-amber-800 font-medium mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
             {t('schemes.subtitle')}
           </p>
         </div>
@@ -210,7 +210,7 @@ export const SchemesBrowserScreen: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowEligibilityHelper(!showEligibilityHelper)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-600 text-white font-bold text-xs shadow-md hover:bg-orange-700 transition-all min-h-[44px]"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-md hover:bg-blue-700 transition-all min-h-[44px]"
           >
             <Sparkles className="w-4 h-4" />
             <span>Eligibility Helper</span>
@@ -221,22 +221,22 @@ export const SchemesBrowserScreen: React.FC = () => {
 
       {/* 3-Question Eligibility Helper Card */}
       {showEligibilityHelper && (
-        <div className="bg-white rounded-3xl p-6 border-2 border-orange-300 shadow-lg mb-6 animate-fade-in">
-          <h3 className="font-extrabold text-amber-950 text-lg mb-2 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-orange-500" />
+        <div className="bg-white rounded-3xl p-6 border border-blue-200 shadow-lg mb-6 animate-fade-in">
+          <h3 className="font-extrabold text-slate-900 text-lg mb-2 flex items-center gap-2">
+            <Sparkles className="w-5 h-5 text-blue-600" />
             3-Question Scheme Eligibility Helper
           </h3>
-          <p className="text-xs text-amber-800 mb-4">
+          <p className="text-xs text-slate-600 mb-4">
             Answer 3 simple questions to see which schemes you qualify for:
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-xs font-bold text-amber-900 mb-1">Student Grade</label>
+              <label className="block text-xs font-bold text-slate-800 mb-1">Student Grade</label>
               <select
                 value={helperGrade}
                 onChange={(e) => setHelperGrade(parseInt(e.target.value, 10))}
-                className="w-full p-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 font-bold text-sm min-h-[44px]"
+                className="w-full p-2.5 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 font-bold text-sm min-h-[44px]"
               >
                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((g) => (
                   <option key={g} value={g}>Grade {g}</option>
@@ -245,11 +245,11 @@ export const SchemesBrowserScreen: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-amber-900 mb-1">Gender</label>
+              <label className="block text-xs font-bold text-slate-800 mb-1">Gender</label>
               <select
                 value={helperGender}
                 onChange={(e) => setHelperGender(e.target.value as any)}
-                className="w-full p-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 font-bold text-sm min-h-[44px]"
+                className="w-full p-2.5 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 font-bold text-sm min-h-[44px]"
               >
                 <option value="FEMALE">Girl Student (मुलगी)</option>
                 <option value="MALE">Boy Student (मुलगा)</option>
@@ -257,14 +257,14 @@ export const SchemesBrowserScreen: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-amber-900 mb-1">Current Attendance %</label>
+              <label className="block text-xs font-bold text-slate-800 mb-1">Current Attendance %</label>
               <input
                 type="number"
                 min="0"
                 max="100"
                 value={helperAttendance}
                 onChange={(e) => setHelperAttendance(parseInt(e.target.value, 10) || 0)}
-                className="w-full p-2.5 rounded-xl border border-amber-300 bg-amber-50 text-amber-950 font-bold text-sm min-h-[44px]"
+                className="w-full p-2.5 rounded-xl border border-slate-300 bg-slate-50 text-slate-900 font-bold text-sm min-h-[44px]"
               />
             </div>
           </div>
@@ -274,13 +274,13 @@ export const SchemesBrowserScreen: React.FC = () => {
       {/* Search and Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-6">
         <div className="relative flex-1 min-w-[200px]">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-amber-600" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Search schemes by name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-amber-200 bg-white font-medium text-sm text-amber-950 shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400 min-h-[44px]"
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white font-medium text-sm text-slate-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[44px]"
           />
         </div>
 
@@ -289,7 +289,7 @@ export const SchemesBrowserScreen: React.FC = () => {
           className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs border transition-all min-h-[44px] ${
             girlFilter
               ? 'bg-rose-600 text-white border-rose-700 shadow-md'
-              : 'bg-white text-rose-800 border-rose-300 hover:bg-rose-50'
+              : 'bg-white text-rose-700 border-rose-300 hover:bg-rose-50'
           }`}
         >
           <Filter className="w-4 h-4" />

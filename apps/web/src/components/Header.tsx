@@ -1,12 +1,20 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '../store/useAuthStore.js';
 import { SyncStatusChip } from './SyncStatusChip.js';
 import { SupportedLanguage, UserRole } from '@vidya-setu/shared';
-import { BookOpen, Sparkles, Globe, UserCheck, Accessibility } from 'lucide-react';
+import {
+  Globe,
+  Accessibility,
+  Flame,
+  Target,
+  ChevronDown,
+} from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const {
     role,
     setRole,
@@ -18,65 +26,97 @@ export const Header: React.FC = () => {
   } = useAuthStore();
 
   const roles: Array<{ id: UserRole; label: string }> = [
-    { id: 'STUDENT', label: 'Student (विद्यार्थी)' },
-    { id: 'TEACHER', label: 'Teacher (शिक्षक)' },
-    { id: 'GUARDIAN', label: 'Parent (पालक)' },
-    { id: 'DISTRICT_ADMIN', label: 'District Admin' },
-    { id: 'CONTENT_ADMIN', label: 'Content Admin' },
+    { id: 'STUDENT', label: '👨‍🎓 Student (विद्यार्थी)' },
+    { id: 'TEACHER', label: '👨‍🏫 Teacher (शिक्षक)' },
+    { id: 'GUARDIAN', label: '👨‍👩‍👧 Parent (पालक)' },
+    { id: 'DISTRICT_ADMIN', label: '🏛️ District Admin' },
+    { id: 'CONTENT_ADMIN', label: '✍️ Content Admin' },
   ];
 
+  const studentGrade = currentStudent ? `Class ${currentStudent.grade}` : 'Class 3';
+
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-amber-200/80 px-4 py-2.5 shadow-sm">
+    <header className="sticky top-0 z-50 bg-slate-900 border-b border-slate-800 text-white px-3 sm:px-6 py-2.5 shadow-lg">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-        {/* Brand */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20">
-            <BookOpen className="w-5 h-5" />
+        {/* Left: PW Brand & Goal Selector */}
+        <div className="flex items-center gap-3">
+          <div
+            onClick={() => navigate(role === 'STUDENT' ? '/student/home' : '/')}
+            className="flex items-center gap-2.5 cursor-pointer"
+          >
+            {/* PW style Bold Logo Mark */}
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-700 flex items-center justify-center font-black text-xl text-white shadow-md shadow-blue-600/30 ring-1 ring-white/20">
+              VS
+            </div>
+            <div>
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-base sm:text-lg tracking-tight text-white">
+                  VIDYA SETU
+                </span>
+                <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-black text-[10px] font-black px-1.5 py-0.5 rounded font-mono uppercase tracking-wide">
+                  PW ED
+                </span>
+              </div>
+              <p className="text-[10px] text-slate-400 font-medium hidden sm:block">
+                Bharat's Offline Learning Platform
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 className="font-extrabold text-lg sm:text-xl text-amber-950 tracking-tight leading-tight flex items-center gap-1.5">
-              {t('common.appName')}
-              <Sparkles className="w-4 h-4 text-orange-500" />
-            </h1>
-            <p className="text-[11px] text-amber-800 font-medium hidden sm:block">
-              {t('common.tagline')}
-            </p>
-          </div>
+
+          {/* PW Goal / Class Selector Badge */}
+          {role === 'STUDENT' && (
+            <div className="hidden md:flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 px-2.5 py-1 rounded-xl text-xs font-bold text-slate-200 cursor-pointer transition-all">
+              <Target className="w-3.5 h-3.5 text-blue-400" />
+              <span>{studentGrade} • Safar Batch</span>
+              <ChevronDown className="w-3 h-3 text-slate-400" />
+            </div>
+          )}
         </div>
 
-        {/* Persistent Sync Status Chip */}
+        {/* Center: Offline Sync & Study Streak */}
         <div className="flex items-center gap-2">
+          {/* Daily Streak Pill */}
+          {role === 'STUDENT' && (
+            <div
+              title="Daily Study Streak"
+              className="inline-flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 text-amber-400 px-2.5 py-1 rounded-full text-xs font-black shadow-sm"
+            >
+              <Flame className="w-3.5 h-3.5 text-amber-400 fill-amber-400 animate-pulse" />
+              <span>4 Days</span>
+            </div>
+          )}
+
+          {/* Sync Status */}
           <SyncStatusChip />
         </div>
 
-        {/* Actions / Switches */}
+        {/* Right: Actions, Language & Profile Switcher */}
         <div className="flex items-center gap-2 flex-wrap">
           {/* Simple Mode Toggle */}
           <button
             onClick={toggleSimpleMode}
-            title="Toggle Simple / Standard Mode"
-            aria-pressed={isSimpleMode}
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all min-h-[38px] ${
+            title="Toggle Accessibility Mode"
+            className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold border transition-all min-h-[34px] ${
               isSimpleMode
-                ? 'bg-amber-500 text-white border-amber-600 shadow-sm'
-                : 'bg-amber-50 text-amber-900 border-amber-300 hover:bg-amber-100'
+                ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                : 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
             }`}
           >
-            <Accessibility className="w-4 h-4" />
-            <span>{isSimpleMode ? t('common.simpleMode') : t('common.standardMode')}</span>
+            <Accessibility className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">{isSimpleMode ? 'Simple' : 'Standard'}</span>
           </button>
 
           {/* Language Switcher */}
-          <div className="inline-flex items-center rounded-lg border border-amber-300 bg-amber-50 p-0.5">
-            <Globe className="w-4 h-4 ml-2 mr-1 text-amber-700" />
+          <div className="inline-flex items-center rounded-lg border border-slate-700 bg-slate-800 p-0.5">
+            <Globe className="w-3.5 h-3.5 ml-2 mr-1 text-slate-400" />
             {(['hi', 'mr', 'en'] as SupportedLanguage[]).map((lang) => (
               <button
                 key={lang}
                 onClick={() => setLanguage(lang)}
-                className={`px-2 py-1 text-xs font-bold rounded-md transition-all min-h-[32px] ${
+                className={`px-2 py-0.5 text-xs font-bold rounded-md transition-all ${
                   language === lang
-                    ? 'bg-orange-600 text-white shadow-sm'
-                    : 'text-amber-900 hover:bg-amber-200/60'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-300 hover:text-white'
                 }`}
               >
                 {lang === 'hi' ? 'हिन्दी' : lang === 'mr' ? 'मराठी' : 'EN'}
@@ -84,22 +124,36 @@ export const Header: React.FC = () => {
             ))}
           </div>
 
-          {/* Role Selector */}
+          {/* Role Dropdown */}
           <div className="relative inline-flex items-center">
-            <UserCheck className="w-4 h-4 absolute left-2.5 text-amber-700 pointer-events-none" />
             <select
               value={role}
               onChange={(e) => setRole(e.target.value as UserRole)}
               aria-label="Switch User Role"
-              className="pl-8 pr-3 py-1.5 bg-amber-50 text-amber-950 font-semibold text-xs border border-amber-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-400 min-h-[38px]"
+              className="pl-2.5 pr-7 py-1 bg-slate-800 text-slate-100 font-bold text-xs border border-slate-700 rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer min-h-[34px]"
             >
               {roles.map((r) => (
-                <option key={r.id} value={r.id}>
+                <option key={r.id} value={r.id} className="bg-slate-900 text-white">
                   {r.label}
                 </option>
               ))}
             </select>
           </div>
+
+          {/* Student Profile Avatar */}
+          {currentStudent && (
+            <div
+              onClick={() => navigate('/student/picker')}
+              className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-2 py-1 rounded-xl cursor-pointer transition-all"
+            >
+              <div className="w-6 h-6 rounded-lg bg-blue-600/30 border border-blue-500/40 flex items-center justify-center text-xs">
+                🦁
+              </div>
+              <span className="text-xs font-bold text-slate-200 hidden sm:inline max-w-[80px] truncate">
+                {currentStudent.name.split(' ')[0]}
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </header>

@@ -7,7 +7,21 @@ import { useAuthStore } from '../../store/useAuthStore.js';
 import { gradeQuiz, generateUuidV7, Quiz, QuizResult } from '@vidya-setu/shared';
 import { StarRating } from '../../components/StarRating.js';
 import { AudioHelpButton } from '../../components/AudioHelpButton.js';
-import { Check, X, ArrowRight, RotateCcw, Home, Sparkles } from 'lucide-react';
+import {
+  Check,
+  X,
+  ArrowRight,
+  ArrowLeft,
+  RotateCcw,
+  Home,
+  Sparkles,
+  Clock,
+  Award,
+  CheckCircle2,
+  FileCheck,
+  ChevronRight,
+  AlertCircle,
+} from 'lucide-react';
 
 export const QuizRunnerScreen: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -17,27 +31,31 @@ export const QuizRunnerScreen: React.FC = () => {
 
   const [quiz, setQuiz] = useState<Quiz | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedAnswers, setSelectedAnswers] = useState<
-    Array<{ questionId: string; selectedOptionId: string; timeSpentSec: number }>
-  >([]);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [isAnswerRevealed, setIsAnswerRevealed] = useState(false);
+  const [answersMap, setAnswersMap] = useState<Record<string, string>>({});
   const [completedResult, setCompletedResult] = useState<any | null>(null);
   const [startTime] = useState<string>(new Date().toISOString());
+  const [secondsElapsed, setSecondsElapsed] = useState(0);
+
+  // Timer loop
+  useEffect(() => {
+    if (completedResult) return;
+    const interval = setInterval(() => {
+      setSecondsElapsed((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [completedResult]);
 
   useEffect(() => {
     async function loadQuiz() {
       if (!id) return;
-      const q = await offlineDb.quizzes.get(id);
-      if (q) {
-        setQuiz(q);
-      } else {
+      let q = await offlineDb.quizzes.get(id);
+      if (!q) {
         // Fallback default quiz
-        const fallbackQuiz: Quiz = {
+        q = {
           id: id || 'quiz-default',
           schoolId: 'global',
           lessonId: '018f679a-ls01-7000-8000-000000000001',
-          title: 'Letters & Phonics Quiz',
+          title: 'Daily Practice Problem (DPP 01) • Phonics & Words',
           subject: 'LANGUAGE',
           grade: 1,
           totalMarks: 10,
@@ -51,73 +69,75 @@ export const QuizRunnerScreen: React.FC = () => {
             {
               id: 'q1',
               type: 'MCQ',
-              prompt: 'Which word starts with the sound "क"?',
+              prompt: 'Which word starts with the sound "क"? (कोणता शब्द "क" ने सुरू होतो?)',
               options: [
-                { id: 'opt1', text: 'कमळ (Kamal)' },
-                { id: 'opt2', text: 'अननस (Ananas)' },
-                { id: 'opt3', text: 'घर (Ghar)' },
+                { id: 'opt1', text: 'कमळ (Kamal / Lotus)' },
+                { id: 'opt2', text: 'अननस (Ananas / Pineapple)' },
+                { id: 'opt3', text: 'घर (Ghar / House)' },
               ],
               correctOptionId: 'opt1',
+              explanation: '"कमळ" starts with the letter "क".',
               level: 1,
               marks: 5,
             },
             {
               id: 'q2',
               type: 'TRUE_FALSE',
-              prompt: 'The letter "म" makes the sound /ma/.',
+              prompt: 'The letter "म" makes the sound /ma/ as in "मका" (Corn).',
               options: [
-                { id: 't_opt', text: 'True (होय)' },
-                { id: 'f_opt', text: 'False (नाही)' },
+                { id: 't_opt', text: 'True (होय - बरोबर)' },
+                { id: 'f_opt', text: 'False (नाही - चूक)' },
               ],
               correctOptionId: 't_opt',
+              explanation: 'Yes, "म" represents the /ma/ sound.',
               level: 1,
               marks: 5,
             },
           ],
         };
-        setQuiz(fallbackQuiz);
+        await offlineDb.quizzes.put(q);
       }
+      setQuiz(q);
     }
     loadQuiz();
   }, [id]);
 
   if (!quiz) {
-    return <div className="p-6 text-center text-amber-800">Loading quiz...</div>;
+    return (
+      <div className="p-8 text-center text-slate-500">
+        <p>Loading test paper...</p>
+      </div>
+    );
   }
 
   const currentQuestion = quiz.questions[currentIndex];
+  const selectedOptionId = answersMap[currentQuestion.id] || null;
 
   const handleSelectOption = (optionId: string) => {
-    if (isAnswerRevealed) return;
-    setSelectedOption(optionId);
-    setIsAnswerRevealed(true);
-
-    const isCorrect = optionId === currentQuestion.correctOptionId;
-    const answerEntry = {
-      questionId: currentQuestion.id,
-      selectedOptionId: optionId,
-      timeSpentSec: 5,
-    };
-
-    const nextAnswers = [...selectedAnswers, answerEntry];
-    setSelectedAnswers(nextAnswers);
-
-    // After 1.2s delay, advance or finish
-    setTimeout(() => {
-      if (currentIndex + 1 < quiz.questions.length) {
-        setCurrentIndex(currentIndex + 1);
-        setSelectedOption(null);
-        setIsAnswerRevealed(false);
-      } else {
-        finishQuiz(nextAnswers);
-      }
-    }, 1200);
+    setAnswersMap((prev) => ({
+      ...prev,
+      [currentQuestion.id]: optionId,
+    }));
   };
 
-  const finishQuiz = async (answers: typeof selectedAnswers) => {
-    const grading = gradeQuiz(quiz, answers);
+  const handleNextOrFinish = () => {
+    if (currentIndex + 1 < quiz.questions.length) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      finishQuiz();
+    }
+  };
+
+  const finishQuiz = async () => {
+    const formattedAnswers = quiz.questions.map((q) => ({
+      questionId: q.id,
+      selectedOptionId: answersMap[q.id] || '',
+      timeSpentSec: Math.max(5, Math.floor(secondsElapsed / quiz.questions.length)),
+    }));
+
+    const grading = gradeQuiz(quiz, formattedAnswers);
     const resultId = generateUuidV7();
-    const studentId = currentStudent ? currentStudent.id : 'stu-guest';
+    const studentId = currentStudent ? currentStudent.id : '018f679a-st01-7000-8000-000000000001';
 
     const quizResultEntity: QuizResult = {
       id: resultId,
@@ -138,72 +158,100 @@ export const QuizRunnerScreen: React.FC = () => {
       deletedAt: null,
     };
 
-    // Save to local Dexie database and enqueue mutation into Outbox atomically!
     await syncManager.mutate('QuizResult', offlineDb.quizResults, quizResultEntity, 'INSERT', 1);
-
     setCompletedResult(grading);
   };
 
-  // Completion Result Card
+  const formatTimer = (totalSec: number) => {
+    const mins = Math.floor(totalSec / 60);
+    const secs = totalSec % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // PW Test Series Result Card
   if (completedResult) {
+    const pct = completedResult.percentage;
+    const isPassed = pct >= 60;
+
     return (
-      <div className="max-w-md mx-auto p-4 sm:p-6 pb-28 text-center animate-fade-in">
-        <div className="bg-white rounded-3xl p-8 border-2 border-amber-300 shadow-xl">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-400 to-orange-500 text-white mx-auto flex items-center justify-center shadow-lg shadow-orange-500/30 mb-4 animate-bounce">
-            <Sparkles className="w-10 h-10" />
+      <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-28 text-center animate-fade-in space-y-6">
+        <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl space-y-6">
+          {/* Header Badge */}
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white mx-auto flex items-center justify-center shadow-lg shadow-blue-600/30">
+            <Award className="w-10 h-10" />
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-black text-amber-950 mb-1">
-            {t('student.congratulations')}
-          </h2>
-          <p className="text-sm font-semibold text-amber-800 mb-4">
-            {quiz.title} Complete!
-          </p>
-
-          <StarRating rating={completedResult.starRating} size="lg" />
-
-          <div className="my-6 p-4 rounded-2xl bg-amber-50 border border-amber-200">
-            <span className="text-xs uppercase font-extrabold text-amber-800 tracking-wider">
-              Score
+          <div>
+            <span className="text-xs font-black uppercase tracking-wider text-blue-600">
+              PW Test Series Result
             </span>
-            <div className="text-3xl font-black text-amber-950 mt-1">
-              {completedResult.score} / {completedResult.maxScore}
-            </div>
-            <p className="text-xs font-bold text-orange-600 mt-1">
-              {completedResult.percentage}% Accuracy
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
+              {isPassed ? 'Shabash! Test Completed 🎉' : 'Test Submitted! Keep Practicing 💪'}
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+              {quiz.title} • Time Taken: {formatTimer(secondsElapsed)}
             </p>
           </div>
 
-          <div className="flex flex-col gap-2.5">
+          {/* Star Rating */}
+          <div className="flex justify-center">
+            <StarRating rating={completedResult.starRating} size="lg" />
+          </div>
+
+          {/* PW Detailed Score Grid */}
+          <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-500 block">Total Score</span>
+              <div className="text-2xl sm:text-3xl font-black text-slate-900 mt-0.5">
+                {completedResult.score} / {completedResult.maxScore}
+              </div>
+            </div>
+
+            <div className="border-x border-slate-200">
+              <span className="text-[10px] uppercase font-bold text-slate-500 block">Accuracy</span>
+              <div className="text-2xl sm:text-3xl font-black text-emerald-600 mt-0.5">
+                {pct}%
+              </div>
+            </div>
+
+            <div>
+              <span className="text-[10px] uppercase font-bold text-slate-500 block">Status</span>
+              <div className={`text-base sm:text-lg font-black mt-1 ${isPassed ? 'text-emerald-700' : 'text-amber-700'}`}>
+                {isPassed ? 'QUALIFIED' : 'NEEDS PRACTICE'}
+              </div>
+            </div>
+          </div>
+
+          {/* Solution & Action Buttons */}
+          <div className="space-y-3 pt-2">
             <button
               onClick={() => navigate('/student/quizzes')}
-              className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-black text-sm shadow-md hover:from-emerald-700 hover:to-teal-700 transition-all min-h-[48px]"
+              className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-md transition-all min-h-[48px]"
             >
-              <Check className="w-4 h-4" />
-              <span>View Detailed Answers & Scorecard (निकाल पहा)</span>
+              <FileCheck className="w-5 h-5" />
+              <span>View Detailed Solutions & Answer Key (तपशीलवार उत्तरे)</span>
             </button>
 
             <div className="flex gap-3">
               <button
                 onClick={() => {
                   setCurrentIndex(0);
-                  setSelectedAnswers([]);
-                  setSelectedOption(null);
-                  setIsAnswerRevealed(false);
+                  setAnswersMap({});
                   setCompletedResult(null);
+                  setSecondsElapsed(0);
                 }}
-                className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-amber-100 text-amber-900 font-bold text-sm hover:bg-amber-200 transition-all min-h-[48px]"
+                className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs sm:text-sm transition-all min-h-[44px]"
               >
                 <RotateCcw className="w-4 h-4" />
-                <span>Retry</span>
+                <span>Re-Attempt DPP</span>
               </button>
 
               <button
                 onClick={() => navigate('/student/home')}
-                className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-orange-600 text-white font-black text-sm shadow-md hover:bg-orange-700 transition-all min-h-[48px]"
+                className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition-all min-h-[44px]"
               >
                 <Home className="w-4 h-4" />
-                <span>Home</span>
+                <span>Classroom Home</span>
               </button>
             </div>
           </div>
@@ -212,63 +260,172 @@ export const QuizRunnerScreen: React.FC = () => {
     );
   }
 
+  // PW Test Series Question Stage
   return (
-    <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-28">
-      {/* Progress Counter */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-xs font-black uppercase text-amber-800 tracking-wider">
-          Question {currentIndex + 1} of {quiz.questions.length}
-        </span>
-        <div className="flex items-center gap-2">
-          <AudioHelpButton text={currentQuestion.prompt} size="sm" />
+    <div className="max-w-4xl mx-auto p-3 sm:p-6 pb-28 space-y-4">
+      {/* PW Top Test Bar */}
+      <div className="bg-slate-900 rounded-2xl p-4 text-white flex flex-wrap items-center justify-between gap-3 shadow-md">
+        <div>
+          <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400 font-black">
+            PW CBT Test Portal • {quiz.subject}
+          </span>
+          <h2 className="text-sm sm:text-base font-black truncate max-w-sm">
+            {quiz.title}
+          </h2>
+        </div>
+
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1.5 bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 text-xs font-mono font-bold text-amber-400">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Time: {formatTimer(secondsElapsed)}</span>
+          </div>
+
+          <button
+            onClick={() => {
+              if (window.confirm('Are you sure you want to exit this test?')) {
+                navigate('/student/home');
+              }
+            }}
+            className="text-xs text-slate-400 hover:text-white font-bold"
+          >
+            Exit Test
+          </button>
         </div>
       </div>
 
-      <div className="w-full bg-amber-200/60 rounded-full h-2 mb-6">
-        <div
-          className="bg-orange-500 h-2 rounded-full transition-all duration-300"
-          style={{ width: `${((currentIndex + 1) / quiz.questions.length) * 100}%` }}
-        />
+      {/* PW Question Palette Bar */}
+      <div className="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-slate-500 hidden sm:inline">Questions:</span>
+          <div className="flex items-center gap-1.5 overflow-x-auto">
+            {quiz.questions.map((q, idx) => {
+              const isAnswered = !!answersMap[q.id];
+              const isCurrent = idx === currentIndex;
+
+              return (
+                <button
+                  key={q.id}
+                  onClick={() => setCurrentIndex(idx)}
+                  className={`w-8 h-8 rounded-xl font-mono text-xs font-black transition-all flex items-center justify-center ${
+                    isCurrent
+                      ? 'bg-blue-600 text-white shadow-md ring-2 ring-blue-300'
+                      : isAnswered
+                      ? 'bg-emerald-600 text-white'
+                      : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
+                >
+                  {idx + 1}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-500">
+          <span className="flex items-center gap-1 text-emerald-600">
+            <span className="w-2 h-2 rounded-full bg-emerald-600" />
+            Answered
+          </span>
+          <span className="flex items-center gap-1 text-slate-400">
+            <span className="w-2 h-2 rounded-full bg-slate-300" />
+            Unvisited
+          </span>
+        </div>
       </div>
 
-      {/* Question Card */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200 shadow-md">
-        <h3 className="text-xl sm:text-2xl font-black text-amber-950 mb-6 leading-relaxed">
-          {currentQuestion.prompt}
-        </h3>
+      {/* Main Question Card */}
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <span className="text-xs font-black uppercase tracking-wider text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+            Question {currentIndex + 1} of {quiz.questions.length}
+          </span>
+          <span className="text-xs font-bold text-slate-500">
+            +{currentQuestion.marks} Marks • 0 Neg.
+          </span>
+        </div>
 
-        {/* Options */}
-        <div className="space-y-3">
-          {currentQuestion.options.map((opt) => {
-            const isSelected = selectedOption === opt.id;
-            const isCorrect = opt.id === currentQuestion.correctOptionId;
+        {/* Prompt */}
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="text-lg sm:text-xl font-black text-slate-900 leading-relaxed">
+            {currentQuestion.prompt}
+          </h3>
+          <AudioHelpButton text={currentQuestion.prompt} size="sm" />
+        </div>
 
-            let optionBg = 'bg-amber-50 hover:bg-amber-100/70 border-amber-200 text-amber-950';
-            if (isAnswerRevealed) {
-              if (isCorrect) {
-                optionBg = 'bg-emerald-100 border-emerald-500 text-emerald-950 shadow-md';
-              } else if (isSelected) {
-                optionBg = 'bg-rose-100 border-rose-500 text-rose-950 shadow-md';
-              }
-            }
+        {/* Options Grid */}
+        <div className="space-y-3 pt-2">
+          {currentQuestion.options.map((opt, oIdx) => {
+            const isSelected = selectedOptionId === opt.id;
+            const letter = String.fromCharCode(65 + oIdx); // A, B, C, D
 
             return (
-              <button
+              <div
                 key={opt.id}
                 onClick={() => handleSelectOption(opt.id)}
-                disabled={isAnswerRevealed}
-                className={`w-full flex items-center justify-between p-4 sm:p-5 rounded-2xl border-2 font-extrabold text-base sm:text-lg transition-all text-left min-h-[56px] ${optionBg}`}
+                className={`p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                  isSelected
+                    ? 'bg-blue-50/80 border-blue-600 shadow-md ring-1 ring-blue-500'
+                    : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+                }`}
               >
-                <span>{opt.text}</span>
-                {isAnswerRevealed && (
-                  <div>
-                    {isCorrect && <Check className="w-6 h-6 text-emerald-600" />}
-                    {isSelected && !isCorrect && <X className="w-6 h-6 text-rose-600" />}
+                <div className="flex items-center gap-3.5">
+                  <div
+                    className={`w-8 h-8 rounded-xl font-black text-xs flex items-center justify-center transition-colors ${
+                      isSelected
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-slate-100 text-slate-700'
+                    }`}
+                  >
+                    {letter}
                   </div>
-                )}
-              </button>
+                  <span className="font-bold text-slate-900 text-sm sm:text-base">
+                    {opt.text}
+                  </span>
+                </div>
+
+                <div
+                  className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
+                    isSelected ? 'border-blue-600 bg-blue-600 text-white' : 'border-slate-300'
+                  }`}
+                >
+                  {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
+                </div>
+              </div>
             );
           })}
+        </div>
+
+        {/* Bottom Actions */}
+        <div className="pt-6 border-t border-slate-100 flex items-center justify-between gap-3">
+          <button
+            onClick={() => {
+              const updated = { ...answersMap };
+              delete updated[currentQuestion.id];
+              setAnswersMap(updated);
+            }}
+            className="text-xs font-bold text-slate-500 hover:text-slate-800"
+          >
+            Clear Response
+          </button>
+
+          <div className="flex items-center gap-2">
+            {currentIndex > 0 && (
+              <button
+                onClick={() => setCurrentIndex(currentIndex - 1)}
+                className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs min-h-[44px]"
+              >
+                Previous
+              </button>
+            )}
+
+            <button
+              onClick={handleNextOrFinish}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all min-h-[44px]"
+            >
+              <span>{currentIndex + 1 === quiz.questions.length ? 'Submit Test Paper' : 'Save & Next'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>

@@ -16,6 +16,14 @@ import {
   CheckCircle2,
   BookOpen,
   Video as VideoIcon,
+  FileText,
+  CheckSquare,
+  Sparkles,
+  Download,
+  Share2,
+  MessageCircle,
+  Clock,
+  ArrowRight,
 } from 'lucide-react';
 
 export const LessonReaderScreen: React.FC = () => {
@@ -28,7 +36,7 @@ export const LessonReaderScreen: React.FC = () => {
   const [associatedQuiz, setAssociatedQuiz] = useState<Quiz | null>(null);
   const [isReadingAloud, setIsReadingAloud] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [viewMode, setViewMode] = useState<'text' | 'video'>('video');
+  const [activeTab, setActiveTab] = useState<'video' | 'notes' | 'dpp' | 'doubt'>('video');
 
   useEffect(() => {
     async function fetchLesson() {
@@ -36,7 +44,6 @@ export const LessonReaderScreen: React.FC = () => {
       const local = await offlineDb.lessons.get(id);
       if (local) {
         setLesson(local);
-        // Find quiz
         const quiz = await offlineDb.quizzes.where('lessonId').equals(id).first();
         if (quiz) {
           setAssociatedQuiz(quiz);
@@ -65,173 +72,270 @@ export const LessonReaderScreen: React.FC = () => {
 
   const handleMarkComplete = async () => {
     setIsCompleted(true);
-    // Unlocks quiz directly
     if (associatedQuiz) {
       navigate(`/student/quizzes/${associatedQuiz.id}`);
     } else {
-      navigate('/student/lessons');
+      navigate('/student/quizzes');
     }
   };
 
   if (!lesson) {
     return (
-      <div className="p-6 text-center">
-        <p className="text-amber-800">Loading lesson...</p>
+      <div className="p-8 text-center text-slate-500">
+        <p>Loading classroom lecture...</p>
       </div>
     );
   }
 
   return (
-    <div className="max-w-3xl mx-auto p-4 sm:p-6 pb-28">
-      {/* Top Bar */}
-      <div className="flex items-center justify-between mb-4">
+    <div className="max-w-5xl mx-auto p-3 sm:p-6 pb-28 space-y-5">
+      {/* PW Lecture Top Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={() => navigate('/student/home')}
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-100 text-amber-900 font-bold text-xs hover:bg-amber-200 transition-all min-h-[44px]"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all min-h-[38px]"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>{t('common.back')}</span>
+          <span>Back to Classroom (बॅचवर परत जा)</span>
         </button>
 
-        <button
-          onClick={handleReadFullLesson}
-          className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-bold text-xs shadow-sm transition-all min-h-[44px] ${
-            isReadingAloud
-              ? 'bg-rose-500 text-white animate-pulse'
-              : 'bg-orange-600 text-white hover:bg-orange-700'
-          }`}
-        >
-          {isReadingAloud ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-          <span>{isReadingAloud ? t('common.stopAudio') : t('common.readAloud')}</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold px-2.5 py-1 rounded-full">
+            ● 240p/360p Offline Cached
+          </span>
+          <AudioHelpButton text="आपण व्हिडिओ पाहू शकता किंवा खालील नोट्स वाचू शकता." size="sm" />
+        </div>
       </div>
 
-      {/* Lesson Reader Card */}
-      <article className="bg-white rounded-3xl p-6 sm:p-10 border-2 border-amber-200 shadow-md">
-        <header className="mb-6 border-b border-amber-100 pb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="px-2.5 py-0.5 rounded-full bg-orange-100 text-orange-800 font-extrabold text-[11px] uppercase tracking-wider">
-              {lesson.subject}
-            </span>
-            <span className="text-xs font-semibold text-amber-700">
-              Grade {lesson.grade} • Level {lesson.level}
-            </span>
+      {/* PW Video Player Container */}
+      <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950">
+        <VideoPlayer
+          videoId={lesson.id}
+          title={lesson.title}
+          subject={lesson.subject}
+          durationSec={lesson.estimatedMinutes * 60}
+          onComplete={handleMarkComplete}
+        />
+      </div>
+
+      {/* PW Class Details & Teacher Header */}
+      <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-700 font-black text-xs uppercase tracking-wider">
+                {lesson.subject}
+              </span>
+              <span className="text-xs font-bold text-slate-500">
+                Grade {lesson.grade} • Level {lesson.level} • Lecture 01
+              </span>
+            </div>
+
+            <h1 className="text-xl sm:text-2xl font-black text-slate-900 leading-tight">
+              {lesson.title}
+            </h1>
+
+            <p className="text-xs text-slate-500 font-semibold mt-1">
+              By Sunil Patil Sir (सुनील पाटील सर) • Master Faculty, Vidya Setu
+            </p>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black text-amber-950 leading-tight">
-            {lesson.title}
-          </h1>
-
-          {/* Mode Switcher Tabs: Video Lecture vs Reading Text */}
-          <div className="flex items-center gap-2 mt-4 pt-2">
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setViewMode('video')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all min-h-[40px] ${
-                viewMode === 'video'
-                  ? 'bg-orange-600 text-white shadow-md'
-                  : 'bg-amber-100/60 text-amber-900 hover:bg-amber-200'
+              onClick={handleReadFullLesson}
+              className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-bold text-xs shadow-sm transition-all min-h-[40px] ${
+                isReadingAloud
+                  ? 'bg-rose-600 text-white animate-pulse'
+                  : 'bg-slate-100 hover:bg-slate-200 text-slate-800'
               }`}
             >
-              <VideoIcon className="w-4 h-4" />
-              <span>Watch Video Lecture (व्हिडिओ व्याख्यान)</span>
-            </button>
-
-            <button
-              onClick={() => setViewMode('text')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-black transition-all min-h-[40px] ${
-                viewMode === 'text'
-                  ? 'bg-orange-600 text-white shadow-md'
-                  : 'bg-amber-100/60 text-amber-900 hover:bg-amber-200'
-              }`}
-            >
-              <BookOpen className="w-4 h-4" />
-              <span>Read Text Lesson (वाचन पाठ)</span>
+              {isReadingAloud ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+              <span>{isReadingAloud ? 'Stop Voice' : 'Audio Narration'}</span>
             </button>
           </div>
-        </header>
+        </div>
 
-        {/* Video Mode */}
-        {viewMode === 'video' && (
-          <div className="mb-6 space-y-4">
-            <VideoPlayer
-              videoId={lesson.id}
-              title={lesson.title}
-              subject={lesson.subject}
-              durationSec={lesson.estimatedMinutes * 60}
-              onComplete={handleMarkComplete}
-            />
-            <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-xs font-medium text-amber-900">
-              💡 <strong>Offline Classroom Tip:</strong> Video plays at 240p/360p resolution. Your playback position is automatically saved so you can resume anytime.
+        {/* PW Classroom Sub-Tabs */}
+        <div className="flex items-center gap-2 border-b border-slate-200 pt-2 overflow-x-auto no-scrollbar">
+          {[
+            { id: 'video', label: '🎬 Lecture Overview', count: null },
+            { id: 'notes', label: '📄 Class Notes & Reading', count: 'PDF' },
+            { id: 'dpp', label: '📝 Attached DPP / Quiz', count: associatedQuiz ? '1 Test' : 'None' },
+            { id: 'doubt', label: '❓ Ask a Doubt', count: null },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-4 py-2.5 rounded-t-xl font-black text-xs sm:text-sm whitespace-nowrap transition-all border-b-2 flex items-center gap-1.5 ${
+                activeTab === tab.id
+                  ? 'text-blue-600 border-blue-600 bg-blue-50/50'
+                  : 'text-slate-500 border-transparent hover:text-slate-800'
+              }`}
+            >
+              <span>{tab.label}</span>
+              {tab.count && (
+                <span className="bg-slate-200 text-slate-700 text-[10px] font-black px-1.5 py-0.2 rounded-full">
+                  {tab.count}
+                </span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {/* Tab 1: Overview */}
+        {activeTab === 'video' && (
+          <div className="space-y-4 pt-2 text-slate-700 text-sm">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+              <h4 className="font-extrabold text-slate-900 text-sm flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-500" />
+                <span>Classroom Objectives (या पाठात आपण काय शिकणार?)</span>
+              </h4>
+              <ul className="list-disc pl-5 space-y-1 text-xs text-slate-600 font-medium">
+                <li>Understand fundamental sounds, phonics, and letters of the regional script.</li>
+                <li>Interactive visual examples with everyday village objects (lotus, mangoes, trees).</li>
+                <li>Complete the video lecture to unlock the 10-mark Daily Practice Problem (DPP).</li>
+              </ul>
+            </div>
+
+            {/* Attached DPP Card */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-4 border border-blue-200 flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-blue-700">
+                  Daily Practice Problem (DPP)
+                </span>
+                <h5 className="font-black text-slate-900 text-base">
+                  {associatedQuiz?.title || 'Lecture Practice Test 01'}
+                </h5>
+                <p className="text-xs text-slate-600 font-medium">
+                  {associatedQuiz?.questions.length || 2} Questions • 10 Marks • ⭐⭐⭐ 3 Stars Reward
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  if (associatedQuiz) {
+                    navigate(`/student/quizzes/${associatedQuiz.id}`);
+                  } else {
+                    navigate('/student/quizzes');
+                  }
+                }}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all"
+              >
+                <span>Start Practice Quiz (DPP)</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
         )}
 
-        {/* Text Mode (Content Blocks) */}
-        {viewMode === 'text' && (
-        <div className="space-y-6 text-slate-800">
-          {(lesson.contentBlocks || []).map((block: any, idx: number) => {
-            if (block.type === 'HEADING') {
-              return (
-                <div key={idx} className="flex items-center justify-between gap-3 pt-2">
-                  <h3 className="text-lg sm:text-xl font-extrabold text-orange-950">
-                    {block.content}
-                  </h3>
-                  <AudioHelpButton text={block.content} size="sm" />
-                </div>
-              );
-            }
-
-            if (block.type === 'CALLOUT') {
-              return (
-                <div
-                  key={idx}
-                  className="rounded-2xl bg-amber-50 border-2 border-amber-300 p-4 sm:p-5 flex items-start gap-3.5 my-4"
-                >
-                  <div className="p-2 rounded-xl bg-amber-200 text-amber-900 min-w-[36px]">
-                    <HelpCircle className="w-5 h-5" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-amber-950 text-sm sm:text-base leading-relaxed">
-                      {block.content}
-                    </p>
-                  </div>
-                  <AudioHelpButton text={block.content} size="sm" />
-                </div>
-              );
-            }
-
-            return (
-              <div key={idx} className="flex items-start justify-between gap-3">
-                <p
-                  className={`leading-relaxed text-slate-800 flex-1 ${
-                    isSimpleMode ? 'text-lg sm:text-xl font-medium' : 'text-base sm:text-lg'
-                  }`}
-                >
-                  {block.content}
-                </p>
-                <AudioHelpButton text={block.content} size="sm" />
+        {/* Tab 2: Class Notes & Text */}
+        {activeTab === 'notes' && (
+          <div className="space-y-5 pt-2">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-blue-50/60 border border-blue-200">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-blue-600" />
+                <span className="font-bold text-xs text-blue-900">
+                  Official Class Notes (हस्तलिखित वर्ग नोंदी)
+                </span>
               </div>
-            );
-          })}
-        </div>
+              <button
+                onClick={() => window.print()}
+                className="inline-flex items-center gap-1 text-xs font-black text-blue-600 hover:text-blue-700"
+              >
+                <Download className="w-4 h-4" />
+                <span>Print / Save Notes</span>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {(lesson.contentBlocks || []).map((block: any, idx: number) => {
+                if (block.type === 'HEADING') {
+                  return (
+                    <h3 key={idx} className="text-lg font-black text-slate-900 pt-2 border-b border-slate-100 pb-1">
+                      {block.content}
+                    </h3>
+                  );
+                }
+                if (block.type === 'CALLOUT') {
+                  return (
+                    <div key={idx} className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 font-bold text-xs sm:text-sm">
+                      💡 {block.content}
+                    </div>
+                  );
+                }
+                return (
+                  <p key={idx} className="text-slate-800 leading-relaxed text-sm sm:text-base font-medium">
+                    {block.content}
+                  </p>
+                );
+              })}
+            </div>
+          </div>
         )}
 
-        {/* Lesson Footer & Quiz Unlock Action */}
-        <div className="mt-10 pt-6 border-t border-amber-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-xs font-bold text-amber-800">
-            <CheckCircle2 className="w-5 h-5 text-emerald-600" />
-            <span>Completing this lesson unlocks the practice quiz!</span>
-          </div>
+        {/* Tab 3: Attached DPP */}
+        {activeTab === 'dpp' && (
+          <div className="pt-2 space-y-4">
+            <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                  PW DPP • Daily Practice Problem
+                </span>
+                <span className="text-xs font-bold text-slate-500">
+                  Passing Marks: {associatedQuiz?.passingMarks || 6} / {associatedQuiz?.totalMarks || 10}
+                </span>
+              </div>
 
-          <button
-            onClick={handleMarkComplete}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-orange-500 to-amber-600 text-white font-extrabold text-base shadow-lg shadow-orange-500/30 hover:scale-105 active:scale-95 transition-all min-h-[48px]"
-          >
-            <span>{associatedQuiz ? 'Take Practice Quiz' : 'Mark Completed'}</span>
-            <CheckCircle2 className="w-5 h-5" />
-          </button>
-        </div>
-      </article>
+              <h4 className="font-black text-slate-900 text-lg">
+                {associatedQuiz?.title || 'Lecture Practice Test'}
+              </h4>
+
+              <p className="text-xs text-slate-600 font-medium">
+                Test your understanding immediately after watching the lecture. Instant answer review and star rewards.
+              </p>
+
+              <div className="pt-2 flex justify-end">
+                <button
+                  onClick={() => {
+                    if (associatedQuiz) {
+                      navigate(`/student/quizzes/${associatedQuiz.id}`);
+                    } else {
+                      navigate('/student/quizzes');
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md"
+                >
+                  <span>Solve DPP Questions Now</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Tab 4: Doubt Solver */}
+        {activeTab === 'doubt' && (
+          <div className="pt-2 space-y-4">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-center space-y-3">
+              <div className="w-12 h-12 rounded-2xl bg-blue-100 text-blue-600 mx-auto flex items-center justify-center">
+                <MessageCircle className="w-6 h-6" />
+              </div>
+              <h4 className="font-black text-slate-900 text-base">
+                Ask Teacher a Doubt (शिक्षकांना शंका विचारा)
+              </h4>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto font-medium">
+                In offline classroom mode, your questions are saved locally on the school hub PC for your teacher to review.
+              </p>
+              <button
+                onClick={() => speechService.speak(lesson.title, language)}
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-sm"
+              >
+                🔊 Listen to Voice Explanation
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
