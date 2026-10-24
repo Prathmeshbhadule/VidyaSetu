@@ -1,0 +1,62 @@
+name: Vidya Setu CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: vidyasetu
+          POSTGRES_PASSWORD: vidyasetu_password
+          POSTGRES_DB: vidyasetu_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install pnpm
+        run: npm install -g pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile=false
+
+      - name: Typecheck and Build
+        run: pnpm run build
+
+      - name: Run Unit & Integration Tests
+        run: pnpm run test:coverage
+        env:
+          DATABASE_URL: "postgresql://vidyasetu:vidyasetu_password@localhost:5432/vidyasetu_db?schema=public"
+          REDIS_URL: "redis://localhost:6379"
+          JWT_SECRET: "test-jwt-secret-minimum-32-chars-long!"
+          DEVICE_HMAC_SECRET: "test-device-hmac-secret-32-chars!"
