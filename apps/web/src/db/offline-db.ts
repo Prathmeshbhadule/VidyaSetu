@@ -3,12 +3,14 @@ import {
   StudentProfile,
   AttendanceRecord,
   Lesson,
+  Video,
   Quiz,
   QuizResult,
   Scheme,
   SchemeChecklistProgress,
   NotificationRecord,
   AtRiskFlag,
+  StudyMaterial,
   ChangeItem,
 } from '@vidya-setu/shared';
 
@@ -28,8 +30,10 @@ export class VidyaSetuOfflineDb extends Dexie {
   students!: EntityTable<StudentProfile, 'id'>;
   attendance!: EntityTable<AttendanceRecord, 'id'>;
   lessons!: EntityTable<Lesson, 'id'>;
+  videos!: EntityTable<Video, 'id'>;
   quizzes!: EntityTable<Quiz, 'id'>;
   quizResults!: EntityTable<QuizResult, 'id'>;
+  studyMaterials!: EntityTable<StudyMaterial, 'id'>;
   schemes!: EntityTable<Scheme, 'id'>;
   checklists!: EntityTable<SchemeChecklistProgress, 'id'>;
   notifications!: EntityTable<NotificationRecord, 'id'>;
@@ -52,6 +56,11 @@ export class VidyaSetuOfflineDb extends Dexie {
       atRiskFlags: 'id, studentId, schoolId, ruleId, resolvedAt',
       outbox: 'id, priority, status, createdAt',
       metadata: 'key',
+    });
+
+    this.version(2).stores({
+      videos: 'id, lessonId, subject',
+      studyMaterials: 'id, subject, grade, type',
     });
   }
 }

@@ -159,6 +159,21 @@ export interface Video extends SyncedEntity {
   transcodeStatus: VideoTranscodeStatus;
 }
 
+export type StudyMaterialType = 'TEXTBOOK' | 'NOTES' | 'WORKSHEET';
+
+export interface StudyMaterial extends SyncedEntity {
+  title: string;
+  type: StudyMaterialType;
+  subject: string;
+  grade: number;
+  sizeBytes?: number;
+  pages?: number;
+  description: string;
+  content?: string;
+  downloadUrl?: string;
+  offlineReady: boolean;
+}
+
 export interface QuestionOption {
   id: string;
   text: string;

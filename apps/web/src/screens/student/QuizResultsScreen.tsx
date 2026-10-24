@@ -177,92 +177,17 @@ export const QuizResultsScreen: React.FC = () => {
       }
       setQuizzes(allQuizzes);
 
-      // 2. Load Quiz Results
-      let studentResults: QuizResult[] = [];
-      const studentId = currentStudent ? currentStudent.id : '018f679a-st01-7000-8000-000000000001';
+      // 2. Load Quiz Results strictly for active student
+      if (currentStudent) {
+        const studentResults = await offlineDb.quizResults
+          .where('studentId')
+          .equals(currentStudent.id)
+          .toArray();
 
-      studentResults = await offlineDb.quizResults
-        .where('studentId')
-        .equals(studentId)
-        .toArray();
-
-      // Seed sample quiz results if empty so student sees past achievements immediately
-      if (studentResults.length === 0) {
-        const seedResults: QuizResult[] = [
-          {
-            id: 'res-seed-01',
-            schoolId: 'global',
-            studentId,
-            quizId: 'quiz-lang-01',
-            mode: 'QUIZ',
-            answers: [
-              {
-                questionId: 'q1',
-                selectedOptionId: 'opt1',
-                isCorrect: true,
-                marksAwarded: 5,
-                timeSpentSec: 8,
-              },
-              {
-                questionId: 'q2',
-                selectedOptionId: 't_opt',
-                isCorrect: true,
-                marksAwarded: 5,
-                timeSpentSec: 6,
-              },
-            ],
-            score: 10,
-            maxScore: 10,
-            assessedLevel: 2,
-            startedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-            submittedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-            version: 1,
-            deviceId: 'hub',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            deletedAt: null,
-          },
-          {
-            id: 'res-seed-02',
-            schoolId: 'global',
-            studentId,
-            quizId: 'quiz-math-01',
-            mode: 'QUIZ',
-            answers: [
-              {
-                questionId: 'mq1',
-                selectedOptionId: 'm2',
-                isCorrect: true,
-                marksAwarded: 5,
-                timeSpentSec: 10,
-              },
-              {
-                questionId: 'mq2',
-                selectedOptionId: 'm5',
-                isCorrect: true,
-                marksAwarded: 5,
-                timeSpentSec: 7,
-              },
-            ],
-            score: 10,
-            maxScore: 10,
-            assessedLevel: 2,
-            startedAt: new Date(Date.now() - 86400000).toISOString(),
-            submittedAt: new Date(Date.now() - 86400000).toISOString(),
-            version: 1,
-            deviceId: 'hub',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            deletedAt: null,
-          },
-        ];
-        await offlineDb.quizResults.bulkPut(seedResults);
-        studentResults = seedResults;
-      }
-
-      setResults(studentResults);
-      if (studentResults.length > 0) {
-        setExpandedResultId(studentResults[0].id);
+        setResults(studentResults);
+        if (studentResults.length > 0) {
+          setExpandedResultId(studentResults[0].id);
+        }
       }
     }
     loadData();
@@ -275,7 +200,7 @@ export const QuizResultsScreen: React.FC = () => {
   const assessedLevel = currentStudent ? currentStudent.assessedLevel : 2;
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28 space-y-5">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-36 space-y-5">
       {/* Top Navigation Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -563,7 +488,7 @@ export const QuizResultsScreen: React.FC = () => {
 
                 <button
                   onClick={() => navigate(`/student/quizzes/${quiz.id}`)}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-xs shadow-md transition-all min-h-[40px]"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all min-h-[40px]"
                 >
                   <span>Start Quiz</span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -573,6 +498,9 @@ export const QuizResultsScreen: React.FC = () => {
           ))}
         </div>
       )}
+
+      {/* Guaranteed Bottom Buffer */}
+      <div className="h-10" />
     </div>
   );
 };

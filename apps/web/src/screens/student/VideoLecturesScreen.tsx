@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { offlineDb } from '../../db/offline-db.js';
 import { VideoPlayer } from '../../components/VideoPlayer.js';
 import { AudioHelpButton } from '../../components/AudioHelpButton.js';
 import {
@@ -32,7 +33,7 @@ const sampleLectures: LectureItem[] = [
   {
     id: 'vid-01',
     lessonId: '018f679a-ls01-7000-8000-000000000001',
-    quizId: 'quiz-default',
+    quizId: 'quiz-lang-01',
     title: 'Our Alphabet and Phonics (वर्णमाला व ध्वनी)',
     subject: 'LANGUAGE',
     grade: 1,
@@ -82,17 +83,60 @@ const sampleLectures: LectureItem[] = [
 export const VideoLecturesScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const [lectures, setLectures] = useState<LectureItem[]>(sampleLectures);
   const [selectedSubject, setSelectedSubject] = useState<string>('ALL');
   const [activeLecture, setActiveLecture] = useState<LectureItem>(sampleLectures[0]);
+
+  useEffect(() => {
+    async function loadVideos() {
+      const storedLessons = await offlineDb.lessons.toArray();
+      const storedVideos = await offlineDb.videos.toArray();
+      const storedQuizzes = await offlineDb.quizzes.toArray();
+
+      if (storedLessons.length > 0) {
+        const dynamicList: LectureItem[] = storedLessons.map((l, idx) => {
+          const v = storedVideos.find((vid) => vid.lessonId === l.id);
+          const q = storedQuizzes.find((quiz) => quiz.lessonId === l.id);
+
+          return {
+            id: v ? v.id : `vid-dyn-${idx}`,
+            lessonId: l.id,
+            quizId: q ? q.id : 'quiz-default',
+            title: l.title,
+            subject: l.subject,
+            grade: l.grade,
+            level: l.level,
+            durationSec: v ? v.durationSec : l.estimatedMinutes * 60,
+            sizeMb: v ? Math.round(v.sizeBytes / (1024 * 1024)) || 14 : 12,
+            description:
+              l.contentBlocks?.[1]?.content ||
+              l.contentBlocks?.[0]?.content ||
+              'Comprehensive offline lecture video.',
+          };
+        });
+
+        // Merge with sampleLectures for full variety
+        const combined = [...dynamicList];
+        for (const s of sampleLectures) {
+          if (!combined.some((c) => c.title === s.title)) {
+            combined.push(s);
+          }
+        }
+        setLectures(combined);
+        setActiveLecture(combined[0]);
+      }
+    }
+    loadVideos();
+  }, []);
 
   const subjects = ['ALL', 'LANGUAGE', 'MATH', 'SCIENCE'];
 
   const filteredLectures = selectedSubject === 'ALL'
-    ? sampleLectures
-    : sampleLectures.filter((item) => item.subject === selectedSubject);
+    ? lectures
+    : lectures.filter((item) => item.subject === selectedSubject);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28 space-y-5">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-36 space-y-5">
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
@@ -245,6 +289,9 @@ export const VideoLecturesScreen: React.FC = () => {
           );
         })}
       </div>
+
+      {/* Guaranteed Bottom Buffer */}
+      <div className="h-10" />
     </div>
   );
 };

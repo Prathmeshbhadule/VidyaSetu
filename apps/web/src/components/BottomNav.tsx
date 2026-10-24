@@ -29,7 +29,8 @@ export const BottomNav: React.FC = () => {
           { to: '/teacher/attendance', icon: <CheckSquare className="w-5 h-5" />, label: 'हजेरी (Attendance)' },
           { to: '/teacher/grouping', icon: <Layers className="w-5 h-5" />, label: 'स्तर गट (TaRL)' },
           { to: '/teacher/at-risk', icon: <HeartHandshake className="w-5 h-5" />, label: 'अडचण (Retention)' },
-          { to: '/teacher/hub-status', icon: <Server className="w-5 h-5" />, label: 'हब सिंक (Hub)' },
+          { to: '/admin/content', icon: <BookOpen className="w-5 h-5" />, label: 'साहित्य (Studio)' },
+          { to: '/teacher/hub-status', icon: <Server className="w-5 h-5" />, label: 'हब (Hub)' },
         ];
       case 'GUARDIAN':
         return [

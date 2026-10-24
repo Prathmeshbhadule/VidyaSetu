@@ -1,21 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { useAuthStore } from '../../store/useAuthStore.js';
 import { offlineDb } from '../../db/offline-db.js';
+import { useAuthStore } from '../../store/useAuthStore.js';
+import { Lesson, Quiz, StudyMaterial, QuizResult } from '@vidya-setu/shared';
 import { AudioHelpButton } from '../../components/AudioHelpButton.js';
-import { Lesson } from '@vidya-setu/shared';
 import {
   BookOpen,
-  GraduationCap,
   Award,
+  Video as VideoIcon,
   PlayCircle,
-  Sparkles,
   ArrowRight,
+  Flame,
   Star,
   CheckCircle2,
-  Video as VideoIcon,
-  Flame,
+  Calendar,
+  Layers,
+  Sparkles,
   FileText,
   Clock,
   CheckSquare,
@@ -24,19 +25,41 @@ import {
   TrendingUp,
   Download,
   ShieldCheck,
+  LogOut,
+  X,
+  Volume2,
 } from 'lucide-react';
 
 export const StudentHome: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentStudent, isSimpleMode } = useAuthStore();
+  const { currentStudent, isSimpleMode, logout } = useAuthStore();
+
   const [recentLesson, setRecentLesson] = useState<Lesson | null>(null);
+  const [allLessons, setAllLessons] = useState<Lesson[]>([]);
+  const [allQuizzes, setAllQuizzes] = useState<Quiz[]>([]);
+  const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>([]);
+  const [studentResults, setStudentResults] = useState<QuizResult[]>([]);
   const [activeSubjectTab, setActiveSubjectTab] = useState<string>('ALL');
+
+  // Modal state for reading books / notes
+  const [selectedMaterial, setSelectedMaterial] = useState<StudyMaterial | null>(null);
+
+  // Enforce Student Privacy / Session Guard
+  useEffect(() => {
+    if (!currentStudent) {
+      navigate('/student/picker', { replace: true });
+    }
+  }, [currentStudent, navigate]);
 
   useEffect(() => {
     async function loadContent() {
+      if (!currentStudent) return;
+
+      // 1. Load Lessons
       const lessons = await offlineDb.lessons.toArray();
       if (lessons.length > 0) {
+        setAllLessons(lessons);
         setRecentLesson(lessons[0]);
       } else {
         const defaultLessons: Lesson[] = [
@@ -68,11 +91,11 @@ export const StudentHome: React.FC = () => {
             grade: 2,
             level: 2,
             contentBlocks: [
-              { id: 'b1', type: 'HEADING', content: 'Counting Objects' },
-              { id: 'b2', type: 'PARAGRAPH', content: 'Count the five mangoes on the tree: 1, 2, 3, 4, 5. Add one more to get 6!' },
+              { id: 'b1', type: 'HEADING', content: 'Counting with Everyday Objects' },
+              { id: 'b2', type: 'PARAGRAPH', content: 'Count pebbles, sticks, or fingers. 1 apple plus 1 apple equals 2 apples!' },
             ],
             status: 'PUBLISHED',
-            estimatedMinutes: 15,
+            estimatedMinutes: 12,
             version: 1,
             deviceId: 'hub',
             createdAt: new Date().toISOString(),
@@ -100,18 +123,144 @@ export const StudentHome: React.FC = () => {
           },
         ];
         await offlineDb.lessons.bulkPut(defaultLessons);
+        setAllLessons(defaultLessons);
         setRecentLesson(defaultLessons[0]);
       }
-    }
-    loadContent();
-  }, []);
 
-  const studentName = currentStudent ? currentStudent.name : 'Aarav Patil';
-  const assessedLevel = currentStudent ? currentStudent.assessedLevel : 2;
-  const gradeNumber = currentStudent ? currentStudent.grade : 3;
+      // 2. Load Quizzes
+      const quizzes = await offlineDb.quizzes.toArray();
+      setAllQuizzes(quizzes);
+
+      // 3. Load or Seed Study Materials / Books
+      const materials = await offlineDb.studyMaterials.toArray();
+      if (materials.length > 0) {
+        setStudyMaterials(materials);
+      } else {
+        const seedMaterials: StudyMaterial[] = [
+          {
+            id: 'mat-01',
+            schoolId: 'global',
+            title: 'इयत्ता ३ री गणित पाठ्यपुस्तक - बालभारती',
+            type: 'TEXTBOOK',
+            subject: 'MATH',
+            grade: 3,
+            pages: 48,
+            sizeBytes: 4404019,
+            description: 'महाराष्ट्र राज्य पाठ्यपुस्तक मंडळ (बालभारती) अधिकृत गणित पुस्तक - संख्याज्ञान, बेरीज, वजाबाकी व भौमितिक आकृत्या.',
+            content: `इयत्ता ३ री गणित पाठ्यपुस्तक (Mathematics Textbook)\n\nअनुक्रमणिका:\n१. भौमितिक आकृत्यांची ओळख - कोन, कडा व शिरोबिंदू\n२. संख्याज्ञान - तीन अंकी संख्यांचे वाचन व लेखन\n३. बिनहातच्याची व हातच्याची बेरीज\n४. बिनउसन्याची व उसन्याची वजाबाकी\n५. गुणाकार पूर्वतयारी व पाढे तयार करणे\n\nप्रकरण १: तीन अंकी संख्याज्ञान\nउदा. शतक (१००), दशक (१०) आणि एकक (१). १०० + २० + ५ = १२५ (एकशे पंचवीस).`,
+            downloadUrl: '/materials/math_grade3_balbharati.pdf',
+            offlineReady: true,
+            version: 1,
+            deviceId: 'hub',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            deletedAt: null,
+          },
+          {
+            id: 'mat-02',
+            schoolId: 'global',
+            title: 'परिसर अभ्यास व सामान्य विज्ञान हस्तलिखित नोट्स',
+            type: 'NOTES',
+            subject: 'SCIENCE',
+            grade: 3,
+            pages: 18,
+            sizeBytes: 2097152,
+            description: 'शिक्षकांच्या हस्तलिखित स्पष्टीकरणासह जलचक्र, सजीव-निर्जीव आणि वनस्पतींची वाढ यावरील महत्त्वाचे मुद्दे.',
+            content: `परिसर अभ्यास हस्तलिखित नोट्स (Science Teacher Notes)\n\nघटक: जलचक्र आणि वनस्पती\n\n१. वनस्पतींचे अवयव:\n- मुळे: जमिनीतील पाणी व क्षार शोषून घेतात.\n- खोड: झाडाला आधार देते व अन्न पोहोचवते.\n- पाने: सूर्यप्रकाशामध्ये अन्न तयार करतात (प्रकाशसंश्लेषण).\n\n२. पाण्याचे चक्र:\nउष्णता -> पाण्याचे बाष्पीभवन -> आकाशात ढग -> थंड हवा लागल्याने संघनन -> पाऊस!`,
+            downloadUrl: '/materials/science_notes_std3.pdf',
+            offlineReady: true,
+            version: 1,
+            deviceId: 'hub',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            deletedAt: null,
+          },
+          {
+            id: 'mat-03',
+            schoolId: 'global',
+            title: 'मराठी वर्णमाला व ध्वनी स्वाध्याय पत्रिका',
+            type: 'WORKSHEET',
+            subject: 'LANGUAGE',
+            grade: 1,
+            pages: 12,
+            sizeBytes: 1048576,
+            description: 'अक्षर ओळख, चित्र-शब्द जोड्या आणि स्वरचिन्हांचा सराव करण्यासाठी रंगीत कार्यपत्रिका.',
+            content: `मराठी भाषा स्वाध्याय पत्रिका (Vernacular Language Worksheet)\n\nस्वाध्याय १: अक्षराला गोल करा\nक - कमळ, कप, कपाट, करवत\nम - मका, मगर, मासा, मध\n\nस्वाध्याय २: रिकाम्या जागी योग्य शब्द भरा:\n१. आकाशामध्ये _______ चमकतो. (सूर्य / चंद्र)\n२. झाडावर गोड _______ पिकले आहेत. (आंबे / दगड)`,
+            downloadUrl: '/materials/marathi_worksheet_std1.pdf',
+            offlineReady: true,
+            version: 1,
+            deviceId: 'hub',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            deletedAt: null,
+          },
+        ];
+        await offlineDb.studyMaterials.bulkPut(seedMaterials);
+        setStudyMaterials(seedMaterials);
+      }
+
+      // 4. Load Student's OWN quiz results
+      const results = await offlineDb.quizResults
+        .where('studentId')
+        .equals(currentStudent.id)
+        .toArray();
+      setStudentResults(results);
+    }
+
+    loadContent();
+  }, [currentStudent]);
+
+  if (!currentStudent) {
+    return null;
+  }
+
+  const studentName = currentStudent.name;
+  const assessedLevel = currentStudent.assessedLevel;
+  const gradeNumber = currentStudent.grade;
+
+  // Counts
+  const videoCount = allLessons.length;
+  const quizCount = allQuizzes.length;
+  const materialCount = studyMaterials.length;
 
   return (
-    <div className="max-w-6xl mx-auto p-3 sm:p-6 pb-28 space-y-6">
+    <div className="max-w-6xl mx-auto p-3 sm:p-6 pb-36 space-y-6">
+      {/* Student Session & Privacy Top Bar */}
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-600/20">
+            {currentStudent.gender === 'FEMALE' ? '👧' : '👦'}
+          </div>
+          <div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-black text-lg text-slate-900 leading-tight">
+                {studentName}
+              </h3>
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                Grade {gradeNumber}
+              </span>
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                TaRL Level {assessedLevel}
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              PRN: {currentStudent.prn} • सुरक्षित वैयक्तिक सत्र (Logged in via 4-Digit PIN)
+            </p>
+          </div>
+        </div>
+
+        <button
+          onClick={() => {
+            logout();
+            navigate('/student/picker');
+          }}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-300 font-black text-xs transition-all min-h-[40px]"
+        >
+          <LogOut className="w-3.5 h-3.5 text-rose-600" />
+          <span>विद्यार्थी बदला / लॉक करा (Switch / Lock)</span>
+        </button>
+      </div>
+
       {/* Hero Batch Banner Carousel */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 border border-slate-800 text-white shadow-2xl p-6 sm:p-8">
         <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400 via-indigo-500 to-transparent pointer-events-none" />
@@ -142,61 +291,52 @@ export const StudentHome: React.FC = () => {
             </div>
 
             {/* Features Row */}
-            <div className="flex items-center gap-4 text-xs font-semibold text-slate-300 pt-1">
+            <div className="flex items-center gap-4 text-xs font-semibold text-slate-300 pt-1 flex-wrap">
               <div className="flex items-center gap-1.5">
                 <VideoIcon className="w-4 h-4 text-amber-400" />
-                <span>4 Video Lectures</span>
+                <span>{videoCount} Video Lectures</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckSquare className="w-4 h-4 text-emerald-400" />
-                <span>Daily Practice DPP</span>
+                <span>{quizCount} Daily Practice DPPs</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <FileText className="w-4 h-4 text-sky-400" />
-                <span>Class Notes PDF</span>
+                <span>{materialCount} Books & Notes</span>
               </div>
             </div>
 
             {/* CTA Buttons */}
-            <div className="pt-2 flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-3 pt-2">
               <button
                 onClick={() => navigate('/student/videos')}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs sm:text-sm shadow-lg shadow-blue-600/30 active:scale-95 transition-all min-h-[46px]"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-lg shadow-blue-600/30 transition-all min-h-[44px]"
               >
-                <PlayCircle className="w-5 h-5 fill-white text-blue-600" />
-                <span>Resume Lecture (लेक्चर सुरु करा)</span>
+                <PlayCircle className="w-4 h-4" />
+                <span>व्हिडिओ तासिका सुरू करा (Resume Lecture)</span>
               </button>
-
               <button
-                onClick={() => navigate('/student/quizzes')}
-                className="inline-flex items-center gap-2 px-4 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-700 border border-slate-700 text-white font-bold text-xs sm:text-sm transition-all min-h-[46px]"
+                onClick={() => navigate('/student/lessons')}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all min-h-[44px]"
               >
-                <CheckSquare className="w-4 h-4 text-emerald-400" />
-                <span>Solve Today's DPP (चाचणी सोडवा)</span>
+                <span>बॅच तपशील (Explore)</span>
               </button>
             </div>
           </div>
 
-          {/* Student Status Card */}
-          <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl p-5 border border-slate-700 text-center min-w-[200px] shadow-xl">
-            <div className="w-16 h-16 rounded-2xl bg-blue-600/20 border border-blue-500/40 text-3xl mx-auto flex items-center justify-center mb-2 shadow-inner">
-              🦁
+          {/* Right Banner Badge */}
+          <div className="bg-slate-800/90 border border-slate-700 p-5 rounded-3xl text-center space-y-2 min-w-[200px]">
+            <div className="flex items-center justify-center gap-1.5 text-amber-400 font-black text-xs uppercase">
+              <Flame className="w-4 h-4 fill-amber-400 text-amber-400" />
+              <span>अभ्यास सातत्य (Study Streak)</span>
             </div>
-            <h4 className="font-black text-white text-base">{studentName}</h4>
-            <div className="flex items-center justify-center gap-1.5 text-xs text-amber-400 font-black mt-1">
-              <Flame className="w-4 h-4 fill-amber-400" />
-              <span>4 Days Study Streak!</span>
-            </div>
-            <div className="mt-3 pt-3 border-t border-slate-700/80 flex items-center justify-around text-xs">
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">TaRL Level</span>
-                <span className="font-black text-blue-400 text-sm">Level {assessedLevel}</span>
-              </div>
-              <div className="h-6 w-px bg-slate-700" />
-              <div>
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Accuracy</span>
-                <span className="font-black text-emerald-400 text-sm">92%</span>
-              </div>
+            <div className="text-3xl font-black text-white">🔥 4 Days</div>
+            <p className="text-[11px] text-slate-300">
+              सोम • मंगळ • बुध • आज (सलग अभ्यास चालू आहे)
+            </p>
+            <div className="pt-2 border-t border-slate-700/80">
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">माझे अचूक गुण (Accuracy)</span>
+              <span className="text-base font-black text-emerald-400">92% अचूकता</span>
             </div>
           </div>
         </div>
@@ -244,39 +384,38 @@ export const StudentHome: React.FC = () => {
               <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 to-indigo-950 flex items-center justify-center">
                 <span className="text-3xl">🎬</span>
               </div>
-              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-all flex items-center justify-center">
-                <PlayCircle className="w-10 h-10 text-white group-hover:scale-110 transition-transform" />
+              <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-mono font-bold px-1.5 py-0.5 rounded">
+                ~{recentLesson.estimatedMinutes || 12}:00
               </div>
-              <span className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-[10px] font-mono font-bold px-1.5 py-0.5 rounded">
-                12:45
-              </span>
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                <PlayCircle className="w-5 h-5 fill-white text-blue-600" />
+              </div>
             </div>
 
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] font-black uppercase tracking-wider bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full border border-blue-200">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="bg-blue-100 text-blue-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
                   {recentLesson.subject}
                 </span>
-                <span className="text-xs text-slate-500 font-semibold flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-slate-400" />
-                  ~{recentLesson.estimatedMinutes} min
+                <span className="text-xs font-semibold text-slate-500">
+                  Grade {recentLesson.grade} • Level {recentLesson.level}
+                </span>
+                <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  ● 65% Completed
                 </span>
               </div>
 
-              <h3
-                onClick={() => navigate(`/student/lessons/${recentLesson.id}`)}
-                className="font-black text-slate-900 text-base sm:text-lg hover:text-blue-600 cursor-pointer line-clamp-1"
-              >
+              <h4 className="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-1">
                 {recentLesson.title}
-              </h3>
+              </h4>
 
-              <p className="text-xs text-slate-500 font-medium mt-0.5">
-                Classroom Lecture • By Sunil Patil Sir (सुनील पाटील सर)
+              <p className="text-xs text-slate-500 font-medium line-clamp-1">
+                मार्गदर्शक: सुनील पाटील सर • Master Faculty
               </p>
 
-              {/* Progress bar */}
-              <div className="w-48 bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden border border-slate-200">
-                <div className="bg-blue-600 h-full rounded-full" style={{ width: '65%' }} />
+              {/* Progress Bar */}
+              <div className="w-48 sm:w-64 bg-slate-100 rounded-full h-1.5 overflow-hidden mt-2">
+                <div className="bg-blue-600 h-full rounded-full w-[65%]" />
               </div>
             </div>
           </div>
@@ -284,9 +423,9 @@ export const StudentHome: React.FC = () => {
           <div className="flex items-center gap-2 w-full md:w-auto justify-end">
             <button
               onClick={() => navigate(`/student/lessons/${recentLesson.id}`)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all min-h-[44px]"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all min-h-[44px]"
             >
-              <span>Continue Studying</span>
+              <span>पुढे चालू ठेवा (Resume)</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -299,7 +438,7 @@ export const StudentHome: React.FC = () => {
           <div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-blue-600" />
-              <span>My Subject Classrooms (माझे विषय वर्ग)</span>
+              <span>माझे विषय वर्ग (My Subject Classrooms)</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">
               Structured lectures, assignments (DPP) and chapter notes
@@ -310,128 +449,167 @@ export const StudentHome: React.FC = () => {
             onClick={() => navigate('/student/lessons')}
             className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
           >
-            <span>View All</span>
+            <span>सर्व तासिका पहा (View All)</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Batch Card 1: Language */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Card 1: Language */}
           <div
             onClick={() => navigate('/student/lessons')}
-            className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between group"
+            className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer group"
           >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="px-2.5 py-1 rounded-xl bg-indigo-50 text-indigo-700 font-black text-xs">
-                  📖 भाषा व इंग्रजी
-                </span>
-                <span className="text-xs font-bold text-slate-400">Class 3</span>
-              </div>
-
-              <h4 className="font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors">
-                मराठी व इंग्रजी वर्णमाला व शब्द वाचन
-              </h4>
-              <p className="text-xs text-slate-500 font-medium mt-1">
-                Faculty: Sunil Patil Sir • Master Teacher
-              </p>
-
-              <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3 text-[11px] font-bold text-slate-600">
-                <span>📹 3 Lectures</span>
-                <span>•</span>
-                <span>📝 2 DPPs</span>
-                <span>•</span>
-                <span>📄 Notes PDF</span>
-              </div>
-            </div>
-
-            <div className="pt-4 flex items-center justify-between">
-              <span className="text-[11px] font-bold text-emerald-600">
-                ● 100% Offline
+            <div className="flex items-center justify-between mb-3">
+              <span className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-2xl font-black group-hover:scale-105 transition-transform">
+                📖
               </span>
-              <div className="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-colors">
-                <ArrowRight className="w-4 h-4" />
-              </div>
+              <span className="bg-amber-50 text-amber-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
+                {allLessons.filter((l) => l.subject === 'LANGUAGE').length || 1} Lectures
+              </span>
+            </div>
+            <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">
+              मराठी व इंग्रजी भाषा (Language)
+            </h4>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              Phonics, letter recognition, vocabulary building & storytelling
+            </p>
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
+              <span>Grade {gradeNumber} • Level 1-2</span>
+              <span className="text-blue-600 flex items-center gap-0.5">
+                उघडा <ChevronRight className="w-3.5 h-3.5" />
+              </span>
             </div>
           </div>
 
-          {/* Batch Card 2: Mathematics */}
+          {/* Card 2: Math */}
           <div
             onClick={() => navigate('/student/lessons')}
-            className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between group"
+            className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer group"
           >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="px-2.5 py-1 rounded-xl bg-blue-50 text-blue-700 font-black text-xs">
-                  🔢 गणित (Mathematics)
-                </span>
-                <span className="text-xs font-bold text-slate-400">Class 3</span>
-              </div>
-
-              <h4 className="font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors">
-                संख्याज्ञान, मोजणी आणि गमतीशीर बेरीज
-              </h4>
-              <p className="text-xs text-slate-500 font-medium mt-1">
-                Faculty: Anita Kulkarni Madam
-              </p>
-
-              <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3 text-[11px] font-bold text-slate-600">
-                <span>📹 4 Lectures</span>
-                <span>•</span>
-                <span>📝 3 DPPs</span>
-                <span>•</span>
-                <span>📄 Formula Sheet</span>
-              </div>
-            </div>
-
-            <div className="pt-4 flex items-center justify-between">
-              <span className="text-[11px] font-bold text-emerald-600">
-                ● 100% Offline
+            <div className="flex items-center justify-between mb-3">
+              <span className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center text-2xl font-black group-hover:scale-105 transition-transform">
+                🔢
               </span>
-              <div className="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-colors">
-                <ArrowRight className="w-4 h-4" />
-              </div>
+              <span className="bg-blue-50 text-blue-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
+                {allLessons.filter((l) => l.subject === 'MATH').length || 1} Lectures
+              </span>
+            </div>
+            <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">
+              गणित व संख्याज्ञान (Mathematics)
+            </h4>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              Counting, 2-digit addition, subtraction, visual mental math
+            </p>
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
+              <span>Grade {gradeNumber} • Level 2-3</span>
+              <span className="text-blue-600 flex items-center gap-0.5">
+                उघडा <ChevronRight className="w-3.5 h-3.5" />
+              </span>
             </div>
           </div>
 
-          {/* Batch Card 3: Science */}
+          {/* Card 3: Science */}
           <div
             onClick={() => navigate('/student/lessons')}
-            className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer flex flex-col justify-between group"
+            className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer group"
           >
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <span className="px-2.5 py-1 rounded-xl bg-emerald-50 text-emerald-700 font-black text-xs">
-                  🔬 परिसर अभ्यास व विज्ञान
-                </span>
-                <span className="text-xs font-bold text-slate-400">Class 3</span>
-              </div>
-
-              <h4 className="font-black text-slate-900 text-base group-hover:text-blue-600 transition-colors">
-                आपल्या सभोवतालची झाडे व निसर्ग
-              </h4>
-              <p className="text-xs text-slate-500 font-medium mt-1">
-                Faculty: Rajesh Deshmukh Sir
-              </p>
-
-              <div className="mt-3 pt-3 border-t border-slate-100 flex items-center gap-3 text-[11px] font-bold text-slate-600">
-                <span>📹 2 Lectures</span>
-                <span>•</span>
-                <span>📝 1 DPP</span>
-                <span>•</span>
-                <span>📄 Diagrams PDF</span>
-              </div>
-            </div>
-
-            <div className="pt-4 flex items-center justify-between">
-              <span className="text-[11px] font-bold text-emerald-600">
-                ● 100% Offline
+            <div className="flex items-center justify-between mb-3">
+              <span className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-2xl font-black group-hover:scale-105 transition-transform">
+                🔬
               </span>
-              <div className="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-colors">
-                <ArrowRight className="w-4 h-4" />
-              </div>
+              <span className="bg-emerald-50 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
+                {allLessons.filter((l) => l.subject === 'SCIENCE').length || 1} Lectures
+              </span>
+            </div>
+            <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">
+              परिसर अभ्यास व विज्ञान (Science)
+            </h4>
+            <p className="text-xs text-slate-500 font-medium mt-1">
+              Plants, water cycle, animals, environment & basic science
+            </p>
+            <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
+              <span>Grade {gradeNumber} • Level 3</span>
+              <span className="text-blue-600 flex items-center gap-0.5">
+                उघडा <ChevronRight className="w-3.5 h-3.5" />
+              </span>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* ========================================================================= */}
+      {/* SECTION: OFFLINE BOOKS, STUDY MATERIALS & NOTES */}
+      {/* ========================================================================= */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
+              <FileText className="w-5 h-5 text-purple-600" />
+              <span>अभ्यास साहित्य, पुस्तके व नोट्स (Books & Study Material)</span>
+            </h3>
+            <p className="text-xs text-slate-500 font-medium">
+              बालभारती शासकीय पुस्तके, शिक्षकांच्या हस्तलिखित नोट्स आणि स्वाध्याय पत्रिका
+            </p>
+          </div>
+
+          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
+            ● {studyMaterials.length} साहित्य उपलब्ध
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {studyMaterials.map((mat) => {
+            const isTextbook = mat.type === 'TEXTBOOK';
+            const isNotes = mat.type === 'NOTES';
+
+            return (
+              <div
+                key={mat.id}
+                onClick={() => setSelectedMaterial(mat)}
+                className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-purple-400 hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+              >
+                <div>
+                  <div className="flex items-center justify-between gap-2 mb-2.5">
+                    <span
+                      className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                        isTextbook
+                          ? 'bg-purple-100 text-purple-800'
+                          : isNotes
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-emerald-100 text-emerald-800'
+                      }`}
+                    >
+                      {isTextbook ? '📖 पाठ्यपुस्तक' : isNotes ? '📝 हस्तलिखित नोट्स' : '📑 स्वाध्याय पत्रिका'}
+                    </span>
+                    <span className="text-xs font-bold text-slate-500">
+                      {mat.pages || 24} पृष्ठे
+                    </span>
+                  </div>
+
+                  <h4 className="font-extrabold text-slate-900 text-base leading-snug line-clamp-2">
+                    {mat.title}
+                  </h4>
+
+                  <p className="text-xs text-slate-500 line-clamp-2 mt-1.5 font-medium">
+                    {mat.description}
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
+                  <span className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
+                    <Download className="w-3.5 h-3.5 text-slate-400" />
+                    ऑफलाइन उपलब्ध
+                  </span>
+
+                  <button className="inline-flex items-center gap-1 text-xs font-black text-purple-600 hover:underline">
+                    <span>वाचा (Read)</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -452,119 +630,135 @@ export const StudentHome: React.FC = () => {
             onClick={() => navigate('/student/quizzes')}
             className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
           >
-            <span>All Results & Scorecards</span>
+            <span>सर्व निकाल व चाचण्या (All Tests)</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {/* DPP 1 */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="bg-amber-100 text-amber-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
-                  DPP 01 • LANGUAGE
-                </span>
-                <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  Score: 10/10
-                </span>
-              </div>
-              <h4 className="font-extrabold text-slate-900 text-base">
-                Phonics & Letter Sounds Practice
-              </h4>
-              <p className="text-xs text-slate-500 font-medium">
-                10 Marks • ⭐⭐⭐ 3 Stars Earned
-              </p>
-            </div>
-
-            <button
-              onClick={() => navigate('/student/quizzes')}
-              className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs"
+          {allQuizzes.slice(0, 2).map((q, idx) => (
+            <div
+              key={q.id}
+              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex items-center justify-between gap-4"
             >
-              Review
-            </button>
-          </div>
-
-          {/* DPP 2 */}
-          <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex items-center justify-between gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
-                <span className="bg-blue-100 text-blue-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
-                  DPP 02 • MATH
-                </span>
-                <span className="text-xs font-bold text-blue-600">
-                  New Exercise
-                </span>
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="bg-blue-100 text-blue-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                    DPP 0{idx + 1} • {q.subject}
+                  </span>
+                  <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {q.totalMarks} Marks
+                  </span>
+                </div>
+                <h4 className="font-extrabold text-slate-900 text-base line-clamp-1">
+                  {q.title}
+                </h4>
+                <p className="text-xs text-slate-500 font-medium">
+                  {q.questions?.length || 2} प्रश्न • Passing: {q.passingMarks} Marks
+                </p>
               </div>
-              <h4 className="font-extrabold text-slate-900 text-base">
-                Numbers 1 to 20 & Quick Addition
-              </h4>
-              <p className="text-xs text-slate-500 font-medium">
-                10 Questions • 10 Marks • ~5 min
-              </p>
-            </div>
 
-            <button
-              onClick={() => navigate('/student/quizzes/quiz-math-01')}
-              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md"
-            >
-              Start DPP
-            </button>
-          </div>
+              <button
+                onClick={() => navigate(`/student/quizzes/${q.id}`)}
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md whitespace-nowrap min-h-[40px]"
+              >
+                Start DPP
+              </button>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Section: Free Offline Study Material & Schemes */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Welfare Schemes Box */}
-        <div
-          onClick={() => navigate('/schemes')}
-          className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-5 border border-amber-200 hover:border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl shadow-md">
-              🏛️
-            </div>
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
-                Welfare Portal
-              </span>
-              <h4 className="font-black text-slate-900 text-base">
-                Government Schemes & Benefits
-              </h4>
-              <p className="text-xs text-slate-600 font-medium">
-                Scholarships, uniforms, bicycles & checklist
-              </p>
-            </div>
+      {/* Welfare Portal Shortcut */}
+      <div
+        onClick={() => navigate('/schemes')}
+        className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-5 border border-amber-200 hover:border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3.5">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl shadow-md">
+            🏛️
           </div>
-          <ArrowRight className="w-5 h-5 text-amber-700" />
+          <div>
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
+              Welfare Portal
+            </span>
+            <h4 className="font-black text-slate-900 text-base">
+              शासकीय योजना व शिष्यवृत्ती (Government Schemes)
+            </h4>
+            <p className="text-xs text-slate-600 font-medium">
+              PM POSHAN, सावित्रीबाई फुले शिष्यवृत्ती व सायकल वाटप तपासणी
+            </p>
+          </div>
         </div>
 
-        {/* TaRL Diagnostic Level Box */}
-        <div
-          onClick={() => navigate('/student/adaptive')}
-          className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-3xl p-5 border border-indigo-200 hover:border-indigo-400 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
-        >
-          <div className="flex items-center gap-3.5">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center text-2xl shadow-md">
-              🎯
-            </div>
-            <div>
-              <span className="text-[10px] font-black uppercase tracking-wider text-indigo-800">
-                TaRL Staircase Diagnostic
-              </span>
-              <h4 className="font-black text-slate-900 text-base">
-                Check My Learning Level (1 to 5)
-              </h4>
-              <p className="text-xs text-slate-600 font-medium">
-                Current Level: Level {assessedLevel} Certified
-              </p>
-            </div>
-          </div>
-          <ArrowRight className="w-5 h-5 text-indigo-700" />
+        <div className="flex items-center gap-1 text-xs font-black text-amber-900 bg-white/80 px-3 py-1.5 rounded-xl border border-amber-300">
+          <span>तपासा (Check)</span>
+          <ChevronRight className="w-4 h-4" />
         </div>
       </div>
+
+      {/* ========================================================================= */}
+      {/* READING MODAL: BOOK / NOTES VIEWER */}
+      {/* ========================================================================= */}
+      {selectedMaterial && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in">
+          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
+            {/* Modal Header */}
+            <div className="bg-slate-900 text-white p-5 flex items-center justify-between gap-3">
+              <div>
+                <span className="text-[10px] uppercase font-bold text-purple-400">
+                  {selectedMaterial.type} • Grade {selectedMaterial.grade}
+                </span>
+                <h3 className="text-lg font-black">{selectedMaterial.title}</h3>
+              </div>
+              <button
+                onClick={() => setSelectedMaterial(null)}
+                className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content / Reader */}
+            <div className="p-6 overflow-y-auto space-y-4 flex-1">
+              <div className="flex items-center justify-between text-xs text-slate-500 border-b border-slate-100 pb-3">
+                <span>एकूण पृष्ठे: {selectedMaterial.pages || 24}</span>
+                <span className="text-emerald-600 font-bold">● ऑफलाइन वाचनासाठी उपलब्ध</span>
+              </div>
+
+              <div className="prose max-w-none text-slate-800 text-sm whitespace-pre-line leading-relaxed font-medium bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                {selectedMaterial.content}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between">
+              <button
+                onClick={() => {
+                  if ('speechSynthesis' in window && selectedMaterial.content) {
+                    window.speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(selectedMaterial.content.slice(0, 200));
+                    u.lang = 'mr-IN';
+                    window.speechSynthesis.speak(u);
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold text-xs hover:bg-slate-50"
+              >
+                <Volume2 className="w-4 h-4 text-blue-600" />
+                <span>वाचून दाखवा (Audio Read Aloud)</span>
+              </button>
+
+              <button
+                onClick={() => setSelectedMaterial(null)}
+                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+              >
+                बंद करा (Close Reader)
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

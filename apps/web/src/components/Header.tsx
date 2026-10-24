@@ -10,6 +10,8 @@ import {
   Flame,
   Target,
   ChevronDown,
+  LogOut,
+  Lock,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -23,6 +25,7 @@ export const Header: React.FC = () => {
     isSimpleMode,
     toggleSimpleMode,
     currentStudent,
+    logout,
   } = useAuthStore();
 
   const roles: Array<{ id: UserRole; label: string }> = [
@@ -140,19 +143,44 @@ export const Header: React.FC = () => {
             </select>
           </div>
 
-          {/* Student Profile Avatar */}
-          {currentStudent && (
-            <div
-              onClick={() => navigate('/student/picker')}
-              className="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700 border border-slate-700 px-2 py-1 rounded-xl cursor-pointer transition-all"
-            >
-              <div className="w-6 h-6 rounded-lg bg-blue-600/30 border border-blue-500/40 flex items-center justify-center text-xs">
-                🦁
+          {/* Student Profile & Privacy Session Button */}
+          {role === 'STUDENT' && (
+            currentStudent ? (
+              <div className="flex items-center gap-1.5 bg-slate-800/90 border border-slate-700 px-2 py-1 rounded-xl">
+                <div
+                  onClick={() => navigate('/student/picker')}
+                  className="flex items-center gap-1.5 cursor-pointer"
+                  title="View Profile"
+                >
+                  <div className="w-6 h-6 rounded-lg bg-blue-600/40 border border-blue-500/50 flex items-center justify-center text-xs">
+                    {currentStudent.gender === 'FEMALE' ? '👧' : '👦'}
+                  </div>
+                  <span className="text-xs font-bold text-slate-100 hidden sm:inline max-w-[85px] truncate">
+                    {currentStudent.name.split(' ')[0]}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => {
+                    logout();
+                    navigate('/student/picker');
+                  }}
+                  title="Lock Session / Switch Student (बाहेर पडा)"
+                  className="ml-1 px-1.5 py-0.5 rounded-md bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white text-[10px] font-black transition-all flex items-center gap-1 min-h-[26px]"
+                >
+                  <LogOut className="w-3 h-3" />
+                  <span className="hidden md:inline">बाहेर पडा</span>
+                </button>
               </div>
-              <span className="text-xs font-bold text-slate-200 hidden sm:inline max-w-[80px] truncate">
-                {currentStudent.name.split(' ')[0]}
-              </span>
-            </div>
+            ) : (
+              <button
+                onClick={() => navigate('/student/picker')}
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all min-h-[34px]"
+              >
+                <Lock className="w-3.5 h-3.5" />
+                <span>लॉगिन PIN</span>
+              </button>
+            )
           )}
         </div>
       </div>

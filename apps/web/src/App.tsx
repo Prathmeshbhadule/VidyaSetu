@@ -31,6 +31,14 @@ const queryClient = new QueryClient({
   },
 });
 
+const StudentGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { role, currentStudent } = useAuthStore();
+  if (role === 'STUDENT' && !currentStudent) {
+    return <Navigate to="/student/picker" replace />;
+  }
+  return <>{children}</>;
+};
+
 const AppContent: React.FC = () => {
   const { role, currentStudent } = useAuthStore();
   const location = useLocation();
@@ -41,7 +49,7 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen flex flex-col bg-amber-50/40 text-slate-900">
       <Header />
 
-      <main className="flex-1">
+      <main className="flex-1 pb-36">
         <Routes>
           {/* Default redirect according to active user role */}
           <Route
@@ -65,14 +73,70 @@ const AppContent: React.FC = () => {
 
           {/* Student Routes */}
           <Route path="/student/picker" element={<StudentProfilePicker />} />
-          <Route path="/student/home" element={<StudentHome />} />
-          <Route path="/student/lessons" element={<LessonListScreen />} />
-          <Route path="/student/lessons/:id" element={<LessonReaderScreen />} />
-          <Route path="/student/videos" element={<VideoLecturesScreen />} />
-          <Route path="/student/quizzes" element={<QuizResultsScreen />} />
-          <Route path="/student/quizzes/:id" element={<QuizRunnerScreen />} />
-          <Route path="/student/adaptive" element={<AdaptiveAssessmentScreen />} />
-          <Route path="/student/progress" element={<StudentProgressScreen />} />
+          <Route
+            path="/student/home"
+            element={
+              <StudentGuard>
+                <StudentHome />
+              </StudentGuard>
+            }
+          />
+          <Route
+            path="/student/lessons"
+            element={
+              <StudentGuard>
+                <LessonListScreen />
+              </StudentGuard>
+            }
+          />
+          <Route
+            path="/student/lessons/:id"
+            element={
+              <StudentGuard>
+                <LessonReaderScreen />
+              </StudentGuard>
+            }
+          />
+          <Route
+            path="/student/videos"
+            element={
+              <StudentGuard>
+                <VideoLecturesScreen />
+              </StudentGuard>
+            }
+          />
+          <Route
+            path="/student/quizzes"
+            element={
+              <StudentGuard>
+                <QuizResultsScreen />
+              </StudentGuard>
+            }
+          />
+          <Route
+            path="/student/quizzes/:id"
+            element={
+              <StudentGuard>
+                <QuizRunnerScreen />
+              </StudentGuard>
+            }
+          />
+          <Route
+            path="/student/adaptive"
+            element={
+              <StudentGuard>
+                <AdaptiveAssessmentScreen />
+              </StudentGuard>
+            }
+          />
+          <Route
+            path="/student/progress"
+            element={
+              <StudentGuard>
+                <StudentProgressScreen />
+              </StudentGuard>
+            }
+          />
 
           {/* Schemes & Welfare Routes */}
           <Route path="/schemes" element={<SchemesBrowserScreen />} />
