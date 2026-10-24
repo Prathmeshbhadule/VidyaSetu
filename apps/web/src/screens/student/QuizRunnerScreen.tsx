@@ -168,7 +168,7 @@ export const QuizRunnerScreen: React.FC = () => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  // PW Test Series Result Card
+  // Test Series Result Card
   if (completedResult) {
     const pct = completedResult.percentage;
     const isPassed = pct >= 60;
@@ -183,7 +183,7 @@ export const QuizRunnerScreen: React.FC = () => {
 
           <div>
             <span className="text-xs font-black uppercase tracking-wider text-blue-600">
-              PW Test Series Result
+              चाचणी निकाल (Test Series Result)
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
               {isPassed ? 'Shabash! Test Completed 🎉' : 'Test Submitted! Keep Practicing 💪'}
@@ -198,7 +198,7 @@ export const QuizRunnerScreen: React.FC = () => {
             <StarRating rating={completedResult.starRating} size="lg" />
           </div>
 
-          {/* PW Detailed Score Grid */}
+          {/* Detailed Score Grid */}
           <div className="grid grid-cols-3 gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center">
             <div>
               <span className="text-[10px] uppercase font-bold text-slate-500 block">Total Score</span>
@@ -260,14 +260,14 @@ export const QuizRunnerScreen: React.FC = () => {
     );
   }
 
-  // PW Test Series Question Stage
+  // Test Series Question Stage
   return (
     <div className="max-w-4xl mx-auto p-3 sm:p-6 pb-28 space-y-4">
-      {/* PW Top Test Bar */}
+      {/* Top Test Bar */}
       <div className="bg-slate-900 rounded-2xl p-4 text-white flex flex-wrap items-center justify-between gap-3 shadow-md">
         <div>
           <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400 font-black">
-            PW CBT Test Portal • {quiz.subject}
+            सराव परीक्षा (CBT Test Portal) • {quiz.subject}
           </span>
           <h2 className="text-sm sm:text-base font-black truncate max-w-sm">
             {quiz.title}
@@ -293,7 +293,7 @@ export const QuizRunnerScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* PW Question Palette Bar */}
+      {/* Question Palette Bar */}
       <div className="bg-white rounded-2xl p-3 border border-slate-200 shadow-sm flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-xs font-bold text-slate-500 hidden sm:inline">Questions:</span>

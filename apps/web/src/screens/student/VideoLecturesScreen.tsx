@@ -105,7 +105,7 @@ export const VideoLecturesScreen: React.FC = () => {
           </button>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
             <VideoIcon className="w-7 h-7 text-blue-600" />
-            <span>PW Video Lectures (व्हिडिओ व्याख्याने)</span>
+            <span>व्हिडिओ तासिका (Video Lectures)</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
             Offline 240p/360p video lessons with seekable playback and attached DPP tests

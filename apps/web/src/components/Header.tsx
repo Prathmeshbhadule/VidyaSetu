@@ -38,13 +38,13 @@ export const Header: React.FC = () => {
   return (
     <header className="sticky top-0 z-50 bg-slate-900 border-b border-slate-800 text-white px-3 sm:px-6 py-2.5 shadow-lg">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-        {/* Left: PW Brand & Goal Selector */}
+        {/* Left: Brand & Goal Selector */}
         <div className="flex items-center gap-3">
           <div
             onClick={() => navigate(role === 'STUDENT' ? '/student/home' : '/')}
             className="flex items-center gap-2.5 cursor-pointer"
           >
-            {/* PW style Bold Logo Mark */}
+            {/* Bold Logo Mark */}
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-700 flex items-center justify-center font-black text-xl text-white shadow-md shadow-blue-600/30 ring-1 ring-white/20">
               VS
             </div>
@@ -54,7 +54,7 @@ export const Header: React.FC = () => {
                   VIDYA SETU
                 </span>
                 <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-black text-[10px] font-black px-1.5 py-0.5 rounded font-mono uppercase tracking-wide">
-                  PW ED
+                  OFFLINE
                 </span>
               </div>
               <p className="text-[10px] text-slate-400 font-medium hidden sm:block">
@@ -63,7 +63,7 @@ export const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* PW Goal / Class Selector Badge */}
+          {/* Goal / Class Selector Badge */}
           {role === 'STUDENT' && (
             <div className="hidden md:flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-800 border border-slate-700/80 px-2.5 py-1 rounded-xl text-xs font-bold text-slate-200 cursor-pointer transition-all">
               <Target className="w-3.5 h-3.5 text-blue-400" />

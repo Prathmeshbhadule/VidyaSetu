@@ -288,7 +288,7 @@ export const QuizResultsScreen: React.FC = () => {
           </button>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
             <CheckCircle2 className="w-7 h-7 text-blue-600" />
-            <span>PW Test Series & Scorecards (चाचण्या व निकाल)</span>
+            <span>विद्या सेतू चाचण्या व निकाल (Tests & Scorecards)</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
             Detailed solution sheets, accuracy analysis, and question reviews

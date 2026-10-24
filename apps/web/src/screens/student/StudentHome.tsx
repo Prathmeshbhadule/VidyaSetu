@@ -112,13 +112,13 @@ export const StudentHome: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-6 pb-28 space-y-6">
-      {/* PW Hero Batch Banner Carousel */}
+      {/* Hero Batch Banner Carousel */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 border border-slate-800 text-white shadow-2xl p-6 sm:p-8">
         <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400 via-indigo-500 to-transparent pointer-events-none" />
 
         <div className="flex flex-wrap items-center justify-between gap-6 relative z-10">
           <div className="space-y-3 max-w-xl">
-            {/* PW Batch Tag */}
+            {/* Batch Tag */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
                 🎯 लक्ष्य बॅच २०२६ (TARGET 2026)
@@ -202,7 +202,7 @@ export const StudentHome: React.FC = () => {
         </div>
       </div>
 
-      {/* PW Quick Category Bar */}
+      {/* Quick Category Bar */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
         {[
           { id: 'ALL', label: 'सर्व विषय (All)', icon: '📚' },
@@ -232,7 +232,7 @@ export const StudentHome: React.FC = () => {
         ))}
       </div>
 
-      {/* PW Section: Continue Watching / Recent Lecture */}
+      {/* Section: Continue Watching / Recent Lecture */}
       {recentLesson && (
         <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-4 w-full md:w-auto">
@@ -293,7 +293,7 @@ export const StudentHome: React.FC = () => {
         </div>
       )}
 
-      {/* PW Section: My Batches & Subject Classrooms */}
+      {/* Section: My Batches & Subject Classrooms */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
@@ -435,7 +435,7 @@ export const StudentHome: React.FC = () => {
         </div>
       </div>
 
-      {/* PW Section: Daily Practice Problems (DPP) & Test Series */}
+      {/* Section: Daily Practice Problems (DPP) & Test Series */}
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <div>
@@ -515,7 +515,7 @@ export const StudentHome: React.FC = () => {
         </div>
       </div>
 
-      {/* PW Section: Free Offline Study Material & Schemes */}
+      {/* Section: Free Offline Study Material & Schemes */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Welfare Schemes Box */}
         <div

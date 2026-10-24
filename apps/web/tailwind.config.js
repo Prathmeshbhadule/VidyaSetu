@@ -7,7 +7,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        pw: {
+        edtech: {
           navy: '#0c1024',
           dark: '#111827',
           card: '#1e293b',

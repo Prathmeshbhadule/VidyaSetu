@@ -89,7 +89,7 @@ export const LessonReaderScreen: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-3 sm:p-6 pb-28 space-y-5">
-      {/* PW Lecture Top Bar */}
+      {/* Lecture Top Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={() => navigate('/student/home')}
@@ -107,7 +107,7 @@ export const LessonReaderScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* PW Video Player Container */}
+      {/* Video Player Container */}
       <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-950">
         <VideoPlayer
           videoId={lesson.id}
@@ -118,7 +118,7 @@ export const LessonReaderScreen: React.FC = () => {
         />
       </div>
 
-      {/* PW Class Details & Teacher Header */}
+      {/* Class Details & Teacher Header */}
       <div className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -155,7 +155,7 @@ export const LessonReaderScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* PW Classroom Sub-Tabs */}
+        {/* Classroom Sub-Tabs */}
         <div className="flex items-center gap-2 border-b border-slate-200 pt-2 overflow-x-auto no-scrollbar">
           {[
             { id: 'video', label: '🎬 Lecture Overview', count: null },
@@ -279,7 +279,7 @@ export const LessonReaderScreen: React.FC = () => {
             <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-3">
               <div className="flex items-center justify-between">
                 <span className="bg-emerald-100 text-emerald-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
-                  PW DPP • Daily Practice Problem
+                  DPP • Daily Practice Problem (दैनंदिन सराव चाचणी)
                 </span>
                 <span className="text-xs font-bold text-slate-500">
                   Passing Marks: {associatedQuiz?.passingMarks || 6} / {associatedQuiz?.totalMarks || 10}

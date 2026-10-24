@@ -75,7 +75,7 @@ export const LessonListScreen: React.FC = () => {
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-black uppercase tracking-wider bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full">
-                PW Video Classroom
+                व्हिडिओ तासिका (Video Classroom)
               </span>
               <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
                 ● 240p/360p Offline
