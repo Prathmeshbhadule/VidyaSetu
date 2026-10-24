@@ -19,7 +19,7 @@ import { syncManager } from '../services/sync-manager.js';
 import { speakText, stopSpeaking } from '../services/speech.js';
 import { useAuthStore } from '../store/useAuthStore.js';
 import { useSyncStore } from '../store/useSyncStore.js';
-import { translations, SupportedLanguage } from '@vidya-setu/shared';
+import { translations, SupportedLanguage, StudentProfile } from '@vidya-setu/shared';
 import i18n from '../i18n/index.js';
 
 describe('Vidya Setu Web - Offline-First PWA Tests', () => {
@@ -46,13 +46,10 @@ describe('Vidya Setu Web - Offline-First PWA Tests', () => {
         prn: 'PRN-2026-001',
         grade: 3,
         assessedLevel: 2,
-        pin: '1234',
-        avatar: '🦁',
-        gender: 'BOY' as const,
-        category: 'OBC',
-        bplCard: true,
-        disability: false,
-        active: true,
+        avatarId: 'lion',
+        pinHash: '1234',
+        parentalConsent: true,
+        gender: 'MALE' as const,
         version: 1,
         deviceId: 'device-test-1',
         createdAt: new Date().toISOString(),
@@ -65,7 +62,7 @@ describe('Vidya Setu Web - Offline-First PWA Tests', () => {
 
       expect(retrieved).toBeDefined();
       expect(retrieved?.name).toBe('Aarav Patil (आरव पाटील)');
-      expect(retrieved?.pin).toBe('1234');
+      expect(retrieved?.pinHash).toBe('1234');
       expect(retrieved?.grade).toBe(3);
     });
 
@@ -77,6 +74,7 @@ describe('Vidya Setu Web - Offline-First PWA Tests', () => {
         date: '2026-10-24',
         status: 'PRESENT' as const,
         markedBy: 'teacher-uuid',
+        source: 'TEACHER' as const,
         hlc: '2026-10-24T00:00:00.000Z-0000-node1',
         version: 1,
         deviceId: 'device-test-1',
@@ -103,6 +101,7 @@ describe('Vidya Setu Web - Offline-First PWA Tests', () => {
         date: '2026-10-24',
         status: 'ABSENT' as const,
         markedBy: 'teacher-offline',
+        source: 'TEACHER' as const,
         hlc: '',
         version: 1,
         deviceId: 'device-test-1',
@@ -175,20 +174,17 @@ describe('Vidya Setu Web - Offline-First PWA Tests', () => {
       expect(store.isAuthenticated).toBe(false);
       expect(store.currentStudent).toBeNull();
 
-      const mockStudent = {
+      const mockStudent: StudentProfile = {
         id: '018f679a-st01-7000-8000-000000000001',
         schoolId: '018f679a-1111-7000-8000-000000000001',
         name: 'Priya Sharma (प्रिया शर्मा)',
         prn: 'PRN-2026-002',
         grade: 4,
         assessedLevel: 3,
-        pin: '5678',
-        avatar: '🐘',
-        gender: 'GIRL' as const,
-        category: 'SC',
-        bplCard: true,
-        disability: false,
-        active: true,
+        avatarId: 'elephant',
+        pinHash: '5678',
+        parentalConsent: true,
+        gender: 'FEMALE' as const,
         version: 1,
         deviceId: 'hub',
         createdAt: new Date().toISOString(),
