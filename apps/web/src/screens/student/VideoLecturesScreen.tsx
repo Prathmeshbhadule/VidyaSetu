@@ -145,14 +145,14 @@ export const VideoLecturesScreen: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all mb-2 min-h-[36px]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Classroom (बॅचवर परत जा)</span>
+            <span>{t('videos.backToClassroom')}</span>
           </button>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
             <VideoIcon className="w-7 h-7 text-blue-600" />
-            <span>व्हिडिओ तासिका (Video Lectures)</span>
+            <span>{t('videos.title')}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
-            Offline 240p/360p video lessons with seekable playback and attached DPP tests
+            {t('videos.subtitle')}
           </p>
         </div>
 
@@ -184,17 +184,17 @@ export const VideoLecturesScreen: React.FC = () => {
                   {activeLecture.subject}
                 </span>
                 <span className="text-xs font-bold text-slate-500">
-                  Grade {activeLecture.grade} • Level {activeLecture.level}
+                  {t('common.grade')} {activeLecture.grade} • {t('common.level')} {activeLecture.level}
                 </span>
                 <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  ● Offline Ready
+                  ● {t('batch.offlineReady')}
                 </span>
               </div>
               <h3 className="text-lg sm:text-xl font-black text-slate-900">
                 {activeLecture.title}
               </h3>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                Faculty: Sunil Patil Sir • Master Teacher
+                {t('batch.faculty')}
               </p>
             </div>
 
@@ -203,7 +203,7 @@ export const VideoLecturesScreen: React.FC = () => {
                 onClick={() => navigate(`/student/quizzes/${activeLecture.quizId}`)}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all min-h-[44px]"
               >
-                <span>Solve DPP Quiz</span>
+                <span>{t('videos.solveDpp')}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -215,7 +215,7 @@ export const VideoLecturesScreen: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <h4 className="font-black text-lg text-slate-900 flex items-center gap-2">
           <PlayCircle className="w-5 h-5 text-blue-600" />
-          <span>All Video Lessons ({filteredLectures.length})</span>
+          <span>{t('videos.allVideos')} ({filteredLectures.length})</span>
         </h4>
 
         <div className="flex items-center gap-1.5 overflow-x-auto">
@@ -281,7 +281,7 @@ export const VideoLecturesScreen: React.FC = () => {
                 </span>
 
                 <div className="inline-flex items-center gap-1.5 text-xs font-black text-blue-600">
-                  <span>{isSelected ? 'Now Playing' : 'Play Video'}</span>
+                  <span>{isSelected ? t('videos.nowPlaying') : t('videos.playVideo')}</span>
                   <PlayCircle className="w-4 h-4 fill-blue-600 text-white" />
                 </div>
               </div>

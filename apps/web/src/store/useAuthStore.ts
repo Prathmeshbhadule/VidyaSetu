@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { UserRole, StudentProfile, SupportedLanguage } from '@vidya-setu/shared';
-import { setLanguage } from '../i18n/index.js';
+import { setLanguage as updateI18nLanguage } from '../i18n/index.js';
 
 function getStorage(key: string): string | null {
   if (typeof localStorage !== 'undefined') {
@@ -75,7 +75,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   setLanguage: (lang) => {
-    setLanguage(lang);
+    updateI18nLanguage(lang);
     set({ language: lang });
   },
 

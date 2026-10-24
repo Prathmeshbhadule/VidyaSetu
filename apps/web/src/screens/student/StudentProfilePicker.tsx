@@ -180,13 +180,13 @@ export const StudentProfilePicker: React.FC = () => {
             <Lock className="w-8 h-8" />
           </div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            {selectedStudent ? `${selectedStudent.name}` : 'विद्यार्थी लॉगिन (Student Login)'}
+            {selectedStudent ? `${selectedStudent.name}` : t('session.loginTitle')}
           </h2>
           <div className="flex items-center justify-center gap-2">
             <p className="text-xs sm:text-sm font-medium text-slate-400">
               {selectedStudent
-                ? 'सुरक्षित लॉगिनसाठी आपला ४ अंकांचा पिन टाका (Enter 4-Digit PIN)'
-                : 'अभ्यास सुरू करण्यासाठी आपले नाव निवडा (Select your profile)'}
+                ? t('session.enterPin', { name: selectedStudent.name })
+                : t('session.loginSubtitle')}
             </p>
             <AudioHelpButton text="आपले नाव निवडा आणि चार अंकांचा गुप्त पिन टाका." size="sm" />
           </div>
@@ -211,11 +211,11 @@ export const StudentProfilePicker: React.FC = () => {
                       {student.name}
                     </span>
                     <span className="text-[11px] font-bold text-blue-400 mt-0.5">
-                      इयत्ता {student.grade} • Level {student.assessedLevel}
+                      {t('common.grade')} {student.grade} • {t('common.level')} {student.assessedLevel}
                     </span>
                     <span className="text-[10px] text-slate-500 mt-1 flex items-center gap-1 font-mono">
                       <Lock className="w-2.5 h-2.5 text-slate-400" />
-                      PIN Protected
+                      {t('session.lockedSession')}
                     </span>
                   </button>
                 );
@@ -229,7 +229,7 @@ export const StudentProfilePicker: React.FC = () => {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-blue-400 border border-slate-800 font-bold text-xs transition-all shadow-sm"
               >
                 <UserPlus className="w-4 h-4" />
-                <span>+ नवीन विद्यार्थी प्रोफाइल जोडा (Add New Student)</span>
+                <span>{t('session.newStudent')}</span>
               </button>
             </div>
           </div>
@@ -245,7 +245,7 @@ export const StudentProfilePicker: React.FC = () => {
                     {selectedStudent.name}
                   </h3>
                   <p className="text-xs text-slate-400 font-mono">
-                    Grade {selectedStudent.grade} • PRN: {selectedStudent.prn}
+                    {t('common.grade')} {selectedStudent.grade} • PRN: {selectedStudent.prn}
                   </p>
                 </div>
               </div>
@@ -253,7 +253,7 @@ export const StudentProfilePicker: React.FC = () => {
                 onClick={() => setSelectedStudent(null)}
                 className="text-xs font-bold text-blue-400 hover:underline min-h-[36px] px-2"
               >
-                बदला (Change)
+                {t('common.edit')}
               </button>
             </div>
 
@@ -310,7 +310,7 @@ export const StudentProfilePicker: React.FC = () => {
             </div>
 
             <div className="pt-2 text-center text-[11px] text-slate-400 font-medium">
-              <span>डेमो पिन: <strong>{selectedStudent.pinHash || '1234'}</strong> (किंवा 1234)</span>
+              <span>{t('session.demoPin')} ({selectedStudent.pinHash})</span>
             </div>
           </div>
         )}
@@ -322,7 +322,7 @@ export const StudentProfilePicker: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h3 className="font-black text-lg text-white flex items-center gap-2">
                   <UserPlus className="w-5 h-5 text-blue-500" />
-                  नवीन विद्यार्थी नोंदणी (Register Student)
+                  {t('session.registerTitle')}
                 </h3>
                 <button
                   onClick={() => setShowAddModal(false)}
@@ -335,7 +335,7 @@ export const StudentProfilePicker: React.FC = () => {
               <form onSubmit={handleCreateNewStudent} className="space-y-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-300 mb-1">
-                    विद्यार्थ्याचे पूर्ण नाव (Student Full Name) *
+                    {t('session.fullName')} *
                   </label>
                   <input
                     type="text"
@@ -349,7 +349,7 @@ export const StudentProfilePicker: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">इयत्ता (Grade)</label>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">{t('common.grade')}</label>
                     <select
                       value={newGrade}
                       onChange={(e) => setNewGrade(Number(e.target.value))}
@@ -357,14 +357,14 @@ export const StudentProfilePicker: React.FC = () => {
                     >
                       {[1, 2, 3, 4, 5, 6, 7, 8].map((g) => (
                         <option key={g} value={g}>
-                          इयत्ता {g} री
+                          {t('common.grade')} {g}
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold text-slate-300 mb-1">लिंग (Gender)</label>
+                    <label className="block text-xs font-bold text-slate-300 mb-1">Gender</label>
                     <select
                       value={newGender}
                       onChange={(e) => setNewGender(e.target.value as any)}
@@ -378,7 +378,7 @@ export const StudentProfilePicker: React.FC = () => {
 
                 <div>
                   <label className="block text-xs font-bold text-slate-300 mb-1">
-                    ४ अंकांचा गुप्त पिन (4-Digit PIN for Login) *
+                    {t('session.pinLabel')} *
                   </label>
                   <input
                     type="password"
@@ -389,7 +389,7 @@ export const StudentProfilePicker: React.FC = () => {
                     className="w-full p-2.5 rounded-xl border border-slate-700 bg-slate-800 text-white font-mono font-bold text-sm tracking-widest text-center"
                   />
                   <p className="text-[10px] text-slate-400 mt-1">
-                    हा पिन फक्त याच विद्यार्थ्याला माहित असावा जेणेकरून इतर कोणी लॉग इन करू शकणार नाही.
+                    {t('session.pinHelp')}
                   </p>
                 </div>
 
@@ -398,7 +398,7 @@ export const StudentProfilePicker: React.FC = () => {
                   className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
                 >
                   <CheckCircle2 className="w-4 h-4" />
-                  <span>विद्यार्थी प्रोफाइल सेव्ह करा (Save & Continue)</span>
+                  <span>{t('session.saveProfile')}</span>
                 </button>
               </form>
             </div>

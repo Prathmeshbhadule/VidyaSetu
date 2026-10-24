@@ -237,14 +237,14 @@ export const StudentHome: React.FC = () => {
                 {studentName}
               </h3>
               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-                Grade {gradeNumber}
+                {t('common.grade')} {gradeNumber}
               </span>
               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                TaRL Level {assessedLevel}
+                TaRL {t('common.level')} {assessedLevel}
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              PRN: {currentStudent.prn} • सुरक्षित वैयक्तिक सत्र (Logged in via 4-Digit PIN)
+              PRN: {currentStudent.prn} • {t('session.lockedSession')}
             </p>
           </div>
         </div>
@@ -257,7 +257,7 @@ export const StudentHome: React.FC = () => {
           className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-300 font-black text-xs transition-all min-h-[40px]"
         >
           <LogOut className="w-3.5 h-3.5 text-rose-600" />
-          <span>विद्यार्थी बदला / लॉक करा (Switch / Lock)</span>
+          <span>{t('session.switchStudent')}</span>
         </button>
       </div>
 
@@ -270,23 +270,23 @@ export const StudentHome: React.FC = () => {
             {/* Batch Tag */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                🎯 लक्ष्य बॅच २०२६ (TARGET 2026)
+                🎯 {t('batch.targetBatch')}
               </span>
               <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold px-2 py-0.5 rounded-full">
-                ● 100% Offline Ready
+                ● {t('batch.offlineReady')}
               </span>
             </div>
 
             {/* Title & Teacher */}
             <div>
               <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-                इयत्ता {gradeNumber} री • संपूर्ण पायाभूत अभ्यासक्रम
+                {t('batch.foundationCourse', { grade: gradeNumber })}
               </h2>
               <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1">
                 Language Phonics • Vedic Math • Basic Science • TaRL Level {assessedLevel}
               </p>
               <p className="text-[11px] text-blue-300 font-bold mt-1">
-                मार्गदर्शक: सुनील पाटील सर (सुवर्णपदक विजेते शिक्षक) व तज्ञ शिक्षक
+                {t('batch.faculty')}
               </p>
             </div>
 
@@ -294,15 +294,15 @@ export const StudentHome: React.FC = () => {
             <div className="flex items-center gap-4 text-xs font-semibold text-slate-300 pt-1 flex-wrap">
               <div className="flex items-center gap-1.5">
                 <VideoIcon className="w-4 h-4 text-amber-400" />
-                <span>{videoCount} Video Lectures</span>
+                <span>{t('batch.videoCount', { count: videoCount })}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <CheckSquare className="w-4 h-4 text-emerald-400" />
-                <span>{quizCount} Daily Practice DPPs</span>
+                <span>{t('batch.dppCount', { count: quizCount })}</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <FileText className="w-4 h-4 text-sky-400" />
-                <span>{materialCount} Books & Notes</span>
+                <span>{t('batch.notesCount', { count: materialCount })}</span>
               </div>
             </div>
 
@@ -313,13 +313,13 @@ export const StudentHome: React.FC = () => {
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-lg shadow-blue-600/30 transition-all min-h-[44px]"
               >
                 <PlayCircle className="w-4 h-4" />
-                <span>व्हिडिओ तासिका सुरू करा (Resume Lecture)</span>
+                <span>{t('batch.resumeLecture')}</span>
               </button>
               <button
                 onClick={() => navigate('/student/lessons')}
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all min-h-[44px]"
               >
-                <span>बॅच तपशील (Explore)</span>
+                <span>{t('batch.exploreBatch')}</span>
               </button>
             </div>
           </div>
@@ -328,15 +328,15 @@ export const StudentHome: React.FC = () => {
           <div className="bg-slate-800/90 border border-slate-700 p-5 rounded-3xl text-center space-y-2 min-w-[200px]">
             <div className="flex items-center justify-center gap-1.5 text-amber-400 font-black text-xs uppercase">
               <Flame className="w-4 h-4 fill-amber-400 text-amber-400" />
-              <span>अभ्यास सातत्य (Study Streak)</span>
+              <span>{t('streak.studyStreak')}</span>
             </div>
-            <div className="text-3xl font-black text-white">🔥 4 Days</div>
+            <div className="text-3xl font-black text-white">{t('streak.daysCount', { days: 4 })}</div>
             <p className="text-[11px] text-slate-300">
-              सोम • मंगळ • बुध • आज (सलग अभ्यास चालू आहे)
+              {t('streak.streakDays')}
             </p>
             <div className="pt-2 border-t border-slate-700/80">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">माझे अचूक गुण (Accuracy)</span>
-              <span className="text-base font-black text-emerald-400">92% अचूकता</span>
+              <span className="text-[10px] uppercase font-bold text-slate-400 block">{t('streak.accuracyTitle')}</span>
+              <span className="text-base font-black text-emerald-400">{t('streak.accuracyValue')}</span>
             </div>
           </div>
         </div>
@@ -345,11 +345,11 @@ export const StudentHome: React.FC = () => {
       {/* Quick Category Bar */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
         {[
-          { id: 'ALL', label: 'सर्व विषय (All)', icon: '📚' },
-          { id: 'LANGUAGE', label: 'मराठी व इंग्रजी भाषा', icon: '📖' },
-          { id: 'MATH', label: 'गणित व संख्याज्ञान', icon: '🔢' },
-          { id: 'SCIENCE', label: 'परिसर अभ्यास व विज्ञान', icon: '🔬' },
-          { id: 'TESTS', label: 'सराव चाचणी व निकाल', icon: '🎯' },
+          { id: 'ALL', label: t('category.all'), icon: '📚' },
+          { id: 'LANGUAGE', label: t('category.language'), icon: '📖' },
+          { id: 'MATH', label: t('category.math'), icon: '🔢' },
+          { id: 'SCIENCE', label: t('category.science'), icon: '🔬' },
+          { id: 'TESTS', label: t('category.tests'), icon: '🎯' },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -398,10 +398,10 @@ export const StudentHome: React.FC = () => {
                   {recentLesson.subject}
                 </span>
                 <span className="text-xs font-semibold text-slate-500">
-                  Grade {recentLesson.grade} • Level {recentLesson.level}
+                  {t('common.grade')} {recentLesson.grade} • {t('common.level')} {recentLesson.level}
                 </span>
                 <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  ● 65% Completed
+                  ● 65% {t('student.completed')}
                 </span>
               </div>
 
@@ -410,7 +410,7 @@ export const StudentHome: React.FC = () => {
               </h4>
 
               <p className="text-xs text-slate-500 font-medium line-clamp-1">
-                मार्गदर्शक: सुनील पाटील सर • Master Faculty
+                {t('batch.faculty')}
               </p>
 
               {/* Progress Bar */}
@@ -425,7 +425,7 @@ export const StudentHome: React.FC = () => {
               onClick={() => navigate(`/student/lessons/${recentLesson.id}`)}
               className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all min-h-[44px]"
             >
-              <span>पुढे चालू ठेवा (Resume)</span>
+              <span>{t('student.resumeLesson')}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -438,10 +438,10 @@ export const StudentHome: React.FC = () => {
           <div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
               <BookOpen className="w-5 h-5 text-blue-600" />
-              <span>माझे विषय वर्ग (My Subject Classrooms)</span>
+              <span>{t('classrooms.title')}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              Structured lectures, assignments (DPP) and chapter notes
+              {t('classrooms.subtitle')}
             </p>
           </div>
 
@@ -449,7 +449,7 @@ export const StudentHome: React.FC = () => {
             onClick={() => navigate('/student/lessons')}
             className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
           >
-            <span>सर्व तासिका पहा (View All)</span>
+            <span>{t('classrooms.viewAll')}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -465,19 +465,19 @@ export const StudentHome: React.FC = () => {
                 📖
               </span>
               <span className="bg-amber-50 text-amber-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                {allLessons.filter((l) => l.subject === 'LANGUAGE').length || 1} Lectures
+                {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'LANGUAGE').length || 1 })}
               </span>
             </div>
             <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">
-              मराठी व इंग्रजी भाषा (Language)
+              {t('category.language')}
             </h4>
             <p className="text-xs text-slate-500 font-medium mt-1">
               Phonics, letter recognition, vocabulary building & storytelling
             </p>
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
-              <span>Grade {gradeNumber} • Level 1-2</span>
+              <span>{t('common.grade')} {gradeNumber} • {t('common.level')} 1-2</span>
               <span className="text-blue-600 flex items-center gap-0.5">
-                उघडा <ChevronRight className="w-3.5 h-3.5" />
+                {t('classrooms.open')} <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </div>
@@ -492,19 +492,19 @@ export const StudentHome: React.FC = () => {
                 🔢
               </span>
               <span className="bg-blue-50 text-blue-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                {allLessons.filter((l) => l.subject === 'MATH').length || 1} Lectures
+                {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'MATH').length || 1 })}
               </span>
             </div>
             <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">
-              गणित व संख्याज्ञान (Mathematics)
+              {t('category.math')}
             </h4>
             <p className="text-xs text-slate-500 font-medium mt-1">
               Counting, 2-digit addition, subtraction, visual mental math
             </p>
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
-              <span>Grade {gradeNumber} • Level 2-3</span>
+              <span>{t('common.grade')} {gradeNumber} • {t('common.level')} 2-3</span>
               <span className="text-blue-600 flex items-center gap-0.5">
-                उघडा <ChevronRight className="w-3.5 h-3.5" />
+                {t('classrooms.open')} <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </div>
@@ -519,19 +519,19 @@ export const StudentHome: React.FC = () => {
                 🔬
               </span>
               <span className="bg-emerald-50 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                {allLessons.filter((l) => l.subject === 'SCIENCE').length || 1} Lectures
+                {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'SCIENCE').length || 1 })}
               </span>
             </div>
             <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">
-              परिसर अभ्यास व विज्ञान (Science)
+              {t('category.science')}
             </h4>
             <p className="text-xs text-slate-500 font-medium mt-1">
               Plants, water cycle, animals, environment & basic science
             </p>
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
-              <span>Grade {gradeNumber} • Level 3</span>
+              <span>{t('common.grade')} {gradeNumber} • {t('common.level')} 3</span>
               <span className="text-blue-600 flex items-center gap-0.5">
-                उघडा <ChevronRight className="w-3.5 h-3.5" />
+                {t('classrooms.open')} <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
           </div>
@@ -546,15 +546,15 @@ export const StudentHome: React.FC = () => {
           <div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
               <FileText className="w-5 h-5 text-purple-600" />
-              <span>अभ्यास साहित्य, पुस्तके व नोट्स (Books & Study Material)</span>
+              <span>{t('materials.title')}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              बालभारती शासकीय पुस्तके, शिक्षकांच्या हस्तलिखित नोट्स आणि स्वाध्याय पत्रिका
+              {t('materials.subtitle')}
             </p>
           </div>
 
           <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-            ● {studyMaterials.length} साहित्य उपलब्ध
+            ● {t('materials.availableCount', { count: studyMaterials.length })}
           </span>
         </div>
 
@@ -580,10 +580,10 @@ export const StudentHome: React.FC = () => {
                           : 'bg-emerald-100 text-emerald-800'
                       }`}
                     >
-                      {isTextbook ? '📖 पाठ्यपुस्तक' : isNotes ? '📝 हस्तलिखित नोट्स' : '📑 स्वाध्याय पत्रिका'}
+                      {isTextbook ? t('materials.textbook') : isNotes ? t('materials.notes') : t('materials.worksheet')}
                     </span>
                     <span className="text-xs font-bold text-slate-500">
-                      {mat.pages || 24} पृष्ठे
+                      {t('materials.pages', { count: mat.pages || 24 })}
                     </span>
                   </div>
 
@@ -599,11 +599,11 @@ export const StudentHome: React.FC = () => {
                 <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
                   <span className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
                     <Download className="w-3.5 h-3.5 text-slate-400" />
-                    ऑफलाइन उपलब्ध
+                    {t('materials.offlineAvailable')}
                   </span>
 
                   <button className="inline-flex items-center gap-1 text-xs font-black text-purple-600 hover:underline">
-                    <span>वाचा (Read)</span>
+                    <span>{t('materials.read')}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -619,10 +619,10 @@ export const StudentHome: React.FC = () => {
           <div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
               <CheckSquare className="w-5 h-5 text-emerald-600" />
-              <span>Daily Practice Problems (DPP) & Test Series</span>
+              <span>{t('dpp.title')}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">
-              Topic-wise practice quizzes with answer key & scorecards
+              {t('dpp.subtitle')}
             </p>
           </div>
 
@@ -630,7 +630,7 @@ export const StudentHome: React.FC = () => {
             onClick={() => navigate('/student/quizzes')}
             className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
           >
-            <span>सर्व निकाल व चाचण्या (All Tests)</span>
+            <span>{t('dpp.allTests')}</span>
             <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -648,14 +648,14 @@ export const StudentHome: React.FC = () => {
                   </span>
                   <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    {q.totalMarks} Marks
+                    {t('dpp.marksTotal', { marks: q.totalMarks })}
                   </span>
                 </div>
                 <h4 className="font-extrabold text-slate-900 text-base line-clamp-1">
                   {q.title}
                 </h4>
                 <p className="text-xs text-slate-500 font-medium">
-                  {q.questions?.length || 2} प्रश्न • Passing: {q.passingMarks} Marks
+                  {t('dpp.questionsCount', { count: q.questions?.length || 2 })} • {t('dpp.passingMarks', { marks: q.passingMarks })}
                 </p>
               </div>
 
@@ -663,7 +663,7 @@ export const StudentHome: React.FC = () => {
                 onClick={() => navigate(`/student/quizzes/${q.id}`)}
                 className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md whitespace-nowrap min-h-[40px]"
               >
-                Start DPP
+                {t('dpp.startDpp')}
               </button>
             </div>
           ))}
@@ -681,19 +681,19 @@ export const StudentHome: React.FC = () => {
           </div>
           <div>
             <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
-              Welfare Portal
+              {t('nav.schemes')}
             </span>
             <h4 className="font-black text-slate-900 text-base">
-              शासकीय योजना व शिष्यवृत्ती (Government Schemes)
+              {t('schemes.title')}
             </h4>
             <p className="text-xs text-slate-600 font-medium">
-              PM POSHAN, सावित्रीबाई फुले शिष्यवृत्ती व सायकल वाटप तपासणी
+              {t('schemes.subtitle')}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-1 text-xs font-black text-amber-900 bg-white/80 px-3 py-1.5 rounded-xl border border-amber-300">
-          <span>तपासा (Check)</span>
+          <span>{t('schemes.eligibilityCheck')}</span>
           <ChevronRight className="w-4 h-4" />
         </div>
       </div>
@@ -708,7 +708,7 @@ export const StudentHome: React.FC = () => {
             <div className="bg-slate-900 text-white p-5 flex items-center justify-between gap-3">
               <div>
                 <span className="text-[10px] uppercase font-bold text-purple-400">
-                  {selectedMaterial.type} • Grade {selectedMaterial.grade}
+                  {selectedMaterial.type} • {t('common.grade')} {selectedMaterial.grade}
                 </span>
                 <h3 className="text-lg font-black">{selectedMaterial.title}</h3>
               </div>
@@ -723,8 +723,8 @@ export const StudentHome: React.FC = () => {
             {/* Modal Content / Reader */}
             <div className="p-6 overflow-y-auto space-y-4 flex-1">
               <div className="flex items-center justify-between text-xs text-slate-500 border-b border-slate-100 pb-3">
-                <span>एकूण पृष्ठे: {selectedMaterial.pages || 24}</span>
-                <span className="text-emerald-600 font-bold">● ऑफलाइन वाचनासाठी उपलब्ध</span>
+                <span>{t('materials.pages', { count: selectedMaterial.pages || 24 })}</span>
+                <span className="text-emerald-600 font-bold">● {t('materials.offlineAvailable')}</span>
               </div>
 
               <div className="prose max-w-none text-slate-800 text-sm whitespace-pre-line leading-relaxed font-medium bg-slate-50 p-4 rounded-2xl border border-slate-200">
@@ -746,14 +746,14 @@ export const StudentHome: React.FC = () => {
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold text-xs hover:bg-slate-50"
               >
                 <Volume2 className="w-4 h-4 text-blue-600" />
-                <span>वाचून दाखवा (Audio Read Aloud)</span>
+                <span>{t('materials.readAloud')}</span>
               </button>
 
               <button
                 onClick={() => setSelectedMaterial(null)}
                 className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
               >
-                बंद करा (Close Reader)
+                {t('materials.closeReader')}
               </button>
             </div>
           </div>

@@ -229,7 +229,7 @@ export const QuizRunnerScreen: React.FC = () => {
               className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-md transition-all min-h-[48px]"
             >
               <FileCheck className="w-5 h-5" />
-              <span>View Detailed Solutions & Answer Key (तपशीलवार उत्तरे)</span>
+              <span>{t('dpp.review')} & {t('dpp.allTests')}</span>
             </button>
 
             <div className="flex gap-3">
@@ -251,7 +251,7 @@ export const QuizRunnerScreen: React.FC = () => {
                 className="flex-1 inline-flex items-center justify-center gap-2 py-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm transition-all min-h-[44px]"
               >
                 <Home className="w-4 h-4" />
-                <span>Classroom Home</span>
+                <span>{t('videos.backToClassroom')}</span>
               </button>
             </div>
           </div>
@@ -267,7 +267,7 @@ export const QuizRunnerScreen: React.FC = () => {
       <div className="bg-slate-900 rounded-2xl p-4 text-white flex flex-wrap items-center justify-between gap-3 shadow-md">
         <div>
           <span className="text-[10px] font-mono uppercase tracking-wider text-blue-400 font-black">
-            सराव परीक्षा (CBT Test Portal) • {quiz.subject}
+            {t('category.tests')} • {quiz.subject}
           </span>
           <h2 className="text-sm sm:text-base font-black truncate max-w-sm">
             {quiz.title}

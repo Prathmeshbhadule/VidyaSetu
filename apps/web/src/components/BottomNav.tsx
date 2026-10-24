@@ -26,36 +26,36 @@ export const BottomNav: React.FC = () => {
     switch (role) {
       case 'TEACHER':
         return [
-          { to: '/teacher/attendance', icon: <CheckSquare className="w-5 h-5" />, label: 'हजेरी (Attendance)' },
-          { to: '/teacher/grouping', icon: <Layers className="w-5 h-5" />, label: 'स्तर गट (TaRL)' },
-          { to: '/teacher/at-risk', icon: <HeartHandshake className="w-5 h-5" />, label: 'अडचण (Retention)' },
-          { to: '/admin/content', icon: <BookOpen className="w-5 h-5" />, label: 'साहित्य (Studio)' },
-          { to: '/teacher/hub-status', icon: <Server className="w-5 h-5" />, label: 'हब (Hub)' },
+          { to: '/teacher/attendance', icon: <CheckSquare className="w-5 h-5" />, label: t('nav.attendance', 'Attendance') },
+          { to: '/teacher/grouping', icon: <Layers className="w-5 h-5" />, label: t('nav.grouping', 'TaRL') },
+          { to: '/teacher/at-risk', icon: <HeartHandshake className="w-5 h-5" />, label: t('nav.retention', 'Retention') },
+          { to: '/admin/content', icon: <BookOpen className="w-5 h-5" />, label: t('nav.studio', 'Studio') },
+          { to: '/teacher/hub-status', icon: <Server className="w-5 h-5" />, label: t('nav.hub', 'Hub') },
         ];
       case 'GUARDIAN':
         return [
-          { to: '/parent', icon: <Users className="w-5 h-5" />, label: 'माझे मूल (Child)' },
-          { to: '/schemes', icon: <Award className="w-5 h-5" />, label: 'योजना (Schemes)' },
-          { to: '/parent/notifications', icon: <Bell className="w-5 h-5" />, label: 'सूचना (Notices)' },
+          { to: '/parent', icon: <Users className="w-5 h-5" />, label: t('nav.child', 'My Child') },
+          { to: '/schemes', icon: <Award className="w-5 h-5" />, label: t('nav.schemes', 'Schemes') },
+          { to: '/parent/notifications', icon: <Bell className="w-5 h-5" />, label: t('nav.notices', 'Notices') },
         ];
       case 'DISTRICT_ADMIN':
         return [
           { to: '/district/dashboard', icon: <BarChart3 className="w-5 h-5" />, label: 'Analytics' },
-          { to: '/schemes', icon: <Award className="w-5 h-5" />, label: 'Schemes' },
+          { to: '/schemes', icon: <Award className="w-5 h-5" />, label: t('nav.schemes', 'Schemes') },
         ];
       case 'CONTENT_ADMIN':
         return [
-          { to: '/admin/content', icon: <BookOpen className="w-5 h-5" />, label: 'Curriculum' },
-          { to: '/schemes', icon: <Award className="w-5 h-5" />, label: 'Schemes' },
+          { to: '/admin/content', icon: <BookOpen className="w-5 h-5" />, label: t('nav.studio', 'Studio') },
+          { to: '/schemes', icon: <Award className="w-5 h-5" />, label: t('nav.schemes', 'Schemes') },
         ];
       case 'STUDENT':
       default:
         return [
-          { to: '/student/home', icon: <Home className="w-5 h-5" />, label: 'होम (Home)' },
-          { to: '/student/lessons', icon: <BookOpen className="w-5 h-5" />, label: 'बॅच (Batches)' },
-          { to: '/student/videos', icon: <VideoIcon className="w-5 h-5" />, label: 'लेक्चर्स (Videos)' },
-          { to: '/student/quizzes', icon: <CheckSquare className="w-5 h-5" />, label: 'टेस्ट सिरीज (Tests)' },
-          { to: '/schemes', icon: <Award className="w-5 h-5" />, label: 'योजना (Schemes)' },
+          { to: '/student/home', icon: <Home className="w-5 h-5" />, label: t('nav.home', 'Home') },
+          { to: '/student/lessons', icon: <BookOpen className="w-5 h-5" />, label: t('nav.batches', 'Batches') },
+          { to: '/student/videos', icon: <VideoIcon className="w-5 h-5" />, label: t('nav.videos', 'Lectures') },
+          { to: '/student/quizzes', icon: <CheckSquare className="w-5 h-5" />, label: t('nav.tests', 'Tests') },
+          { to: '/schemes', icon: <Award className="w-5 h-5" />, label: t('nav.schemes', 'Schemes') },
         ];
     }
   };

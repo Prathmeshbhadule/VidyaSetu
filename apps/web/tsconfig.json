@@ -5,6 +5,10 @@
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "module": "ESNext",
     "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@tanstack/query-core": ["../../node_modules/.pnpm/@tanstack+query-core@5.104.5/node_modules/@tanstack/query-core"]
+    },
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": false,
     "resolveJsonModule": true,

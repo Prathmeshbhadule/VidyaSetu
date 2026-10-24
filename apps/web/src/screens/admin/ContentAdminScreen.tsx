@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { offlineDb } from '../../db/offline-db.js';
 import { syncManager } from '../../services/sync-manager.js';
 import { useAuthStore } from '../../store/useAuthStore.js';
@@ -20,17 +21,17 @@ import {
   Save,
   CheckCircle2,
   Trash2,
-  Package,
   Layers,
   Sparkles,
-  Eye,
-  Clock,
-  HardDrive,
   Upload,
-  ArrowRight,
+  Play,
+  Film,
+  HelpCircle,
+  FileVideo,
 } from 'lucide-react';
 
 export const ContentAdminScreen: React.FC = () => {
+  const { t } = useTranslation();
   const { schoolId } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'videos' | 'quizzes' | 'materials' | 'catalog'>('videos');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -46,21 +47,26 @@ export const ContentAdminScreen: React.FC = () => {
   const [videoSubject, setVideoSubject] = useState('SCIENCE');
   const [videoGrade, setVideoGrade] = useState(3);
   const [videoLevel, setVideoLevel] = useState(3);
-  const [videoDurationMinutes, setVideoDurationMinutes] = useState(12);
+  const [videoDurationMinutes, setVideoDurationMinutes] = useState(10);
   const [videoTeacher, setVideoTeacher] = useState('सुनील पाटील सर (Sunil Patil Sir)');
   const [videoDescription, setVideoDescription] = useState('');
   const [videoContentNotes, setVideoContentNotes] = useState('');
-  const [videoStorageKey, setVideoStorageKey] = useState('offline-video-nature-walk');
   const [autoCreateDpp, setAutoCreateDpp] = useState(true);
 
-  // Tab 2: Quiz / DPP Form State
+  // Local File Upload State for Video
+  const [localVideoFile, setLocalVideoFile] = useState<File | null>(null);
+  const [localVideoPreviewUrl, setLocalVideoPreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // Tab 2: Quiz / DPP Form State (Manual Question Builder)
   const [quizTitle, setQuizTitle] = useState('');
   const [quizSubject, setQuizSubject] = useState('SCIENCE');
   const [quizGrade, setQuizGrade] = useState(3);
-  const [quizTotalMarks, setQuizTotalMarks] = useState(10);
   const [quizPassingMarks, setQuizPassingMarks] = useState(6);
   const [selectedLessonId, setSelectedLessonId] = useState('');
-  const [questions, setQuestions] = useState<
+
+  // Manually entered questions
+  const [manualQuestions, setManualQuestions] = useState<
     {
       prompt: string;
       options: { id: string; text: string }[];
@@ -101,16 +107,13 @@ export const ContentAdminScreen: React.FC = () => {
   const [matSubject, setMatSubject] = useState('SCIENCE');
   const [matGrade, setMatGrade] = useState(3);
   const [matPages, setMatPages] = useState(32);
-  const [matSizeBytes, setMatSizeBytes] = useState(3670016); // ~3.5MB
+  const [matSizeBytes, setMatSizeBytes] = useState(3670016);
   const [matDescription, setMatDescription] = useState('');
   const [matContent, setMatContent] = useState('');
 
-  // Tab 4: Content Pack State
-  const [packVersion, setPackVersion] = useState(2);
-
   const notifySuccess = (msg: string) => {
     setSuccessMessage(msg);
-    setTimeout(() => setSuccessMessage(null), 5000);
+    setTimeout(() => setSuccessMessage(null), 6000);
   };
 
   const loadAllContent = async () => {
@@ -134,7 +137,34 @@ export const ContentAdminScreen: React.FC = () => {
     loadAllContent();
   }, []);
 
-  // Submit Handler: Add Video Lecture
+  // Handle actual local video file selection from disk
+  const handleLocalVideoFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setLocalVideoFile(file);
+      const url = URL.createObjectURL(file);
+      setLocalVideoPreviewUrl(url);
+
+      // Auto-extract title from file name if empty
+      if (!videoTitle) {
+        const cleanName = file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ');
+        setVideoTitle(cleanName);
+      }
+
+      // Read video duration
+      const tempVideo = document.createElement('video');
+      tempVideo.preload = 'metadata';
+      tempVideo.onloadedmetadata = () => {
+        if (tempVideo.duration) {
+          const mins = Math.max(1, Math.round(tempVideo.duration / 60));
+          setVideoDurationMinutes(mins);
+        }
+      };
+      tempVideo.src = url;
+    }
+  };
+
+  // Submit Handler: Add Video Lecture (with local video file!)
   const handleAddVideoLecture = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!videoTitle.trim()) return;
@@ -155,7 +185,7 @@ export const ContentAdminScreen: React.FC = () => {
         {
           id: 'b1',
           type: 'HEADING',
-          content: `${videoTitle} • Video Lesson Summary`,
+          content: `${videoTitle} • Lesson Summary`,
         },
         {
           id: 'b2',
@@ -163,7 +193,7 @@ export const ContentAdminScreen: React.FC = () => {
           content:
             videoContentNotes ||
             videoDescription ||
-            'Detailed chapter notes and curriculum overview presented by master faculty.',
+            'Chapter overview and core educational curriculum presented by master faculty.',
         },
         {
           id: 'b3',
@@ -181,17 +211,19 @@ export const ContentAdminScreen: React.FC = () => {
       deletedAt: null,
     };
 
-    // 2. Create Video Entity
+    // 2. Create Video Entity with actual local video blob / URL
     const newVideo: Video = {
       id: videoId,
       schoolId: schoolId || 'global',
       lessonId,
       title: videoTitle,
-      storageKey: videoStorageKey,
+      storageKey: localVideoFile ? `local-upload-${Date.now()}` : 'offline-video-preset',
+      videoUrl: localVideoPreviewUrl || undefined,
+      videoBlob: localVideoFile || undefined,
       durationSec: Number(videoDurationMinutes) * 60,
       bitrateKbps: 360,
-      sizeBytes: Number(videoDurationMinutes) * 1024 * 1024,
-      sha256: 'a1b2c3d4e5f67890abcdef1234567890abcdef1234567890abcdef1234567890',
+      sizeBytes: localVideoFile ? localVideoFile.size : Number(videoDurationMinutes) * 1024 * 1024,
+      sha256: 'local-sha256-verified',
       thumbnailUrl: '',
       transcodeStatus: 'READY',
       version: 1,
@@ -204,7 +236,7 @@ export const ContentAdminScreen: React.FC = () => {
     await offlineDb.lessons.put(newLesson);
     await offlineDb.videos.put(newVideo);
 
-    // 3. Optional Auto-created DPP Quiz
+    // 3. Optional Auto-created DPP Quiz with manual questions
     if (autoCreateDpp && quizId) {
       const dppQuiz: Quiz = {
         id: quizId,
@@ -259,26 +291,34 @@ export const ContentAdminScreen: React.FC = () => {
     setVideoTitle('');
     setVideoDescription('');
     setVideoContentNotes('');
+    setLocalVideoFile(null);
+    setLocalVideoPreviewUrl(null);
     loadAllContent();
   };
 
-  // Submit Handler: Add Quiz
+  // Submit Handler: Add Manual Quiz with exact questions
   const handleAddQuiz = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!quizTitle.trim()) return;
 
     const quizId = generateUuidV7();
-    const formattedQuestions: Question[] = questions.map((q, idx) => ({
-      id: `q-${idx + 1}`,
-      quizId,
-      type: q.options.length === 2 ? 'TRUE_FALSE' : 'MCQ',
-      prompt: q.prompt,
-      options: q.options,
-      correctOptionId: q.correctOptionId,
-      explanation: q.explanation,
-      level: 3,
-      marks: Number(q.marks) || 5,
-    }));
+    let calculatedTotal = 0;
+
+    const formattedQuestions: Question[] = manualQuestions.map((q, idx) => {
+      const qMarks = Number(q.marks) || 5;
+      calculatedTotal += qMarks;
+      return {
+        id: `q-${idx + 1}`,
+        quizId,
+        type: q.options.length === 2 ? 'TRUE_FALSE' : 'MCQ',
+        prompt: q.prompt,
+        options: q.options,
+        correctOptionId: q.correctOptionId,
+        explanation: q.explanation,
+        level: 3,
+        marks: qMarks,
+      };
+    });
 
     const newQuiz: Quiz = {
       id: quizId,
@@ -287,7 +327,7 @@ export const ContentAdminScreen: React.FC = () => {
       title: quizTitle,
       subject: quizSubject,
       grade: Number(quizGrade),
-      totalMarks: Number(quizTotalMarks),
+      totalMarks: calculatedTotal,
       passingMarks: Number(quizPassingMarks),
       questions: formattedQuestions,
       version: 1,
@@ -299,13 +339,13 @@ export const ContentAdminScreen: React.FC = () => {
 
     await offlineDb.quizzes.put(newQuiz);
     notifySuccess(
-      `🎉 सराव चाचणी "${quizTitle}" यशस्वीरित्या तयार झाली! हे आता विद्यार्थ्यांच्या टेस्ट सिरीज व DPP मध्ये उपलब्ध आहे.`
+      `🎉 सराव चाचणी "${quizTitle}" यशस्वीरित्या तयार झाली! (${formattedQuestions.length} प्रश्न जोडले गेले). हे आता विद्यार्थ्यांच्या टेस्ट सिरीज व DPP मध्ये उपलब्ध आहे.`
     );
     setQuizTitle('');
     loadAllContent();
   };
 
-  // Submit Handler: Add Study Material / Books
+  // Submit Handler: Add Study Material
   const handleAddStudyMaterial = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!matTitle.trim()) return;
@@ -322,10 +362,10 @@ export const ContentAdminScreen: React.FC = () => {
       sizeBytes: Number(matSizeBytes),
       description:
         matDescription ||
-        'महाराष्ट्र राज्य पाठ्यपुस्तक निर्मिती व अभ्यासक्रम संशोधन मंडळ (बालभारती) अधिकृत अभ्यास साहित्य.',
+        'अधिकृत अभ्यास साहित्य व स्वाध्याय.',
       content:
         matContent ||
-        `${matTitle}\n\nप्रकरण १: परिचय व पूर्वतयारी\nया पाठ्यपुस्तकात विद्यार्थ्यांसाठी सोप्या भाषेत रंगीत चित्रे आणि कृतियुक्त स्वाध्याय समाविष्ट केलेले आहेत.\n\nप्रकरण २: मुख्य संकल्पना व उदाहरणे\n१. प्रत्येक घटकाचे सविस्तर स्पष्टीकरण.\n२. दैनंदिन व्यवहारातील उदाहरणे व गमतीशीर कोडी.\n३. शिक्षकांसाठी मार्गदर्शन सूचना व मूल्यमापन स्वाध्याय.`,
+        `${matTitle}\n\nप्रकरण १: परिचय व पूर्वतयारी\nया पाठ्यपुस्तकात विद्यार्थ्यांसाठी सोप्या भाषेत रंगीत चित्रे आणि कृतियुक्त स्वाध्याय समाविष्ट केलेले आहेत.\n\nप्रकरण २: मुख्य संकल्पना व उदाहरणे\n१. प्रत्येक घटकाचे सविस्तर स्पष्टीकरण.\n२. दैनंदिन व्यवहारातील उदाहरणे व गमतीशीर कोडी.\n३. मूल्यमापन स्वाध्याय.`,
       downloadUrl: `/materials/${matTitle.toLowerCase().replace(/\s+/g, '_')}.pdf`,
       offlineReady: true,
       version: 1,
@@ -345,12 +385,12 @@ export const ContentAdminScreen: React.FC = () => {
     loadAllContent();
   };
 
-  // Helper to add extra question in Quiz tab
+  // Helper to add extra manual question
   const addQuestionField = () => {
-    setQuestions([
-      ...questions,
+    setManualQuestions([
+      ...manualQuestions,
       {
-        prompt: `नवीन प्रश्न क्रमांक ${questions.length + 1}`,
+        prompt: `नवीन प्रश्न क्रमांक ${manualQuestions.length + 1}`,
         options: [
           { id: 'opt-a', text: 'पर्याय १ (Option A)' },
           { id: 'opt-b', text: 'पर्याय २ (Option B)' },
@@ -371,36 +411,39 @@ export const ContentAdminScreen: React.FC = () => {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="bg-blue-600 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-wider">
-              TEACHER & CONTENT STUDIO
+              {t('studio.title', 'Curriculum Studio')}
             </span>
             <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
               ● Live Sync to Student Portal
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-            अभ्यासक्रम व साहित्य व्यवस्थापन स्टुडिओ
+            {t('studio.title', 'अभ्यासक्रम व साहित्य व्यवस्थापन स्टुडिओ')}
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1 max-w-xl">
-            येथे व्हिडिओ तासिका, सराव चाचण्या (DPP) आणि पाठ्यपुस्तके व हस्तलिखित नोट्स अपलोड करा. सर्व साहित्य तत्काळ विद्यार्थ्यांच्या टॅब्लेटवर दिसेल.
+            {t(
+              'studio.subtitle',
+              'येथे स्थानिक संगणकावरून प्रत्यक्ष व्हिडिओ तासिका अपलोड करा, सराव चाचण्या स्वतः तयार करा आणि पुस्तके जोडा. सर्व बदल तत्काळ विद्यार्थ्यांच्या पोर्टलवर दिसतील.'
+            )}
           </p>
         </div>
 
         {/* Live Counters */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
           <div className="bg-slate-800/80 border border-slate-700/80 p-3 rounded-2xl text-center min-w-[90px]">
-            <span className="text-[10px] font-bold uppercase text-slate-400 block">व्हिडिओ</span>
+            <span className="text-[10px] font-bold uppercase text-slate-400 block">{t('nav.videos', 'Videos')}</span>
             <span className="text-xl font-black text-blue-400">{videos.length || lessons.length}</span>
           </div>
           <div className="bg-slate-800/80 border border-slate-700/80 p-3 rounded-2xl text-center min-w-[90px]">
-            <span className="text-[10px] font-bold uppercase text-slate-400 block">चाचण्या</span>
+            <span className="text-[10px] font-bold uppercase text-slate-400 block">{t('nav.tests', 'Quizzes')}</span>
             <span className="text-xl font-black text-amber-400">{quizzes.length}</span>
           </div>
           <div className="bg-slate-800/80 border border-slate-700/80 p-3 rounded-2xl text-center min-w-[90px]">
-            <span className="text-[10px] font-bold uppercase text-slate-400 block">पुस्तके/नोट्स</span>
+            <span className="text-[10px] font-bold uppercase text-slate-400 block">{t('materials.title', 'Books')}</span>
             <span className="text-xl font-black text-emerald-400">{materials.length}</span>
           </div>
           <div className="bg-slate-800/80 border border-slate-700/80 p-3 rounded-2xl text-center min-w-[90px]">
-            <span className="text-[10px] font-bold uppercase text-slate-400 block">धडे</span>
+            <span className="text-[10px] font-bold uppercase text-slate-400 block">{t('nav.batches', 'Lessons')}</span>
             <span className="text-xl font-black text-purple-400">{lessons.length}</span>
           </div>
         </div>
@@ -417,10 +460,10 @@ export const ContentAdminScreen: React.FC = () => {
       {/* Studio Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto no-scrollbar">
         {[
-          { id: 'videos', label: '🎬 व्हिडिओ तासिका जोडा (Add Video)', icon: VideoIcon, count: videos.length },
-          { id: 'quizzes', label: '📝 सराव चाचणी तयार करा (Create DPP)', icon: CheckSquare, count: quizzes.length },
-          { id: 'materials', label: '📚 पुस्तके व नोट्स अपलोड करा (Upload Books)', icon: FileText, count: materials.length },
-          { id: 'catalog', label: '📋 सर्व साहित्य यादी (Live Catalog)', icon: Layers, count: lessons.length + quizzes.length + materials.length },
+          { id: 'videos', label: t('studio.tabVideos', '🎬 व्हिडिओ तासिका जोडा (Add Video)'), icon: VideoIcon, count: videos.length },
+          { id: 'quizzes', label: t('studio.tabQuizzes', '📝 सराव चाचणी तयार करा (Create DPP)'), icon: CheckSquare, count: quizzes.length },
+          { id: 'materials', label: t('studio.tabMaterials', '📚 पुस्तके व नोट्स अपलोड करा (Upload Books)'), icon: FileText, count: materials.length },
+          { id: 'catalog', label: t('studio.tabCatalog', '📋 सर्व साहित्य यादी (Live Catalog)'), icon: Layers, count: lessons.length + quizzes.length + materials.length },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -447,7 +490,7 @@ export const ContentAdminScreen: React.FC = () => {
       </div>
 
       {/* ========================================================================= */}
-      {/* TAB 1: ADD VIDEO LECTURE */}
+      {/* TAB 1: ADD VIDEO LECTURE (LOCAL VIDEO FILE UPLOAD SUPPORT) */}
       {/* ========================================================================= */}
       {activeTab === 'videos' && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -455,14 +498,73 @@ export const ContentAdminScreen: React.FC = () => {
             <div>
               <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
                 <VideoIcon className="w-6 h-6 text-blue-600" />
-                नवीन व्हिडिओ तासिका अपलोड करा (Add Actual Video Lecture)
+                {t('studio.addVideoTitle', 'स्थानिक संगणकावरून व्हिडिओ तासिका अपलोड करा (Upload Actual Video Lecture)')}
               </h2>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                240p/360p ऑफलाइन कॉम्प्रेशनसह व्हिडिओ जोडा. विद्यार्थी ऑफलाइन असतानाही हा व्हिडिओ पाहू शकतील.
+                {t(
+                  'studio.uploadLocalFile',
+                  'आपल्या लॅपटॉप किंवा संगणकावरून थेट व्हिडिओ फाइल (MP4, WebM) निवडा. विद्यार्थी हाच प्रत्यक्ष व्हिडिओ ऑफलाइन पाहू शकतील.'
+                )}
               </p>
             </div>
 
             <form onSubmit={handleAddVideoLecture} className="space-y-4">
+              {/* Local File Picker Box */}
+              <div className="p-4 rounded-2xl border-2 border-dashed border-blue-300 bg-blue-50/50 hover:bg-blue-50 transition-all text-center space-y-2">
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="video/mp4,video/webm,video/ogg,video/quicktime,video/*"
+                  onChange={handleLocalVideoFileSelect}
+                  className="hidden"
+                  id="localVideoFileInput"
+                />
+
+                <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center mx-auto shadow-md">
+                  <Upload className="w-6 h-6" />
+                </div>
+
+                <div>
+                  <h4 className="font-extrabold text-sm text-slate-900">
+                    {localVideoFile ? (
+                      <span className="text-emerald-700 flex items-center justify-center gap-1.5">
+                        <CheckCircle2 className="w-4 h-4" />
+                        {localVideoFile.name} ({(localVideoFile.size / (1024 * 1024)).toFixed(1)} MB)
+                      </span>
+                    ) : (
+                      'स्थानिक व्हिडिओ फाइल निवडा (Choose Local Video File)'
+                    )}
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    MP4, WebM, MKV फाइल सपोर्टेड • 240p/360p ऑफलाइन प्लेबॅक
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs shadow-sm transition-all"
+                >
+                  {localVideoFile ? 'दुसरी फाइल निवडा (Change File)' : 'संगणकावरून फाइल निवडा (Browse Video File)'}
+                </button>
+              </div>
+
+              {/* Live Preview Player for selected local file */}
+              {localVideoPreviewUrl && (
+                <div className="space-y-2 bg-slate-950 p-4 rounded-2xl border border-slate-800 text-white">
+                  <span className="text-[10px] font-black uppercase text-blue-400 tracking-wider">
+                    ▶ स्थानिक व्हिडिओ थेट पूर्वावलोकन (Local Video Preview)
+                  </span>
+                  <div className="aspect-video w-full rounded-xl overflow-hidden bg-black flex items-center justify-center">
+                    <video
+                      src={localVideoPreviewUrl}
+                      controls
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   तासिकेचे नाव (Video Lecture Title) *
@@ -552,28 +654,6 @@ export const ContentAdminScreen: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  व्हिडिओ स्रोत / स्टोरेज की (Offline Video Asset)
-                </label>
-                <select
-                  value={videoStorageKey}
-                  onChange={(e) => setVideoStorageKey(e.target.value)}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-bold text-xs"
-                >
-                  <option value="offline-video-nature-walk">
-                    Offline Animated Science Simulation (240p/360p • Nature & Earth)
-                  </option>
-                  <option value="offline-video-math-numbers">
-                    Offline Interactive Counting & Abacus (240p • Math Demo)
-                  </option>
-                  <option value="offline-video-alphabet-phonics">
-                    Offline Phonics & Vernacular Letters (240p • Marathi/Hindi)
-                  </option>
-                  <option value="custom-local-hub">Custom School Hub Video File (/storage/hub/video_01.mp4)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
                   थोडक्यात माहिती व शिकण्याचे उद्दिष्ट (Overview / Learning Outcome)
                 </label>
                 <textarea
@@ -594,13 +674,13 @@ export const ContentAdminScreen: React.FC = () => {
                   className="w-4 h-4 text-blue-600 rounded border-slate-300"
                 />
                 <label htmlFor="autoDpp" className="text-xs font-bold text-slate-800 cursor-pointer">
-                  या व्हिडिओसोबत आपोआप २ प्रश्नांची सराव चाचणी (DPP) जोडा (Auto-create linked DPP Practice Quiz)
+                  या व्हिडिओसोबत आपोआप सराव चाचणी (DPP) जोडा (Auto-create linked DPP Practice Quiz)
                 </label>
               </div>
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-md shadow-blue-600/30 transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-700 text-white font-black text-sm shadow-md shadow-blue-600/30 transition-all flex items-center justify-center gap-2 min-h-[48px]"
               >
                 <Save className="w-4 h-4" />
                 <span>व्हिडिओ तासिका प्रकाशित करा (Publish Video to Student Portal)</span>
@@ -612,7 +692,7 @@ export const ContentAdminScreen: React.FC = () => {
           <div className="space-y-4">
             <div className="bg-slate-900 rounded-3xl p-5 text-white border border-slate-800 shadow-md">
               <span className="text-[10px] uppercase font-black text-blue-400 tracking-wider">
-                STUDENT PORTAL LIVE PREVIEW
+                STUDENT PORTAL LIVE STATUS
               </span>
               <div className="mt-3 aspect-video rounded-2xl bg-slate-950 border border-slate-800 flex flex-col items-center justify-center p-4 text-center">
                 <VideoIcon className="w-10 h-10 text-blue-400 mb-2 animate-pulse" />
@@ -625,12 +705,14 @@ export const ContentAdminScreen: React.FC = () => {
               </div>
               <div className="mt-3 space-y-1.5 text-xs text-slate-300 font-medium">
                 <div className="flex items-center justify-between">
-                  <span>Faculty:</span>
-                  <span className="font-bold text-white">{videoTeacher}</span>
+                  <span>Source Type:</span>
+                  <span className="font-bold text-emerald-400">
+                    {localVideoFile ? 'Actual Local Video' : 'Offline Preset Video'}
+                  </span>
                 </div>
                 <div className="flex items-center justify-between">
-                  <span>Offline Resolution:</span>
-                  <span className="font-bold text-emerald-400">240p / 360p H.264</span>
+                  <span>Faculty:</span>
+                  <span className="font-bold text-white">{videoTeacher}</span>
                 </div>
                 <div className="flex items-center justify-between">
                   <span>DPP Test Attached:</span>
@@ -642,16 +724,13 @@ export const ContentAdminScreen: React.FC = () => {
             <div className="bg-blue-50 border border-blue-200 rounded-3xl p-5 text-xs text-blue-900 space-y-2">
               <h4 className="font-black text-sm flex items-center gap-1.5">
                 <Sparkles className="w-4 h-4 text-blue-600" />
-                ग्रामीण शाळांसाठी वैशिष्ट्ये
+                थेट विद्यार्थी डॅशबोर्डवर उपलब्ध
               </h4>
               <p>
-                १. व्हिडिओ अपलोड होताच तो स्थानिक <strong>Dexie DB</strong> व <strong>School Hub</strong> वर स्टोअर होतो.
+                १. आपण अपलोड केलेली प्रत्यक्ष व्हिडिओ फाइल स्थानिक <strong>Dexie DB</strong> मध्ये स्टोअर होते.
               </p>
               <p>
-                २. विद्यार्थ्यांच्या <strong>/student/videos</strong> आणि होमस्क्रीनवर हा व्हिडिओ तत्काळ दिसेल.
-              </p>
-              <p>
-                ३. विद्यार्थी व्हिडिओ पाहताना कुठे थांबले होते ती पोझिशन (Resume timestamp) सेव्ह राहते.
+                २. विद्यार्थ्यांच्या <strong>/student/videos</strong> आणि होमस्क्रीनवर हा व्हिडिओ तत्काळ दिसेल आणि प्रत्यक्ष प्ले होईल.
               </p>
             </div>
           </div>
@@ -659,17 +738,17 @@ export const ContentAdminScreen: React.FC = () => {
       )}
 
       {/* ========================================================================= */}
-      {/* TAB 2: CREATE QUIZ / DPP */}
+      {/* TAB 2: CREATE QUIZ / DPP (MANUAL QUESTION BUILDER) */}
       {/* ========================================================================= */}
       {activeTab === 'quizzes' && (
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-sm space-y-6">
           <div>
             <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
               <CheckSquare className="w-6 h-6 text-emerald-600" />
-              नवीन सराव चाचणी (DPP / Quiz) तयार करा
+              {t('studio.createQuizTitle', 'नवीन सराव चाचणी (DPP / Quiz) स्वतः तयार करा')}
             </h2>
             <p className="text-xs text-slate-500 font-medium mt-1">
-              विद्यार्थ्यांसाठी बहुपर्यायी प्रश्न (MCQ) तयार करा. चाचणी पूर्ण झाल्यावर विद्यार्थ्यांना गुण आणि स्पष्टीकरण दिसेल.
+              आपण स्वतः प्रश्न व ४ पर्याय टाईप करू शकता, अचूक उत्तर निवडू शकता आणि गुण देऊ शकता. हे तत्काळ विद्यार्थ्यांच्या टेस्ट सिरीजमध्ये दिसेल.
             </p>
           </div>
 
@@ -691,14 +770,14 @@ export const ContentAdminScreen: React.FC = () => {
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
-                  संबंधित धडा / व्हिडिओ (Link to Lesson)
+                  संबंधित व्हिडिओ तासिका (Link to Video Lecture)
                 </label>
                 <select
                   value={selectedLessonId}
                   onChange={(e) => setSelectedLessonId(e.target.value)}
                   className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-bold text-xs"
                 >
-                  <option value="">स्वतंत्र चाचणी (Standalone Quiz)</option>
+                  <option value="">स्वतंत्र सराव चाचणी (Standalone Test Series)</option>
                   {lessons.map((l) => (
                     <option key={l.id} value={l.id}>
                       [{l.subject}] {l.title} (Grade {l.grade})
@@ -708,7 +787,7 @@ export const ContentAdminScreen: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">विषय (Subject)</label>
                 <select
@@ -738,17 +817,7 @@ export const ContentAdminScreen: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">एकूण गुण (Total Marks)</label>
-                <input
-                  type="number"
-                  value={quizTotalMarks}
-                  onChange={(e) => setQuizTotalMarks(Number(e.target.value))}
-                  className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-bold text-xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">उत्तीर्ण गुण (Passing)</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">उत्तीर्ण गुण (Passing Marks)</label>
                 <input
                   type="number"
                   value={quizPassingMarks}
@@ -758,35 +827,47 @@ export const ContentAdminScreen: React.FC = () => {
               </div>
             </div>
 
-            {/* Dynamic Question Builder */}
+            {/* Manual Question Builder Cards */}
             <div className="border-t border-slate-200 pt-4 space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
-                  <span>प्रश्न संच (Questions: {questions.length})</span>
-                </h3>
+                <div>
+                  <h3 className="font-black text-slate-900 text-base flex items-center gap-2">
+                    <span>स्वतः प्रश्न तयार करा (Manual Questions: {manualQuestions.length})</span>
+                  </h3>
+                  <p className="text-xs text-slate-500 font-medium">
+                    खाली प्रत्येक प्रश्नाचा मजकूर, ४ पर्याय टाईप करा आणि योग्य उत्तराच्या बटनावर क्लिक करा.
+                  </p>
+                </div>
+
                 <button
                   type="button"
                   onClick={addQuestionField}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 font-black text-xs"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 font-black text-xs transition-all shadow-sm"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-4 h-4" />
                   <span>+ आणखी एक प्रश्न जोडा (Add Question)</span>
                 </button>
               </div>
 
-              {questions.map((q, qIndex) => (
+              {manualQuestions.map((q, qIndex) => (
                 <div
                   key={qIndex}
-                  className="bg-slate-50 rounded-2xl p-5 border border-slate-200 space-y-3 relative"
+                  className="bg-slate-50 rounded-2xl p-5 border border-slate-200 space-y-3 relative shadow-inner"
                 >
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-black bg-blue-600 text-white px-2.5 py-0.5 rounded-full">
-                      प्रश्न {qIndex + 1}
-                    </span>
-                    {questions.length > 1 && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black bg-blue-600 text-white px-2.5 py-0.5 rounded-full">
+                        प्रश्न {qIndex + 1}
+                      </span>
+                      <span className="text-xs font-bold text-slate-500">
+                        ({q.marks} गुण • Marks)
+                      </span>
+                    </div>
+
+                    {manualQuestions.length > 1 && (
                       <button
                         type="button"
-                        onClick={() => setQuestions(questions.filter((_, idx) => idx !== qIndex))}
+                        onClick={() => setManualQuestions(manualQuestions.filter((_, idx) => idx !== qIndex))}
                         className="text-xs text-rose-600 hover:underline font-bold flex items-center gap-1"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -797,65 +878,110 @@ export const ContentAdminScreen: React.FC = () => {
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 mb-1">
-                      प्रश्नाचा मजकूर (Question Prompt)
+                      प्रश्नाचा मजकूर (Question Prompt) *
                     </label>
                     <input
                       type="text"
                       required
+                      placeholder="उदा. भारताची राजधानी कोणती आहे?"
                       value={q.prompt}
                       onChange={(e) => {
-                        const updated = [...questions];
+                        const updated = [...manualQuestions];
                         updated[qIndex].prompt = e.target.value;
-                        setQuestions(updated);
+                        setManualQuestions(updated);
                       }}
-                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white font-bold text-xs text-slate-900"
+                      className="w-full p-2.5 rounded-xl border border-slate-200 bg-white font-bold text-xs text-slate-900 focus:ring-1 focus:ring-blue-500"
                     />
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {q.options.map((opt, optIndex) => (
-                      <div key={opt.id} className="flex items-center gap-2 bg-white p-2 rounded-xl border border-slate-200">
-                        <input
-                          type="radio"
-                          name={`correct-${qIndex}`}
-                          checked={q.correctOptionId === opt.id}
-                          onChange={() => {
-                            const updated = [...questions];
-                            updated[qIndex].correctOptionId = opt.id;
-                            setQuestions(updated);
-                          }}
-                          className="w-4 h-4 text-emerald-600"
-                        />
-                        <input
-                          type="text"
-                          value={opt.text}
-                          onChange={(e) => {
-                            const updated = [...questions];
-                            updated[qIndex].options[optIndex].text = e.target.value;
-                            setQuestions(updated);
-                          }}
-                          className="flex-1 text-xs font-medium text-slate-800 border-none focus:outline-none"
-                          placeholder={`पर्याय ${optIndex + 1}`}
-                        />
-                      </div>
-                    ))}
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-bold text-slate-600 mb-0.5">
-                      योग्य उत्तराचे स्पष्टीकरण (Explanation / Solution Note)
+                    <label className="block text-xs font-bold text-slate-700 mb-1">
+                      ४ पर्याय (Options) • योग्य उत्तराच्या गोल चिन्हावर क्लिक करा:
                     </label>
-                    <input
-                      type="text"
-                      value={q.explanation}
-                      onChange={(e) => {
-                        const updated = [...questions];
-                        updated[qIndex].explanation = e.target.value;
-                        setQuestions(updated);
-                      }}
-                      placeholder="उदा. उत्तर बरोबर का आहे याचे कारण..."
-                      className="w-full p-2 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-700"
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {q.options.map((opt, optIndex) => {
+                        const isCorrect = q.correctOptionId === opt.id;
+                        return (
+                          <div
+                            key={opt.id}
+                            className={`flex items-center gap-2.5 p-2 rounded-xl border transition-all ${
+                              isCorrect
+                                ? 'bg-emerald-50 border-emerald-400 ring-1 ring-emerald-400'
+                                : 'bg-white border-slate-200'
+                            }`}
+                          >
+                            <input
+                              type="radio"
+                              name={`correct-${qIndex}`}
+                              checked={isCorrect}
+                              onChange={() => {
+                                const updated = [...manualQuestions];
+                                updated[qIndex].correctOptionId = opt.id;
+                                setManualQuestions(updated);
+                              }}
+                              className="w-4 h-4 text-emerald-600 cursor-pointer"
+                            />
+                            <span className="text-xs font-black text-slate-400">
+                              {String.fromCharCode(65 + optIndex)}.
+                            </span>
+                            <input
+                              type="text"
+                              required
+                              value={opt.text}
+                              onChange={(e) => {
+                                const updated = [...manualQuestions];
+                                updated[qIndex].options[optIndex].text = e.target.value;
+                                setManualQuestions(updated);
+                              }}
+                              className="flex-1 text-xs font-bold text-slate-900 border-none bg-transparent focus:outline-none"
+                              placeholder={`पर्याय ${optIndex + 1}`}
+                            />
+                            {isCorrect && (
+                              <span className="text-[10px] font-black uppercase text-emerald-700 bg-emerald-100 px-1.5 py-0.5 rounded">
+                                योग्य
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-1">
+                    <div className="sm:col-span-3">
+                      <label className="block text-[11px] font-bold text-slate-600 mb-0.5">
+                        योग्य उत्तराचे स्पष्टीकरण (Explanation / Solution Note)
+                      </label>
+                      <input
+                        type="text"
+                        value={q.explanation}
+                        onChange={(e) => {
+                          const updated = [...manualQuestions];
+                          updated[qIndex].explanation = e.target.value;
+                          setManualQuestions(updated);
+                        }}
+                        placeholder="उदा. उत्तर बरोबर का आहे याचे कारण..."
+                        className="w-full p-2 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-700"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-600 mb-0.5">
+                        या प्रश्नाचे गुण (Marks)
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={q.marks}
+                        onChange={(e) => {
+                          const updated = [...manualQuestions];
+                          updated[qIndex].marks = Number(e.target.value) || 5;
+                          setManualQuestions(updated);
+                        }}
+                        className="w-full p-2 rounded-lg border border-slate-200 bg-white text-xs font-bold text-slate-900"
+                      />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -863,7 +989,7 @@ export const ContentAdminScreen: React.FC = () => {
 
             <button
               type="submit"
-              className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md transition-all flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md transition-all flex items-center justify-center gap-2 min-h-[48px]"
             >
               <Save className="w-4 h-4" />
               <span>सराव चाचणी प्रकाशित करा (Publish Quiz to Student Portal)</span>
@@ -881,10 +1007,10 @@ export const ContentAdminScreen: React.FC = () => {
             <div>
               <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
                 <FileText className="w-6 h-6 text-purple-600" />
-                पाठ्यपुस्तके व हस्तलिखित नोट्स जोडा (Add Books & Study Material)
+                {t('studio.uploadBooksTitle', 'पाठ्यपुस्तके व हस्तलिखित नोट्स जोडा (Add Books & Study Material)')}
               </h2>
               <p className="text-xs text-slate-500 font-medium mt-1">
-                बालभारती शासकीय पुस्तके, शिक्षकांच्या हस्तलिखित नोट्स आणि स्वाध्याय पत्रिका जोडा. विद्यार्थी ऑफलाइन वाचू शकतील.
+                बालभारती शासकीय पुस्तके, शिक्षकांच्या हस्तलिखित नोट्स आणि स्वाध्याय जोडा.
               </p>
             </div>
 
@@ -989,7 +1115,7 @@ export const ContentAdminScreen: React.FC = () => {
 
               <button
                 type="submit"
-                className="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm shadow-md transition-all flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 text-white font-black text-sm shadow-md transition-all flex items-center justify-center gap-2 min-h-[48px]"
               >
                 <Upload className="w-4 h-4" />
                 <span>अभ्यास साहित्य अपलोड करा (Publish to Student Portal)</span>
@@ -997,7 +1123,6 @@ export const ContentAdminScreen: React.FC = () => {
             </form>
           </div>
 
-          {/* Right: Info Card */}
           <div className="space-y-4">
             <div className="bg-purple-50 border border-purple-200 rounded-3xl p-6 text-purple-950 space-y-3">
               <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl shadow-md">
@@ -1007,11 +1132,6 @@ export const ContentAdminScreen: React.FC = () => {
               <p className="text-xs text-purple-900 font-medium leading-relaxed">
                 अपलोड केलेले कोणतेही पुस्तक किंवा नोट्स थेट विद्यार्थ्यांच्या पोर्टलवर उपलब्ध होतात.
               </p>
-              <ul className="text-xs text-purple-900 space-y-1.5 list-disc pl-4 font-medium">
-                <li>विद्यार्थी थेट टॅब्लेटवर पुस्तक वाचू शकतात.</li>
-                <li>प्रकरणांचे रंगीत स्पष्टीकरण उपलब्ध होते.</li>
-                <li>इंटरनेट नसतानाही संपूर्ण पुस्तक उघडते.</li>
-              </ul>
             </div>
           </div>
         </div>

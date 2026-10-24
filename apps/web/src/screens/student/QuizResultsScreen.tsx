@@ -209,14 +209,14 @@ export const QuizResultsScreen: React.FC = () => {
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs transition-all mb-2 min-h-[36px]"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Back to Classroom (बॅचवर परत जा)</span>
+            <span>{t('videos.backToClassroom')}</span>
           </button>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
             <CheckCircle2 className="w-7 h-7 text-blue-600" />
-            <span>विद्या सेतू चाचण्या व निकाल (Tests & Scorecards)</span>
+            <span>{t('dpp.title')}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 font-medium mt-0.5">
-            Detailed solution sheets, accuracy analysis, and question reviews
+            {t('dpp.subtitle')}
           </p>
         </div>
 
@@ -245,11 +245,11 @@ export const QuizResultsScreen: React.FC = () => {
             </div>
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
-                Official Student Scorecard • Safar Batch
+                Official Student Scorecard • {t('batch.targetBatch')}
               </span>
               <h3 className="text-2xl sm:text-3xl font-black">{studentName}</h3>
               <p className="text-xs text-slate-300 font-medium mt-0.5">
-                TaRL Level {assessedLevel} Certified • Overall Accuracy: {overallPercentage}%
+                TaRL {t('common.level')} {assessedLevel} • {t('streak.accuracyTitle')}: {overallPercentage}%
               </p>
             </div>
           </div>
@@ -283,7 +283,7 @@ export const QuizResultsScreen: React.FC = () => {
           }`}
         >
           <Award className="w-4 h-4" />
-          <span>My Quiz Results & Answers ({results.length})</span>
+          <span>{t('category.tests')} ({results.length})</span>
         </button>
 
         <button
@@ -295,7 +295,7 @@ export const QuizResultsScreen: React.FC = () => {
           }`}
         >
           <BookOpen className="w-4 h-4" />
-          <span>Available DPP Tests ({quizzes.length})</span>
+          <span>{t('dpp.allTests')} ({quizzes.length})</span>
         </button>
       </div>
 
@@ -307,9 +307,9 @@ export const QuizResultsScreen: React.FC = () => {
               <p className="text-amber-800 text-sm">No quizzes completed yet.</p>
               <button
                 onClick={() => setActiveTab('quizzes')}
-                className="mt-4 px-5 py-2.5 rounded-xl bg-orange-600 text-white font-black text-xs shadow-md"
+                className="mt-4 px-5 py-2.5 rounded-xl bg-blue-600 text-white font-black text-xs shadow-md"
               >
-                Take a Quiz Now
+                {t('dpp.startDpp')}
               </button>
             </div>
           ) : (

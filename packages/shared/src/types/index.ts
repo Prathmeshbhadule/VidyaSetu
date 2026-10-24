@@ -156,6 +156,8 @@ export interface Video extends SyncedEntity {
   sizeBytes: number;
   sha256: string;
   thumbnailUrl?: string;
+  videoUrl?: string;
+  videoBlob?: Blob;
   transcodeStatus: VideoTranscodeStatus;
 }
 
