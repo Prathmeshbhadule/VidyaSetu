@@ -1,0 +1,498 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum UserRole {
+  STUDENT
+  TEACHER
+  GUARDIAN
+  CONTENT_ADMIN
+  DISTRICT_ADMIN
+}
+
+enum AdminScope {
+  CONTENT
+  DISTRICT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LEAVE
+}
+
+enum AttendanceSource {
+  TEACHER
+  DEVICE_AUTO
+}
+
+enum QuestionType {
+  MCQ
+  TRUE_FALSE
+  IMAGE_CHOICE
+}
+
+enum AssessmentMode {
+  QUIZ
+  ADAPTIVE
+}
+
+enum LessonStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum VideoTranscodeStatus {
+  PENDING
+  PROCESSING
+  READY
+  FAILED
+}
+
+enum NotificationChannel {
+  ON_DEVICE
+  PRINT_SLIP
+  SMS
+  COMMUNITY_BOARD
+}
+
+enum NotificationStatus {
+  PENDING
+  DELIVERED
+  FAILED
+}
+
+enum SyncOp {
+  INSERT
+  UPDATE
+  DELETE
+}
+
+model District {
+  id        String   @id @default(uuid())
+  name      String
+  state     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  schools   School[]
+  facilities Facility[]
+}
+
+model School {
+  id          String   @id // UUIDv7 or seeded ID
+  districtId  String
+  district    District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  name        String
+  address     String
+  registerNo  String   @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  devices     Device[]
+  users       User[]
+  students    StudentProfile[]
+  teachers    TeacherProfile[]
+}
+
+model Device {
+  id         String    @id // UUIDv7
+  schoolId   String
+  school     School    @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  type       String    // TABLET | HUB_PC | PHONE
+  name       String
+  pairedAt   DateTime  @default(now())
+  lastSeenAt DateTime  @default(now())
+  revokedAt  DateTime?
+  tokenHash  String?
+}
+
+model User {
+  id           String        @id @default(uuid())
+  schoolId     String?
+  school       School?       @relation(fields: [schoolId], references: [id], onDelete: SetNull)
+  role         UserRole
+  language     String        @default("hi")
+  username     String        @unique
+  email        String?       @unique
+  phone        String?
+  passwordHash String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  student      StudentProfile?
+  teacher      TeacherProfile?
+  guardian     GuardianProfile?
+  admin        AdministratorProfile?
+}
+
+model StudentProfile {
+  id              String   @id // UUIDv7
+  schoolId        String
+  school          School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  userId          String?  @unique
+  user            User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  prn             String   @unique // Permanent Registration Number
+  grade           Int
+  gender          Gender
+  dob             DateTime?
+  assessedLevel   Int      @default(1) // 1-5
+  avatarId        String   @default("avatar-1")
+  pinHash         String   // 4-digit PIN hash
+  parentalConsent Boolean  @default(true)
+  version         Int      @default(1)
+  deviceId        String
+  hlc             String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  deletedAt       DateTime?
+  
+  attendance      AttendanceRecord[]
+  quizResults     QuizResult[]
+  atRiskFlags     AtRiskFlag[]
+  guardians       GuardianStudent[]
+  checklist       SchemeChecklistProgress[]
+
+  @@index([schoolId])
+  @@index([grade])
+}
+
+model TeacherProfile {
+  id        String   @id // UUIDv7
+  schoolId  String
+  school    School   @relation(fields: [schoolId], references: [id], onDelete: Cascade)
+  userId    String?  @unique
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  teacherId String   @unique
+  name      String
+  email     String?
+  phone     String?
+  version   Int      @default(1)
+  deviceId  String
+  hlc       String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  deletedAt DateTime?
+
+  @@index([schoolId])
+}
+
+model GuardianProfile {
+  id        String            @id @default(uuid())
+  userId    String?           @unique
+  user      User?             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  phone     String?
+  relation  String            @default("Parent")
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+  students  GuardianStudent[]
+}
+
+model GuardianStudent {
+  guardianId String
+  guardian   GuardianProfile @relation(fields: [guardianId], references: [id], onDelete: Cascade)
+  studentId  String
+  student    StudentProfile  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([guardianId, studentId])
+}
+
+model AdministratorProfile {
+  id         String     @id @default(uuid())
+  userId     String     @unique
+  user       User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scope      AdminScope
+  districtId String?
+}
+
+model Lesson {
+  id               String       @id // UUIDv7
+  schoolId         String       @default("global")
+  title            String
+  subject          String
+  grade            Int
+  level            Int          @default(1) // 1-5
+  contentBlocks    Json         // ContentBlock[]
+  audioUrl         String?
+  status           LessonStatus @default(PUBLISHED)
+  estimatedMinutes Int          @default(15)
+  translations     Json?
+  version          Int          @default(1)
+  deviceId         String       @default("cloud")
+  hlc              String?
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
+  deletedAt        DateTime?
+  
+  videos           Video[]
+  quizzes          Quiz[]
+
+  @@index([subject, grade])
+}
+
+model Video {
+  id              String               @id // UUIDv7
+  schoolId        String               @default("global")
+  lessonId        String
+  lesson          Lesson               @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title           String
+  storageKey      String
+  durationSec     Int                  @default(0)
+  bitrateKbps     Int                  @default(400)
+  sizeBytes       Int                  @default(0)
+  sha256          String               @default("")
+  thumbnailUrl    String?
+  transcodeStatus VideoTranscodeStatus @default(READY)
+  version         Int                  @default(1)
+  deviceId        String               @default("cloud")
+  hlc             String?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  deletedAt       DateTime?
+
+  @@index([lessonId])
+}
+
+model Quiz {
+  id           String       @id // UUIDv7
+  schoolId     String       @default("global")
+  lessonId     String
+  lesson       Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  title        String
+  subject      String
+  grade        Int
+  totalMarks   Int          @default(10)
+  passingMarks Int          @default(6)
+  version      Int          @default(1)
+  deviceId     String       @default("cloud")
+  hlc          String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+  
+  questions    Question[]
+  results      QuizResult[]
+
+  @@index([lessonId])
+}
+
+model Question {
+  id              String       @id // UUIDv7
+  quizId          String
+  quiz            Quiz         @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  type            QuestionType @default(MCQ)
+  prompt          String
+  promptAudioUrl  String?
+  promptImageUrl  String?
+  options         Json         // QuestionOption[]
+  correctOptionId String
+  explanation     String?
+  level           Int          @default(1) // 1-5
+  marks           Int          @default(2)
+
+  @@index([quizId])
+}
+
+model QuizResult {
+  id            String         @id // UUIDv7
+  schoolId      String
+  studentId     String
+  student       StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  quizId        String
+  quiz          Quiz           @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  mode          AssessmentMode @default(QUIZ)
+  answers       Json           // QuizAnswer[]
+  score         Int
+  maxScore      Int
+  assessedLevel Int            @default(1)
+  startedAt     DateTime
+  submittedAt   DateTime
+  version       Int            @default(1)
+  deviceId      String
+  hlc           String?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  deletedAt     DateTime?
+
+  @@index([studentId])
+  @@index([quizId])
+}
+
+model AttendanceRecord {
+  id        String           @id // UUIDv7
+  schoolId  String
+  studentId String
+  student   StudentProfile   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  date      String           // YYYY-MM-DD
+  status    AttendanceStatus
+  markedBy  String
+  source    AttendanceSource @default(TEACHER)
+  note      String?
+  version   Int              @default(1)
+  deviceId  String
+  hlc       String?
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  deletedAt DateTime?
+
+  @@unique([studentId, date])
+  @@index([schoolId, date])
+}
+
+model AtRiskFlag {
+  id                  String         @id // UUIDv7
+  schoolId            String
+  studentId           String
+  student             StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  reason              String
+  ruleId              String
+  attendancePercent   Float?
+  consecutiveAbsences Int?
+  suggestedSchemeIds  Json?          // string[]
+  raisedAt            DateTime       @default(now())
+  resolvedAt          DateTime?
+  resolvedBy          String?
+  note                String?
+  version             Int            @default(1)
+  deviceId            String
+  hlc                 String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  deletedAt           DateTime?
+
+  @@index([schoolId])
+  @@index([studentId])
+}
+
+model Scheme {
+  id                  String   @id // UUIDv7
+  schoolId            String   @default("global")
+  name                String
+  description         String
+  eligibilityRules    Json     // SchemeRule
+  requiredDocuments   Json     // string[]
+  applicationSteps    Json     // string[]
+  whereToApply        String
+  deadline            String?
+  girlSpecific        Boolean  @default(false)
+  attendanceThreshold Float?
+  sourceUrl           String
+  lastVerifiedAt      String
+  translations        Json?
+  version             Int      @default(1)
+  deviceId            String   @default("cloud")
+  hlc                 String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  deletedAt           DateTime?
+}
+
+model Facility {
+  id            String   @id @default(uuid())
+  name          String
+  type          String   // CSC_CENTER | BLOCK_EDUCATION_OFFICE | etc.
+  address       String
+  contactNumber String?
+  districtId    String
+  district      District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  latitude      Float?
+  longitude     Float?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([districtId])
+}
+
+model SchemeChecklistProgress {
+  id          String         @id // UUIDv7
+  schoolId    String
+  studentId   String
+  student     StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  schemeId    String
+  checkedDocs Json           // string[]
+  completed   Boolean        @default(false)
+  version     Int            @default(1)
+  deviceId    String
+  hlc         String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  deletedAt   DateTime?
+
+  @@unique([studentId, schemeId])
+  @@index([studentId])
+}
+
+model NotificationRecord {
+  id             String              @id // UUIDv7
+  schoolId       String
+  recipientId    String
+  recipientName  String
+  recipientPhone String?
+  type           String              // ATTENDANCE_ALERT, SCHEME_ELIGIBLE, etc.
+  title          String
+  message        String
+  channelsTried  Json                // NotificationChannel[]
+  channelUsed    NotificationChannel?
+  status         NotificationStatus  @default(PENDING)
+  deliveredAt    DateTime?
+  metadata       Json?
+  version        Int                 @default(1)
+  deviceId       String
+  hlc            String?
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  deletedAt      DateTime?
+
+  @@index([schoolId])
+  @@index([recipientId])
+}
+
+model ChangeLog {
+  seq        Int      @id @default(autoincrement())
+  id         String   @unique // Change mutation UUIDv7
+  entity     String
+  entityId   String
+  op         SyncOp
+  schoolId   String
+  deviceId   String
+  payload    Json
+  hlc        String
+  receivedAt DateTime @default(now())
+
+  @@index([schoolId, seq])
+  @@index([entity, entityId])
+}
+
+model ContentPack {
+  id          String   @id @default(uuid())
+  version     Int      @unique
+  generatedAt DateTime @default(now())
+  totalSize   Int      @default(0)
+  manifest    Json     // ContentPackManifestItem[]
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String
+  action     String
+  resource   String
+  resourceId String
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([resource, resourceId])
+}
