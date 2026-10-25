@@ -186,3 +186,5 @@ The platform is seeded with realistic demonstration personas for immediate evalu
 ## 📄 License
 
 Vidya Setu is open-source software licensed under the [MIT License](LICENSE).
+#   V i d y a S e t u  
+ 
