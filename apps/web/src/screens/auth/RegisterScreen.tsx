@@ -16,6 +16,8 @@ import {
   ShieldCheck,
   School,
   Sparkles,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 export const RegisterScreen: React.FC = () => {
@@ -24,7 +26,8 @@ export const RegisterScreen: React.FC = () => {
   const [searchParams] = useSearchParams();
   const initialRoleParam = searchParams.get('role') as UserRole | null;
 
-  const { loginStudent, loginAsTeacher, loginAsGuardian, schoolId } = useAuthStore();
+  const { loginStudent, loginAsTeacher, loginAsGuardian, schoolId, theme, toggleTheme } = useAuthStore();
+  const isDark = theme === 'dark';
 
   const [activeRole, setActiveRole] = useState<'STUDENT' | 'TEACHER' | 'GUARDIAN'>(
     initialRoleParam === 'TEACHER' ? 'TEACHER' : initialRoleParam === 'GUARDIAN' ? 'GUARDIAN' : 'STUDENT'
@@ -121,31 +124,66 @@ export const RegisterScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-3 sm:p-6 pb-24 flex flex-col items-center justify-center">
+    <div
+      className={`min-h-screen p-3 sm:p-6 pb-24 flex flex-col items-center justify-center transition-colors duration-200 ${
+        isDark ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'
+      }`}
+    >
       <div className="w-full max-w-xl mx-auto space-y-6">
         {/* Top Header */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-400 text-xs font-bold shadow-sm">
-            <School className="w-4 h-4 text-blue-400" />
-            <span>विद्या सेतू • Offline Profile Registration</span>
+        <div className="text-center space-y-2 relative">
+          <div className="flex items-center justify-center gap-2">
+            <div
+              className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold shadow-sm ${
+                isDark
+                  ? 'bg-blue-600/20 border border-blue-500/40 text-blue-400'
+                  : 'bg-blue-50 border border-blue-200 text-blue-700'
+              }`}
+            >
+              <School className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>विद्या सेतू • Offline Profile Registration</span>
+            </div>
+
+            {/* In-Card Theme Switcher */}
+            <button
+              onClick={toggleTheme}
+              className={`p-1.5 rounded-xl border text-xs font-bold transition-all ${
+                isDark
+                  ? 'bg-slate-800 text-amber-300 border-slate-700 hover:bg-slate-700'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 shadow-sm'
+              }`}
+              title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+            >
+              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
+            </button>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
             Create New Account
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 font-medium max-w-md mx-auto">
+          <p
+            className={`text-xs sm:text-sm font-medium max-w-md mx-auto ${
+              isDark ? 'text-slate-400' : 'text-slate-600'
+            }`}
+          >
             Offline-first account registration saved to local storage and synchronized with school hub
           </p>
         </div>
 
         {/* Role Tabs */}
-        <div className="grid grid-cols-3 gap-2 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+        <div
+          className={`grid grid-cols-3 gap-2 p-1.5 rounded-2xl border shadow-md ${
+            isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+          }`}
+        >
           <button
             onClick={() => setActiveRole('STUDENT')}
             className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[44px] ${
               activeRole === 'STUDENT'
                 ? 'bg-blue-600 text-white shadow-md font-black ring-1 ring-blue-400/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : isDark
+                ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <GraduationCap className="w-4 h-4" />
@@ -157,7 +195,9 @@ export const RegisterScreen: React.FC = () => {
             className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[44px] ${
               activeRole === 'TEACHER'
                 ? 'bg-blue-600 text-white shadow-md font-black ring-1 ring-blue-400/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : isDark
+                ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -169,7 +209,9 @@ export const RegisterScreen: React.FC = () => {
             className={`py-2 px-2 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 min-h-[44px] ${
               activeRole === 'GUARDIAN'
                 ? 'bg-blue-600 text-white shadow-md font-black ring-1 ring-blue-400/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : isDark
+                ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <HeartHandshake className="w-4 h-4" />
@@ -181,16 +223,21 @@ export const RegisterScreen: React.FC = () => {
         {/* STUDENT REGISTRATION FORM */}
         {/* ========================================================================= */}
         {activeRole === 'STUDENT' && (
-          <form onSubmit={handleRegisterStudent} className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
-            <div className="pb-3 border-b border-slate-800">
-              <h3 className="font-black text-lg text-white">Student Registration (विद्यार्थी नोंदणी)</h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+          <form
+            onSubmit={handleRegisterStudent}
+            className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-4 ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-md'
+            }`}
+          >
+            <div className={`pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <h3 className="font-black text-lg">Student Registration (विद्यार्थी नोंदणी)</h3>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Register student to access video lectures, DPP practice, and offline textbook notes
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Student Full Name (विद्यार्थ्याचे नाव)
               </label>
               <input
@@ -198,20 +245,28 @@ export const RegisterScreen: React.FC = () => {
                 value={studentName}
                 onChange={(e) => setStudentName(e.target.value)}
                 placeholder="e.g. Rohini Patil (रोहिणी पाटील)"
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500'
+                    : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                }`}
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Class / Grade (इयत्ता)
                 </label>
                 <select
                   value={studentGrade}
                   onChange={(e) => setStudentGrade(Number(e.target.value))}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-white'
+                      : 'bg-white border-slate-300 text-slate-900'
+                  }`}
                 >
                   <option value={1}>Class 1 (इयत्ता पहिली)</option>
                   <option value={2}>Class 2 (इयत्ता दुसरी)</option>
@@ -222,13 +277,17 @@ export const RegisterScreen: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Gender (लिंग)
                 </label>
                 <select
                   value={studentGender}
                   onChange={(e) => setStudentGender(e.target.value as 'MALE' | 'FEMALE')}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-white'
+                      : 'bg-white border-slate-300 text-slate-900'
+                  }`}
                 >
                   <option value="FEMALE">Female (मुलगी)</option>
                   <option value="MALE">Male (मुलगा)</option>
@@ -238,20 +297,24 @@ export const RegisterScreen: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   PRN / Roll Number
                 </label>
                 <input
                   type="text"
                   value={studentPrn}
                   onChange={(e) => setStudentPrn(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-3 rounded-xl border font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-white'
+                      : 'bg-white border-slate-300 text-slate-900'
+                  }`}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Security PIN (4 digits)
                 </label>
                 <input
@@ -260,7 +323,11 @@ export const RegisterScreen: React.FC = () => {
                   value={studentPin}
                   onChange={(e) => setStudentPin(e.target.value)}
                   placeholder="1234"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono text-sm text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-3 rounded-xl border font-mono text-sm text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-white'
+                      : 'bg-white border-slate-300 text-slate-900'
+                  }`}
                   required
                 />
               </div>
@@ -290,16 +357,21 @@ export const RegisterScreen: React.FC = () => {
         {/* TEACHER REGISTRATION FORM */}
         {/* ========================================================================= */}
         {activeRole === 'TEACHER' && (
-          <form onSubmit={handleRegisterTeacher} className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
-            <div className="pb-3 border-b border-slate-800">
-              <h3 className="font-black text-lg text-white">Teacher Registration (शिक्षक नोंदणी)</h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+          <form
+            onSubmit={handleRegisterTeacher}
+            className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-4 ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-md'
+            }`}
+          >
+            <div className={`pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <h3 className="font-black text-lg">Teacher Registration (शिक्षक नोंदणी)</h3>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Register as a teacher to record attendance and monitor learning mastery
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Teacher Full Name (शिक्षकाचे नाव)
               </label>
               <input
@@ -307,27 +379,35 @@ export const RegisterScreen: React.FC = () => {
                 value={teacherName}
                 onChange={(e) => setTeacherName(e.target.value)}
                 placeholder="e.g. Sunil Patil Sir"
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500'
+                    : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                }`}
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Teacher ID
                 </label>
                 <input
                   type="text"
                   value={teacherId}
                   onChange={(e) => setTeacherId(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-3 rounded-xl border font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-white'
+                      : 'bg-white border-slate-300 text-slate-900'
+                  }`}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Security PIN / Password
                 </label>
                 <input
@@ -335,21 +415,29 @@ export const RegisterScreen: React.FC = () => {
                   value={teacherPin}
                   onChange={(e) => setTeacherPin(e.target.value)}
                   placeholder="••••"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-3 rounded-xl border font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-white'
+                      : 'bg-white border-slate-300 text-slate-900'
+                  }`}
                   required
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 School Name
               </label>
               <input
                 type="text"
                 value={teacherSchool}
                 onChange={(e) => setTeacherSchool(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white'
+                    : 'bg-white border-slate-300 text-slate-900'
+                }`}
                 required
               />
             </div>
@@ -378,16 +466,21 @@ export const RegisterScreen: React.FC = () => {
         {/* GUARDIAN REGISTRATION FORM */}
         {/* ========================================================================= */}
         {activeRole === 'GUARDIAN' && (
-          <form onSubmit={handleRegisterGuardian} className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
-            <div className="pb-3 border-b border-slate-800">
-              <h3 className="font-black text-lg text-white">Parent Registration (पालक नोंदणी)</h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+          <form
+            onSubmit={handleRegisterGuardian}
+            className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-4 ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-md'
+            }`}
+          >
+            <div className={`pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <h3 className="font-black text-lg">Parent Registration (पालक नोंदणी)</h3>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Link your phone to your child's student record for offline SMS and progress cards
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Guardian Full Name (पालकाचे नाव)
               </label>
               <input
@@ -395,14 +488,18 @@ export const RegisterScreen: React.FC = () => {
                 value={guardianName}
                 onChange={(e) => setGuardianName(e.target.value)}
                 placeholder="e.g. Ramesh Patil"
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500'
+                    : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                }`}
                 required
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Guardian Mobile Number
                 </label>
                 <input
@@ -410,13 +507,17 @@ export const RegisterScreen: React.FC = () => {
                   value={guardianPhone}
                   onChange={(e) => setGuardianPhone(e.target.value)}
                   placeholder="10-digit number"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-white'
+                      : 'bg-white border-slate-300 text-slate-900'
+                  }`}
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+                <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                   Ward's PRN / Roll Number
                 </label>
                 <input
@@ -424,7 +525,11 @@ export const RegisterScreen: React.FC = () => {
                   value={wardPrn}
                   onChange={(e) => setWardPrn(e.target.value)}
                   placeholder="e.g. PRN20261001"
-                  className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-white'
+                      : 'bg-white border-slate-300 text-slate-900'
+                  }`}
                   required
                 />
               </div>
@@ -454,7 +559,7 @@ export const RegisterScreen: React.FC = () => {
         <div className="text-center pt-2">
           <Link
             to={`/login?role=${activeRole}`}
-            className="text-xs font-bold text-blue-400 hover:text-blue-300 hover:underline inline-flex items-center gap-1.5"
+            className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1.5"
           >
             <ArrowLeft className="w-4 h-4" />
             <span>Already have an account? Sign In (प्रवेश करा)</span>

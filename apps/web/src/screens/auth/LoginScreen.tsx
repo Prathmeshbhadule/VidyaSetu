@@ -23,6 +23,8 @@ import {
   Phone,
   UserPlus,
   Compass,
+  Sun,
+  Moon,
 } from 'lucide-react';
 
 export const LoginScreen: React.FC = () => {
@@ -39,7 +41,11 @@ export const LoginScreen: React.FC = () => {
     loginAsDistrictAdmin,
     loginAsContentAdmin,
     schoolId,
+    theme,
+    toggleTheme,
   } = useAuthStore();
+
+  const isDark = theme === 'dark';
 
   const [activeRole, setActiveRole] = useState<UserRole>(initialRoleParam || 'STUDENT');
 
@@ -233,25 +239,58 @@ export const LoginScreen: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-white p-3 sm:p-6 pb-24 flex flex-col items-center justify-center">
+    <div
+      className={`min-h-screen p-3 sm:p-6 pb-24 flex flex-col items-center justify-center transition-colors duration-200 ${
+        isDark ? 'bg-slate-950 text-white' : 'bg-slate-50 text-slate-900'
+      }`}
+    >
       <div className="w-full max-w-2xl mx-auto space-y-6">
         {/* Top Header & Platform Badge */}
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-600/20 border border-blue-500/40 text-blue-400 text-xs font-bold shadow-sm">
-            <School className="w-4 h-4 text-blue-400" />
-            <span>विद्या सेतू • Bharat Offline Learning Suite</span>
+        <div className="text-center space-y-2 relative">
+          <div className="flex items-center justify-center gap-2">
+            <div
+              className={`inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold shadow-sm ${
+                isDark
+                  ? 'bg-blue-600/20 border border-blue-500/40 text-blue-400'
+                  : 'bg-blue-50 border border-blue-200 text-blue-700'
+              }`}
+            >
+              <School className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <span>विद्या सेतू • Bharat Offline Learning Suite</span>
+            </div>
+
+            {/* In-Card Theme Switcher */}
+            <button
+              onClick={toggleTheme}
+              className={`p-1.5 rounded-xl border text-xs font-bold transition-all ${
+                isDark
+                  ? 'bg-slate-800 text-amber-300 border-slate-700 hover:bg-slate-700'
+                  : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100 shadow-sm'
+              }`}
+              title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+            >
+              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-blue-600" />}
+            </button>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight">
             Portal Login & Authentication
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 font-medium max-w-md mx-auto">
+          <p
+            className={`text-xs sm:text-sm font-medium max-w-md mx-auto ${
+              isDark ? 'text-slate-400' : 'text-slate-600'
+            }`}
+          >
             Secure offline access for rural students, classroom batches, teachers, and administrators
           </p>
         </div>
 
         {/* Role Selector Tabs */}
-        <div className="grid grid-cols-5 gap-1.5 p-1.5 rounded-2xl bg-slate-900 border border-slate-800 shadow-md">
+        <div
+          className={`grid grid-cols-5 gap-1.5 p-1.5 rounded-2xl border shadow-md ${
+            isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+          }`}
+        >
           <button
             onClick={() => {
               setActiveRole('STUDENT');
@@ -260,7 +299,9 @@ export const LoginScreen: React.FC = () => {
             className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 min-h-[44px] ${
               activeRole === 'STUDENT'
                 ? 'bg-blue-600 text-white shadow-md font-black ring-1 ring-blue-400/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : isDark
+                ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <GraduationCap className="w-4 h-4" />
@@ -272,7 +313,9 @@ export const LoginScreen: React.FC = () => {
             className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 min-h-[44px] ${
               activeRole === 'TEACHER'
                 ? 'bg-blue-600 text-white shadow-md font-black ring-1 ring-blue-400/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : isDark
+                ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <Users className="w-4 h-4" />
@@ -284,7 +327,9 @@ export const LoginScreen: React.FC = () => {
             className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 min-h-[44px] ${
               activeRole === 'GUARDIAN'
                 ? 'bg-blue-600 text-white shadow-md font-black ring-1 ring-blue-400/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : isDark
+                ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <HeartHandshake className="w-4 h-4" />
@@ -296,7 +341,9 @@ export const LoginScreen: React.FC = () => {
             className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 min-h-[44px] ${
               activeRole === 'DISTRICT_ADMIN'
                 ? 'bg-blue-600 text-white shadow-md font-black ring-1 ring-blue-400/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : isDark
+                ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <Building2 className="w-4 h-4" />
@@ -308,7 +355,9 @@ export const LoginScreen: React.FC = () => {
             className={`py-2 px-1 rounded-xl text-xs font-bold transition-all flex flex-col sm:flex-row items-center justify-center gap-1.5 min-h-[44px] ${
               activeRole === 'CONTENT_ADMIN'
                 ? 'bg-blue-600 text-white shadow-md font-black ring-1 ring-blue-400/30'
-                : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : isDark
+                ? 'text-slate-400 hover:text-white hover:bg-slate-800'
+                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
             }`}
           >
             <BookOpen className="w-4 h-4" />
@@ -331,7 +380,9 @@ export const LoginScreen: React.FC = () => {
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 min-h-[38px] ${
                   studentMode === 'INDIVIDUAL'
                     ? 'bg-blue-600 text-white shadow-md font-black'
-                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                    : isDark
+                    ? 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                    : 'bg-white text-slate-700 border border-slate-200 hover:text-slate-900 shadow-sm'
                 }`}
               >
                 <UserCheck className="w-4 h-4" />
@@ -346,7 +397,9 @@ export const LoginScreen: React.FC = () => {
                 className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 min-h-[38px] ${
                   studentMode === 'WHOLE_CLASS'
                     ? 'bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-md font-black'
-                    : 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                    : isDark
+                    ? 'bg-slate-900 text-slate-400 border border-slate-800 hover:text-white'
+                    : 'bg-white text-slate-700 border border-slate-200 hover:text-slate-900 shadow-sm'
                 }`}
               >
                 <School className="w-4 h-4" />
@@ -358,11 +411,17 @@ export const LoginScreen: React.FC = () => {
             {studentMode === 'INDIVIDUAL' && (
               <div>
                 {!selectedStudent ? (
-                  <div className="bg-slate-900/90 rounded-3xl p-5 sm:p-6 border border-slate-800 shadow-xl space-y-4">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <div
+                    className={`rounded-3xl p-5 sm:p-6 border shadow-xl space-y-4 ${
+                      isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200 shadow-md'
+                    }`}
+                  >
+                    <div className={`flex items-center justify-between pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                       <div>
-                        <h3 className="font-extrabold text-base text-white">Select Student Profile</h3>
-                        <p className="text-xs text-slate-400">Choose your name to unlock your personalized batch</p>
+                        <h3 className="font-extrabold text-base">Select Student Profile</h3>
+                        <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                          Choose your name to unlock your personalized batch
+                        </p>
                       </div>
                       <AudioHelpButton text="आपले नाव निवडा आणि पिन टाका." size="sm" />
                     </div>
@@ -372,19 +431,23 @@ export const LoginScreen: React.FC = () => {
                         <button
                           key={student.id}
                           onClick={() => handleSelectStudent(student)}
-                          className="flex items-center sm:flex-col p-4 rounded-2xl bg-slate-850 border border-slate-800 hover:border-blue-500 hover:bg-slate-800 active:scale-95 transition-all text-left sm:text-center group min-h-[80px]"
+                          className={`flex items-center sm:flex-col p-4 rounded-2xl border active:scale-95 transition-all text-left sm:text-center group min-h-[80px] ${
+                            isDark
+                              ? 'bg-slate-850 border-slate-800 hover:border-blue-500 hover:bg-slate-800'
+                              : 'bg-slate-50 border-slate-200 hover:border-blue-400 hover:bg-blue-50/50 shadow-sm'
+                          }`}
                         >
                           <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-700 flex items-center justify-center text-white text-lg font-black shadow-md mr-3 sm:mr-0 sm:mb-2 group-hover:scale-105 transition-transform">
                             {student.name.charAt(0)}
                           </div>
                           <div>
-                            <span className="font-bold text-sm text-white block line-clamp-1">
+                            <span className="font-bold text-sm block line-clamp-1">
                               {student.name}
                             </span>
-                            <span className="text-xs text-blue-400 font-semibold block mt-0.5">
+                            <span className="text-xs text-blue-600 dark:text-blue-400 font-semibold block mt-0.5">
                               Grade {student.grade} • TaRL L{student.assessedLevel}
                             </span>
-                            <span className="text-[10px] text-slate-500 font-mono block mt-1">
+                            <span className={`text-[10px] font-mono block mt-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
                               PRN: {student.prn}
                             </span>
                           </div>
@@ -392,11 +455,13 @@ export const LoginScreen: React.FC = () => {
                       ))}
                     </div>
 
-                    <div className="pt-2 text-center border-t border-slate-800 flex items-center justify-between">
-                      <span className="text-xs text-slate-400">Can't find your name?</span>
+                    <div className={`pt-2 text-center border-t flex items-center justify-between ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+                      <span className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                        Can't find your name?
+                      </span>
                       <Link
                         to="/register?role=STUDENT"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/20 text-blue-400 hover:bg-blue-600 hover:text-white text-xs font-bold transition-all"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600/10 text-blue-600 dark:bg-blue-600/20 dark:text-blue-400 hover:bg-blue-600 hover:text-white text-xs font-bold transition-all"
                       >
                         <UserPlus className="w-3.5 h-3.5" />
                         <span>Register New Student</span>
@@ -405,20 +470,24 @@ export const LoginScreen: React.FC = () => {
                   </div>
                 ) : (
                   /* 4-Digit PIN Keypad */
-                  <div className="bg-slate-900 rounded-3xl p-6 border border-slate-800 shadow-2xl max-w-sm mx-auto space-y-5">
-                    <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+                  <div
+                    className={`rounded-3xl p-6 border shadow-2xl max-w-sm mx-auto space-y-5 ${
+                      isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+                    }`}
+                  >
+                    <div className={`flex items-center justify-between pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-700 text-white font-black flex items-center justify-center text-base">
                           {selectedStudent.name.charAt(0)}
                         </div>
                         <div>
-                          <h4 className="font-bold text-white text-sm">{selectedStudent.name}</h4>
-                          <span className="text-xs text-blue-400">Enter 4-Digit Security PIN</span>
+                          <h4 className="font-bold text-sm">{selectedStudent.name}</h4>
+                          <span className="text-xs text-blue-600 dark:text-blue-400">Enter 4-Digit Security PIN</span>
                         </div>
                       </div>
                       <button
                         onClick={() => setSelectedStudent(null)}
-                        className="text-xs text-slate-400 hover:text-white font-semibold"
+                        className={`text-xs font-semibold ${isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}
                       >
                         Change
                       </button>
@@ -432,14 +501,16 @@ export const LoginScreen: React.FC = () => {
                           className={`w-4 h-4 rounded-full border-2 transition-all ${
                             pin.length > i
                               ? 'bg-blue-500 border-blue-400 scale-125 shadow-md shadow-blue-500/50'
-                              : 'bg-slate-800 border-slate-700'
+                              : isDark
+                              ? 'bg-slate-800 border-slate-700'
+                              : 'bg-slate-100 border-slate-300'
                           }`}
                         />
                       ))}
                     </div>
 
                     {pinError && (
-                      <p className="text-center text-xs font-bold text-rose-400">{pinError}</p>
+                      <p className="text-center text-xs font-bold text-rose-500 dark:text-rose-400">{pinError}</p>
                     )}
 
                     {/* Numeric Keypad */}
@@ -448,33 +519,49 @@ export const LoginScreen: React.FC = () => {
                         <button
                           key={digit}
                           onClick={() => handlePinDigit(digit)}
-                          className="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-blue-600 text-white font-bold text-lg border border-slate-700/80 transition-all flex items-center justify-center"
+                          className={`h-12 rounded-xl font-bold text-lg border transition-all flex items-center justify-center ${
+                            isDark
+                              ? 'bg-slate-800 hover:bg-slate-700 active:bg-blue-600 text-white border-slate-700/80'
+                              : 'bg-white hover:bg-slate-50 active:bg-blue-600 active:text-white text-slate-900 border-slate-200 shadow-sm'
+                          }`}
                         >
                           {digit}
                         </button>
                       ))}
                       <button
                         onClick={() => setPin('')}
-                        className="h-12 rounded-xl bg-slate-800/60 text-rose-400 font-bold text-xs border border-slate-700/80 hover:bg-rose-900/30 flex items-center justify-center"
+                        className={`h-12 rounded-xl font-bold text-xs border transition-all flex items-center justify-center ${
+                          isDark
+                            ? 'bg-slate-800/60 text-rose-400 border-slate-700/80 hover:bg-rose-900/30'
+                            : 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
+                        }`}
                       >
                         Clear
                       </button>
                       <button
                         onClick={() => handlePinDigit('0')}
-                        className="h-12 rounded-xl bg-slate-800 hover:bg-slate-700 active:bg-blue-600 text-white font-bold text-lg border border-slate-700/80 transition-all flex items-center justify-center"
+                        className={`h-12 rounded-xl font-bold text-lg border transition-all flex items-center justify-center ${
+                          isDark
+                            ? 'bg-slate-800 hover:bg-slate-700 active:bg-blue-600 text-white border-slate-700/80'
+                            : 'bg-white hover:bg-slate-50 active:bg-blue-600 active:text-white text-slate-900 border-slate-200 shadow-sm'
+                        }`}
                       >
                         0
                       </button>
                       <button
                         onClick={() => setPin(pin.slice(0, -1))}
-                        className="h-12 rounded-xl bg-slate-800/80 text-slate-300 font-bold border border-slate-700/80 hover:bg-slate-700 flex items-center justify-center"
+                        className={`h-12 rounded-xl font-bold border transition-all flex items-center justify-center ${
+                          isDark
+                            ? 'bg-slate-800/80 text-slate-300 border-slate-700/80 hover:bg-slate-700'
+                            : 'bg-slate-100 text-slate-700 border-slate-200 hover:bg-slate-200'
+                        }`}
                       >
                         <Delete className="w-5 h-5" />
                       </button>
                     </div>
 
-                    <p className="text-center text-[11px] text-slate-400">
-                      💡 Demo PIN: <span className="font-bold text-blue-400">{selectedStudent.pinHash || '1111'}</span> (or master: 1234)
+                    <p className={`text-center text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                      💡 Demo PIN: <span className="font-bold text-blue-600 dark:text-blue-400">{selectedStudent.pinHash || '1111'}</span> (or master: 1234)
                     </p>
                   </div>
                 )}
@@ -483,15 +570,23 @@ export const LoginScreen: React.FC = () => {
 
             {/* Sub-mode B: Whole Class / Group Classroom Mode */}
             {studentMode === 'WHOLE_CLASS' && (
-              <div className="bg-slate-900/90 rounded-3xl p-5 sm:p-6 border border-slate-800 shadow-xl space-y-4">
-                <div className="flex items-start justify-between pb-3 border-b border-slate-800">
+              <div
+                className={`rounded-3xl p-5 sm:p-6 border shadow-xl space-y-4 ${
+                  isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200 shadow-md'
+                }`}
+              >
+                <div className={`flex items-start justify-between pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
                   <div>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[11px] font-bold mb-1">
+                    <div
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold mb-1 ${
+                        isDark ? 'bg-amber-500/20 text-amber-300' : 'bg-amber-50 text-amber-800 border border-amber-200'
+                      }`}
+                    >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Single-Device Rural Classroom Mode • एक उपकरण वर्ग पद्धत</span>
                     </div>
-                    <h3 className="font-extrabold text-base text-white">Select Your Class / Grade</h3>
-                    <p className="text-xs text-slate-400 mt-0.5">
+                    <h3 className="font-extrabold text-base">Select Your Class / Grade</h3>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                       No personal PIN required! Students study together, watch grade lectures, and solve group practice tests.
                     </p>
                   </div>
@@ -507,17 +602,25 @@ export const LoginScreen: React.FC = () => {
                   ].map((cls) => (
                     <div
                       key={cls.grade}
-                      className="p-4 rounded-2xl bg-slate-850 border border-slate-800 hover:border-amber-500/80 transition-all flex flex-col justify-between"
+                      className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
+                        isDark
+                          ? 'bg-slate-850 border-slate-800 hover:border-amber-500/80'
+                          : 'bg-slate-50 border-slate-200 hover:border-amber-400 shadow-sm'
+                      }`}
                     >
                       <div>
                         <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs font-bold text-amber-400 uppercase tracking-wider">{cls.age}</span>
-                          <span className="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-mono">
+                          <span className="text-xs font-bold text-amber-600 dark:text-amber-400 uppercase tracking-wider">{cls.age}</span>
+                          <span
+                            className={`text-[10px] px-2 py-0.5 rounded-full font-mono ${
+                              isDark ? 'bg-slate-800 text-slate-300' : 'bg-white border border-slate-200 text-slate-700'
+                            }`}
+                          >
                             Offline Ready
                           </span>
                         </div>
-                        <h4 className="font-black text-white text-base">{cls.title}</h4>
-                        <p className="text-xs text-slate-400 mt-1">{cls.desc}</p>
+                        <h4 className="font-black text-base">{cls.title}</h4>
+                        <p className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{cls.desc}</p>
                       </div>
 
                       <button
@@ -539,22 +642,31 @@ export const LoginScreen: React.FC = () => {
         {/* ROLE 2: TEACHER LOGIN */}
         {/* ========================================================================= */}
         {activeRole === 'TEACHER' && (
-          <form onSubmit={handleTeacherLogin} className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
-            <div className="pb-3 border-b border-slate-800">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[11px] font-bold mb-1">
+          <form
+            onSubmit={handleTeacherLogin}
+            className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-4 ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-md'
+            }`}
+          >
+            <div className={`pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <div
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold mb-1 ${
+                  isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-50 text-blue-700 border border-blue-200'
+                }`}
+              >
                 <Users className="w-3.5 h-3.5" />
                 <span>Teacher & School Hub Admin • शिक्षक प्रवेश</span>
               </div>
-              <h3 className="font-black text-lg text-white">Teacher Portal Authentication</h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <h3 className="font-black text-lg">Teacher Portal Authentication</h3>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Take offline attendance, manage TaRL competency groups, and resolve at-risk flags
               </p>
             </div>
 
-            {teacherError && <p className="text-xs text-rose-400 font-bold">{teacherError}</p>}
+            {teacherError && <p className="text-xs text-rose-500 dark:text-rose-400 font-bold">{teacherError}</p>}
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Teacher ID or Registered Mobile
               </label>
               <input
@@ -562,13 +674,17 @@ export const LoginScreen: React.FC = () => {
                 value={teacherId}
                 onChange={(e) => setTeacherId(e.target.value)}
                 placeholder="e.g. TCH-PUNE-01 or 9822012345"
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500'
+                    : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                }`}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Security PIN / Password
               </label>
               <input
@@ -576,14 +692,18 @@ export const LoginScreen: React.FC = () => {
                 value={teacherPin}
                 onChange={(e) => setTeacherPin(e.target.value)}
                 placeholder="••••"
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500'
+                    : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                }`}
                 required
               />
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>Demo ID: <code className="text-blue-400">TCH-PUNE-01</code></span>
-              <span>PIN: <code className="text-blue-400">1234</code></span>
+            <div className={`flex items-center justify-between text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              <span>Demo ID: <code className="text-blue-600 dark:text-blue-400">TCH-PUNE-01</code></span>
+              <span>PIN: <code className="text-blue-600 dark:text-blue-400">1234</code></span>
             </div>
 
             <button
@@ -594,8 +714,8 @@ export const LoginScreen: React.FC = () => {
               <span>Sign In as Teacher (शिक्षकांसाठी प्रवेश)</span>
             </button>
 
-            <div className="pt-2 text-center border-t border-slate-800">
-              <Link to="/register?role=TEACHER" className="text-xs text-blue-400 hover:underline font-semibold">
+            <div className={`pt-2 text-center border-t ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <Link to="/register?role=TEACHER" className="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold">
                 New Teacher? Register School Profile
               </Link>
             </div>
@@ -606,22 +726,31 @@ export const LoginScreen: React.FC = () => {
         {/* ROLE 3: PARENT / GUARDIAN LOGIN */}
         {/* ========================================================================= */}
         {activeRole === 'GUARDIAN' && (
-          <form onSubmit={handleGuardianLogin} className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
-            <div className="pb-3 border-b border-slate-800">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[11px] font-bold mb-1">
+          <form
+            onSubmit={handleGuardianLogin}
+            className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-4 ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-md'
+            }`}
+          >
+            <div className={`pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <div
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold mb-1 ${
+                  isDark ? 'bg-emerald-500/20 text-emerald-400' : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                }`}
+              >
                 <HeartHandshake className="w-3.5 h-3.5" />
                 <span>Parent & Guardian Portal • पालक पोर्टल</span>
               </div>
-              <h3 className="font-black text-lg text-white">Parent / Guardian Login</h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <h3 className="font-black text-lg">Parent / Guardian Login</h3>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Track your ward's attendance, competency levels, and welfare scholarship eligibility
               </p>
             </div>
 
-            {guardianError && <p className="text-xs text-rose-400 font-bold">{guardianError}</p>}
+            {guardianError && <p className="text-xs text-rose-500 dark:text-rose-400 font-bold">{guardianError}</p>}
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Guardian Mobile Number
               </label>
               <input
@@ -629,13 +758,17 @@ export const LoginScreen: React.FC = () => {
                 value={guardianPhone}
                 onChange={(e) => setGuardianPhone(e.target.value)}
                 placeholder="10-digit mobile number"
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500'
+                    : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                }`}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Student PRN / Roll Number
               </label>
               <input
@@ -643,14 +776,18 @@ export const LoginScreen: React.FC = () => {
                 value={wardPrn}
                 onChange={(e) => setWardPrn(e.target.value)}
                 placeholder="e.g. PRN20261001"
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white placeholder-slate-500'
+                    : 'bg-white border-slate-300 text-slate-900 placeholder-slate-400'
+                }`}
                 required
               />
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-400">
-              <span>Demo Phone: <code className="text-blue-400">9876543210</code></span>
-              <span>PRN: <code className="text-blue-400">PRN20261001</code></span>
+            <div className={`flex items-center justify-between text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+              <span>Demo Phone: <code className="text-blue-600 dark:text-blue-400">9876543210</code></span>
+              <span>PRN: <code className="text-blue-600 dark:text-blue-400">PRN20261001</code></span>
             </div>
 
             <button
@@ -661,8 +798,8 @@ export const LoginScreen: React.FC = () => {
               <span>Sign In as Guardian (पालकांसाठी प्रवेश)</span>
             </button>
 
-            <div className="pt-2 text-center border-t border-slate-800">
-              <Link to="/register?role=GUARDIAN" className="text-xs text-emerald-400 hover:underline font-semibold">
+            <div className={`pt-2 text-center border-t ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <Link to="/register?role=GUARDIAN" className="text-xs text-emerald-600 dark:text-emerald-400 hover:underline font-semibold">
                 Link New Ward / Register Guardian
               </Link>
             </div>
@@ -673,40 +810,57 @@ export const LoginScreen: React.FC = () => {
         {/* ROLE 4: DISTRICT ADMINISTRATOR LOGIN */}
         {/* ========================================================================= */}
         {activeRole === 'DISTRICT_ADMIN' && (
-          <form onSubmit={handleDistrictLogin} className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
-            <div className="pb-3 border-b border-slate-800">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-400 text-[11px] font-bold mb-1">
+          <form
+            onSubmit={handleDistrictLogin}
+            className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-4 ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-md'
+            }`}
+          >
+            <div className={`pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <div
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold mb-1 ${
+                  isDark ? 'bg-blue-500/20 text-blue-400' : 'bg-blue-50 text-blue-700 border border-blue-200'
+                }`}
+              >
                 <Building2 className="w-3.5 h-3.5" />
                 <span>District Education Office • जिल्हा प्रशासन</span>
               </div>
-              <h3 className="font-black text-lg text-white">District Administrator Sign In</h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <h3 className="font-black text-lg">District Administrator Sign In</h3>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Aggregate cluster analytics, track school sync staleness, and generate reports
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 District Officer ID
               </label>
               <input
                 type="text"
                 value={districtId}
                 onChange={(e) => setDistrictId(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white'
+                    : 'bg-white border-slate-300 text-slate-900'
+                }`}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Administrator Password
               </label>
               <input
                 type="password"
                 value={districtPassword}
                 onChange={(e) => setDistrictPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white'
+                    : 'bg-white border-slate-300 text-slate-900'
+                }`}
                 required
               />
             </div>
@@ -725,40 +879,57 @@ export const LoginScreen: React.FC = () => {
         {/* ROLE 5: CONTENT ADMINISTRATOR LOGIN */}
         {/* ========================================================================= */}
         {activeRole === 'CONTENT_ADMIN' && (
-          <form onSubmit={handleContentAdminLogin} className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-4">
-            <div className="pb-3 border-b border-slate-800">
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-400 text-[11px] font-bold mb-1">
+          <form
+            onSubmit={handleContentAdminLogin}
+            className={`rounded-3xl p-6 sm:p-8 border shadow-xl space-y-4 ${
+              isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200 shadow-md'
+            }`}
+          >
+            <div className={`pb-3 border-b ${isDark ? 'border-slate-800' : 'border-slate-200'}`}>
+              <div
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold mb-1 ${
+                  isDark ? 'bg-purple-500/20 text-purple-400' : 'bg-purple-50 text-purple-700 border border-purple-200'
+                }`}
+              >
                 <BookOpen className="w-3.5 h-3.5" />
                 <span>Curriculum Studio • अभ्यासक्रम व्यवस्थापक</span>
               </div>
-              <h3 className="font-black text-lg text-white">Content Administrator Sign In</h3>
-              <p className="text-xs text-slate-400 mt-0.5">
+              <h3 className="font-black text-lg">Content Administrator Sign In</h3>
+              <p className={`text-xs mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 Upload local video lectures, construct interactive DPP test papers, and publish textbook materials
               </p>
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Studio Editor ID
               </label>
               <input
                 type="text"
                 value={contentAdminId}
                 onChange={(e) => setContentAdminId(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white'
+                    : 'bg-white border-slate-300 text-slate-900'
+                }`}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-300 uppercase mb-1">
+              <label className={`block text-xs font-bold uppercase mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
                 Studio Password
               </label>
               <input
                 type="password"
                 value={contentAdminPassword}
                 onChange={(e) => setContentAdminPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl bg-slate-800 border border-slate-700 text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+                className={`w-full px-4 py-3 rounded-xl border font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 ${
+                  isDark
+                    ? 'bg-slate-800 border-slate-700 text-white'
+                    : 'bg-white border-slate-300 text-slate-900'
+                }`}
                 required
               />
             </div>
@@ -777,7 +948,7 @@ export const LoginScreen: React.FC = () => {
         <div className="text-center pt-2">
           <Link
             to={`/register?role=${activeRole}`}
-            className="text-xs font-bold text-blue-400 hover:text-blue-300 hover:underline inline-flex items-center gap-1.5"
+            className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1.5"
           >
             <UserPlus className="w-4 h-4" />
             <span>Don't have an account? Register New Profile (नवीन नोंदणी करा)</span>

@@ -20,11 +20,13 @@ import {
 
 export const BottomNav: React.FC = () => {
   const { t } = useTranslation();
-  const { role, isAuthenticated, isSimpleMode } = useAuthStore();
+  const { role, isAuthenticated, isSimpleMode, theme } = useAuthStore();
 
   if (!isAuthenticated || !role) {
     return null;
   }
+
+  const isDark = theme === 'dark';
 
   const getLinks = () => {
     switch (role) {
@@ -70,7 +72,11 @@ export const BottomNav: React.FC = () => {
     <nav
       role="navigation"
       aria-label="Bottom Navigation"
-      className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/80 px-2 sm:px-4 py-2 shadow-2xl safe-area-bottom"
+      className={`fixed bottom-0 left-0 right-0 z-40 backdrop-blur-lg px-2 sm:px-4 py-2 transition-colors safe-area-bottom ${
+        isDark
+          ? 'bg-slate-900/95 border-t border-slate-800/80 shadow-2xl'
+          : 'bg-white/95 border-t border-slate-200 shadow-lg'
+      }`}
     >
       <div className="max-w-lg mx-auto flex items-center justify-around gap-1">
         {links.map((link) => (
@@ -80,8 +86,12 @@ export const BottomNav: React.FC = () => {
             className={({ isActive }) =>
               `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-2.5 py-1.5 rounded-2xl transition-all duration-200 select-none active:scale-95 ${
                 isActive
-                  ? 'bg-blue-600/20 text-blue-400 font-black shadow-inner ring-1 ring-blue-500/30'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  ? isDark
+                    ? 'bg-blue-600/20 text-blue-400 font-black shadow-inner ring-1 ring-blue-500/30'
+                    : 'bg-blue-50 text-blue-700 font-black shadow-sm ring-1 ring-blue-500/30'
+                  : isDark
+                  ? 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-slate-100'
               }`
             }
           >

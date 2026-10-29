@@ -35,13 +35,28 @@ const queryClient = new QueryClient({
 });
 
 const AppContent: React.FC = () => {
-  const { role, isAuthenticated, currentStudent } = useAuthStore();
+  const { role, isAuthenticated, currentStudent, theme } = useAuthStore();
   const location = useLocation();
+
+  // Sync document root class with selected theme
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+  }, [theme]);
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
+    <div
+      className={`min-h-screen flex flex-col transition-colors duration-200 ${
+        theme === 'dark' ? 'bg-slate-950 text-slate-100' : 'bg-slate-50 text-slate-900'
+      }`}
+    >
       <Header />
 
       <main className="flex-1 pb-36">

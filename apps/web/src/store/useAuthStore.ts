@@ -61,11 +61,14 @@ interface AuthState {
   teacherName: string;
   language: SupportedLanguage;
   isSimpleMode: boolean;
+  theme: 'light' | 'dark';
   schoolId: string;
 
   // Actions
   setLanguage: (lang: SupportedLanguage) => void;
   toggleSimpleMode: () => void;
+  setTheme: (theme: 'light' | 'dark') => void;
+  toggleTheme: () => void;
   setSchoolId: (id: string) => void;
 
   // Role Login Actions
@@ -144,6 +147,12 @@ function getInitialAdmin(): AdminAuthProfile | null {
   return null;
 }
 
+function getInitialTheme(): 'light' | 'dark' {
+  const raw = getStorage('vidya_theme');
+  if (raw === 'light' || raw === 'dark') return raw;
+  return 'light'; // Default to clean, accessible Light Theme
+}
+
 function getInitialRole(): UserRole | null {
   const savedRole = getStorage('vidya_role') as UserRole | null;
   // If we have saved student or class mode, default role is STUDENT
@@ -167,7 +176,34 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   teacherName: getStorage('vidya_teacher_name') || 'Sunil Patil Sir (शिक्षक)',
   language: (getStorage('vidya_language') as SupportedLanguage) || 'hi',
   isSimpleMode: getStorage('vidya_simple_mode') === 'true',
+  theme: getInitialTheme(),
   schoolId: getStorage('vidya_school_id') || '018f679a-1111-7000-8000-000000000001',
+
+  setTheme: (theme) => {
+    setStorage('vidya_theme', theme);
+    if (typeof document !== 'undefined') {
+      if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    }
+    set({ theme });
+  },
+
+  toggleTheme: () =>
+    set((state) => {
+      const next = state.theme === 'dark' ? 'light' : 'dark';
+      setStorage('vidya_theme', next);
+      if (typeof document !== 'undefined') {
+        if (next === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+      return { theme: next };
+    }),
 
   setLanguage: (lang) => {
     updateI18nLanguage(lang);
