@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { offlineDb } from '../../db/offline-db.js';
+import { ensureContentSeeded } from '../../db/seed-content.js';
 import { syncManager } from '../../services/sync-manager.js';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import {
@@ -117,6 +118,7 @@ export const ContentAdminScreen: React.FC = () => {
   };
 
   const loadAllContent = async () => {
+    await ensureContentSeeded();
     const [lList, vList, qList, mList] = await Promise.all([
       offlineDb.lessons.toArray(),
       offlineDb.videos.toArray(),
@@ -136,6 +138,51 @@ export const ContentAdminScreen: React.FC = () => {
   useEffect(() => {
     loadAllContent();
   }, []);
+
+  // Delete Handlers for Curriculum Assets
+  const handleDeleteLesson = async (lessonId: string, title: string) => {
+    const confirmed = window.confirm(
+      `व्हिडिओ तासिका "${title}" कायमस्वरूपी हटवायची आहे का?\n\nही तासिका विद्यार्थ्यांच्या व्हिडिओ यादीतून व होमस्क्रीनवरून पूर्णपणे काढली जाईल.`
+    );
+    if (!confirmed) return;
+
+    try {
+      // 1. Delete lesson from IndexedDB
+      await offlineDb.lessons.delete(lessonId);
+
+      // 2. Delete corresponding video file record
+      await offlineDb.videos.where('lessonId').equals(lessonId).delete();
+
+      // 3. Delete any quizzes attached to this lesson
+      const attachedQuizzes = await offlineDb.quizzes.where('lessonId').equals(lessonId).toArray();
+      for (const q of attachedQuizzes) {
+        await offlineDb.quizzes.delete(q.id);
+      }
+
+      notifySuccess(`🗑️ व्हिडिओ तासिका "${title}" यशस्वीरित्या हटवली गेली! (Video deleted successfully)`);
+      await loadAllContent();
+    } catch (err: any) {
+      alert(`हटवताना त्रुटी: ${err?.message || 'Error deleting video'}`);
+    }
+  };
+
+  const handleDeleteQuiz = async (quizId: string, title: string) => {
+    const confirmed = window.confirm(`सराव चाचणी "${title}" हटवायची आहे का?`);
+    if (!confirmed) return;
+
+    await offlineDb.quizzes.delete(quizId);
+    notifySuccess(`🗑️ सराव चाचणी "${title}" हटवली गेली.`);
+    await loadAllContent();
+  };
+
+  const handleDeleteMaterial = async (matId: string, title: string) => {
+    const confirmed = window.confirm(`अभ्यास साहित्य "${title}" हटवायचे आहे का?`);
+    if (!confirmed) return;
+
+    await offlineDb.studyMaterials.delete(matId);
+    notifySuccess(`🗑️ अभ्यास साहित्य "${title}" हटवले गेले.`);
+    await loadAllContent();
+  };
 
   // Handle actual local video file selection from disk
   const handleLocalVideoFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -688,8 +735,74 @@ export const ContentAdminScreen: React.FC = () => {
             </form>
           </div>
 
-          {/* Right: Live Preview & Guidance */}
+          {/* Right: Live Preview, Uploaded Video Management & Deletion */}
           <div className="space-y-4">
+            {/* Manage Existing Uploaded Videos & Delete Option */}
+            <div className="bg-white dark:bg-slate-900 rounded-3xl p-5 border border-slate-200 dark:border-slate-800 shadow-sm space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Film className="w-4 h-4 text-rose-600 dark:text-rose-400" />
+                  <h4 className="font-black text-sm text-slate-900 dark:text-white">
+                    व्हिडिओ व्यवस्थापन (Manage & Delete)
+                  </h4>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                  {lessons.length} तासिका
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                खाली उपलब्ध व्हिडिओ तासिकांची यादी आहे. नको असलेली तासिका कायमस्वरूपी हटवण्यासाठी <strong>"हटवा (Delete)"</strong> बटनावर क्लिक करा.
+              </p>
+
+              {lessons.length === 0 ? (
+                <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-center text-xs text-slate-400 font-medium">
+                  कोणतीही व्हिडिओ तासिका उपलब्ध नाही.
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                  {lessons.map((l) => {
+                    const v = videos.find((item) => item.lessonId === l.id);
+                    const isLocal = !!v?.videoBlob;
+                    return (
+                      <div
+                        key={l.id}
+                        className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 mb-1 flex-wrap">
+                            <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
+                              {l.subject}
+                            </span>
+                            <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
+                              इ. {l.grade} • ~{l.estimatedMinutes || 10} min
+                            </span>
+                            {isLocal && (
+                              <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
+                                Local File
+                              </span>
+                            )}
+                          </div>
+                          <h5 className="font-bold text-xs text-slate-900 dark:text-slate-100 truncate" title={l.title}>
+                            {l.title}
+                          </h5>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteLesson(l.id, l.title)}
+                          className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 shrink-0 min-h-[32px]"
+                          title={`"${l.title}" व्हिडिओ तासिका हटवा`}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>हटवा</span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             <div className="bg-slate-900 rounded-3xl p-5 text-white border border-slate-800 shadow-md">
               <span className="text-[10px] uppercase font-black text-blue-400 tracking-wider">
                 STUDENT PORTAL LIVE STATUS
@@ -721,16 +834,16 @@ export const ContentAdminScreen: React.FC = () => {
               </div>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-3xl p-5 text-xs text-blue-900 space-y-2">
+            <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-3xl p-5 text-xs text-blue-900 dark:text-blue-200 space-y-2">
               <h4 className="font-black text-sm flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-blue-600" />
+                <Sparkles className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 थेट विद्यार्थी डॅशबोर्डवर उपलब्ध
               </h4>
               <p>
-                १. आपण अपलोड केलेली प्रत्यक्ष व्हिडिओ फाइल स्थानिक <strong>Dexie DB</strong> मध्ये स्टोअर होते.
+                १. आपण अपलोड केलेली प्रत्यक्ष व्हिडिओ फाइल स्थानिक <strong>Dexie DB</strong> मध्ये सेव्ह होते.
               </p>
               <p>
-                २. विद्यार्थ्यांच्या <strong>/student/videos</strong> आणि होमस्क्रीनवर हा व्हिडिओ तत्काळ दिसेल आणि प्रत्यक्ष प्ले होईल.
+                २. विद्यार्थ्यांच्या <strong>/student/videos</strong> आणि होमस्क्रीनवर हा व्हिडिओ तत्काळ दिसेल.
               </p>
             </div>
           </div>
@@ -1155,69 +1268,123 @@ export const ContentAdminScreen: React.FC = () => {
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {lessons.map((l) => (
-                  <div key={l.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                  <div
+                    key={l.id}
+                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
                           {l.subject}
                         </span>
-                        <span className="text-xs font-bold text-slate-600">Grade {l.grade}</span>
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                          Grade {l.grade} • ~{l.estimatedMinutes || 10} min
+                        </span>
                       </div>
-                      <h4 className="font-bold text-slate-900 text-sm">{l.title}</h4>
+                      <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate" title={l.title}>
+                        {l.title}
+                      </h4>
                     </div>
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
-                      ● Published
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full">
+                        ● Published
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteLesson(l.id, l.title)}
+                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 min-h-[32px]"
+                        title="ही व्हिडिओ तासिका हटवा"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>हटवा</span>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Quizzes Sub-list */}
-            <div className="space-y-2 pt-3 border-t border-slate-100">
+            <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
               <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
                 सराव चाचण्या / DPP ({quizzes.length})
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {quizzes.map((q) => (
-                  <div key={q.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                  <div
+                    key={q.id}
+                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300">
                           {q.subject}
                         </span>
-                        <span className="text-xs font-bold text-slate-600">Grade {q.grade} • {q.questions?.length || 2} Qs</span>
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                          Grade {q.grade} • {q.questions?.length || 2} Qs
+                        </span>
                       </div>
-                      <h4 className="font-bold text-slate-900 text-sm">{q.title}</h4>
+                      <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate" title={q.title}>
+                        {q.title}
+                      </h4>
                     </div>
-                    <span className="text-xs font-bold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full">
-                      {q.totalMarks} Marks
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-bold text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-950/40 px-2.5 py-1 rounded-full">
+                        {q.totalMarks} Marks
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteQuiz(q.id, q.title)}
+                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 min-h-[32px]"
+                        title="ही सराव चाचणी हटवा"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>हटवा</span>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Study Materials Sub-list */}
-            <div className="space-y-2 pt-3 border-t border-slate-100">
+            <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
               <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
                 पुस्तके व अभ्यास साहित्य ({materials.length})
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {materials.map((m) => (
-                  <div key={m.id} className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between">
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-100 text-purple-800">
+                  <div
+                    key={m.id}
+                    className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 flex items-center justify-between gap-3 hover:border-slate-300 dark:hover:border-slate-600 transition-all"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300">
                           {m.type}
                         </span>
-                        <span className="text-xs font-bold text-slate-600">Grade {m.grade} • {m.pages || 24} Pages</span>
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                          Grade {m.grade} • {m.pages || 24} Pages
+                        </span>
                       </div>
-                      <h4 className="font-bold text-slate-900 text-sm">{m.title}</h4>
+                      <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate" title={m.title}>
+                        {m.title}
+                      </h4>
                     </div>
-                    <span className="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">
-                      Offline Ready
-                    </span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full">
+                        Offline Ready
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteMaterial(m.id, m.title)}
+                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 min-h-[32px]"
+                        title="हे अभ्यास साहित्य हटवा"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>हटवा</span>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

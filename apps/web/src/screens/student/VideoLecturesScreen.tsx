@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { offlineDb } from '../../db/offline-db.js';
+import { ensureContentSeeded } from '../../db/seed-content.js';
 import { VideoPlayer } from '../../components/VideoPlayer.js';
 import { AudioHelpButton } from '../../components/AudioHelpButton.js';
 import {
@@ -29,101 +30,51 @@ interface LectureItem {
   description: string;
 }
 
-const sampleLectures: LectureItem[] = [
-  {
-    id: 'vid-01',
-    lessonId: '018f679a-ls01-7000-8000-000000000001',
-    quizId: 'quiz-lang-01',
-    title: 'Our Alphabet and Phonics (वर्णमाला व ध्वनी)',
-    subject: 'LANGUAGE',
-    grade: 1,
-    level: 1,
-    durationSec: 180,
-    sizeMb: 12,
-    description: 'Learn letter sounds, phonics, and basic word association with animated visual demonstrations.',
-  },
-  {
-    id: 'vid-02',
-    lessonId: '018f679a-ls02-7000-8000-000000000002',
-    quizId: 'quiz-math-01',
-    title: 'Numbers and Counting 1 to 20 (अंक आणि मोजणी)',
-    subject: 'MATH',
-    grade: 2,
-    level: 2,
-    durationSec: 240,
-    sizeMb: 15,
-    description: 'Interactive counting with apples, single-digit addition, and number sequence recognition.',
-  },
-  {
-    id: 'vid-03',
-    lessonId: '018f679a-ls03-7000-8000-000000000003',
-    quizId: 'quiz-sci-01',
-    title: 'Plants and Trees Around Us (आपल्या सभोवतालची झाडे)',
-    subject: 'SCIENCE',
-    grade: 3,
-    level: 3,
-    durationSec: 210,
-    sizeMb: 14,
-    description: 'Explore plant roots, green leaves, photosynthesis, and how trees help our environment.',
-  },
-  {
-    id: 'vid-04',
-    lessonId: '018f679a-ls02-7000-8000-000000000002',
-    quizId: 'quiz-math-01',
-    title: 'Fun Addition & Subtraction (मजेदार बेरीज)',
-    subject: 'MATH',
-    grade: 2,
-    level: 2,
-    durationSec: 195,
-    sizeMb: 13,
-    description: 'Simple mental math addition tricks using pebbles, sticks, and visual groups.',
-  },
-];
-
 export const VideoLecturesScreen: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const [lectures, setLectures] = useState<LectureItem[]>(sampleLectures);
+  const [lectures, setLectures] = useState<LectureItem[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('ALL');
-  const [activeLecture, setActiveLecture] = useState<LectureItem>(sampleLectures[0]);
+  const [activeLecture, setActiveLecture] = useState<LectureItem | null>(null);
 
   useEffect(() => {
     async function loadVideos() {
+      await ensureContentSeeded();
       const storedLessons = await offlineDb.lessons.toArray();
       const storedVideos = await offlineDb.videos.toArray();
       const storedQuizzes = await offlineDb.quizzes.toArray();
 
-      if (storedLessons.length > 0) {
-        const dynamicList: LectureItem[] = storedLessons.map((l, idx) => {
-          const v = storedVideos.find((vid) => vid.lessonId === l.id);
-          const q = storedQuizzes.find((quiz) => quiz.lessonId === l.id);
+      const dynamicList: LectureItem[] = storedLessons.map((l, idx) => {
+        const v = storedVideos.find((vid) => vid.lessonId === l.id);
+        const q = storedQuizzes.find((quiz) => quiz.lessonId === l.id);
 
-          return {
-            id: v ? v.id : `vid-dyn-${idx}`,
-            lessonId: l.id,
-            quizId: q ? q.id : 'quiz-default',
-            title: l.title,
-            subject: l.subject,
-            grade: l.grade,
-            level: l.level,
-            durationSec: v ? v.durationSec : l.estimatedMinutes * 60,
-            sizeMb: v ? Math.round(v.sizeBytes / (1024 * 1024)) || 14 : 12,
-            description:
-              l.contentBlocks?.[1]?.content ||
-              l.contentBlocks?.[0]?.content ||
-              'Comprehensive offline lecture video.',
-          };
-        });
+        return {
+          id: v ? v.id : `vid-dyn-${idx}`,
+          lessonId: l.id,
+          quizId: q ? q.id : 'quiz-default',
+          title: l.title,
+          subject: l.subject,
+          grade: l.grade,
+          level: l.level,
+          durationSec: v ? v.durationSec : (l.estimatedMinutes || 10) * 60,
+          sizeMb: v ? Math.round(v.sizeBytes / (1024 * 1024)) || 14 : 12,
+          description:
+            l.contentBlocks?.[1]?.content ||
+            l.contentBlocks?.[0]?.content ||
+            'Comprehensive offline lecture video.',
+        };
+      });
 
-        // Merge with sampleLectures for full variety
-        const combined = [...dynamicList];
-        for (const s of sampleLectures) {
-          if (!combined.some((c) => c.title === s.title)) {
-            combined.push(s);
+      setLectures(dynamicList);
+      if (dynamicList.length > 0) {
+        setActiveLecture((prev) => {
+          if (prev && dynamicList.some((d) => d.id === prev.id)) {
+            return prev;
           }
-        }
-        setLectures(combined);
-        setActiveLecture(combined[0]);
+          return dynamicList[0];
+        });
+      } else {
+        setActiveLecture(null);
       }
     }
     loadVideos();
@@ -237,7 +188,20 @@ export const VideoLecturesScreen: React.FC = () => {
 
       {/* Video Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {filteredLectures.map((lecture) => {
+        {filteredLectures.length === 0 ? (
+          <div className="sm:col-span-2 p-8 rounded-3xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-center space-y-2">
+            <VideoIcon className="w-10 h-10 text-slate-400 mx-auto" />
+            <h4 className="font-bold text-slate-800 dark:text-slate-200 text-sm">
+              कोणतीही व्हिडिओ तासिका उपलब्ध नाही (No Video Lectures Found)
+            </h4>
+            <p className="text-xs text-slate-500">
+              {lectures.length === 0
+                ? 'शिक्षकांनी अथवा कंटेंट ॲडमिनने व्हिडिओ तासिका अपलोड करावी.'
+                : 'निवडलेल्या विषयासाठी अद्याप व्हिडिओ उपलब्ध नाही.'}
+            </p>
+          </div>
+        ) : (
+          filteredLectures.map((lecture) => {
           const isSelected = activeLecture?.id === lecture.id;
           const mins = Math.floor(lecture.durationSec / 60);
 
@@ -287,7 +251,8 @@ export const VideoLecturesScreen: React.FC = () => {
               </div>
             </div>
           );
-        })}
+        })
+        )}
       </div>
 
       {/* Guaranteed Bottom Buffer */}

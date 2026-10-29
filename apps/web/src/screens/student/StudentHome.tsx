@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { offlineDb } from '../../db/offline-db.js';
+import { ensureContentSeeded } from '../../db/seed-content.js';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { Lesson, Quiz, StudyMaterial, QuizResult } from '@vidya-setu/shared';
 import { AudioHelpButton } from '../../components/AudioHelpButton.js';
@@ -60,148 +61,21 @@ export const StudentHome: React.FC = () => {
     async function loadContent() {
       if (!currentStudent) return;
 
-      // 1. Load Lessons
-      const lessons = await offlineDb.lessons.toArray();
-      if (lessons.length > 0) {
-        setAllLessons(lessons);
-        setRecentLesson(lessons[0]);
-      } else {
-        const defaultLessons: Lesson[] = [
-          {
-            id: '018f679a-ls01-7000-8000-000000000001',
-            schoolId: 'global',
-            title: 'Our Alphabet and Phonics (वर्णमाला व ध्वनी)',
-            subject: 'LANGUAGE',
-            grade: 1,
-            level: 1,
-            contentBlocks: [
-              { id: 'b1', type: 'HEADING', content: 'Learning Letter Sounds' },
-              { id: 'b2', type: 'PARAGRAPH', content: 'Every letter has its own sound. For example, "क" makes the sound /ka/ as in Kamal (Lotus).' },
-              { id: 'b3', type: 'CALLOUT', content: 'Point to the picture of a lotus and say "क" loudly!' },
-            ],
-            status: 'PUBLISHED',
-            estimatedMinutes: 10,
-            version: 1,
-            deviceId: 'hub',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            deletedAt: null,
-          },
-          {
-            id: '018f679a-ls02-7000-8000-000000000002',
-            schoolId: 'global',
-            title: 'Numbers and Counting 1 to 20 (अंक आणि मोजणी)',
-            subject: 'MATH',
-            grade: 2,
-            level: 2,
-            contentBlocks: [
-              { id: 'b1', type: 'HEADING', content: 'Counting with Everyday Objects' },
-              { id: 'b2', type: 'PARAGRAPH', content: 'Count pebbles, sticks, or fingers. 1 apple plus 1 apple equals 2 apples!' },
-            ],
-            status: 'PUBLISHED',
-            estimatedMinutes: 12,
-            version: 1,
-            deviceId: 'hub',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            deletedAt: null,
-          },
-          {
-            id: '018f679a-ls03-7000-8000-000000000003',
-            schoolId: 'global',
-            title: 'Plants and Trees Around Us (आपल्या सभोवतालची झाडे)',
-            subject: 'SCIENCE',
-            grade: 3,
-            level: 3,
-            contentBlocks: [
-              { id: 'b1', type: 'HEADING', content: 'Parts of a Plant' },
-              { id: 'b2', type: 'PARAGRAPH', content: 'Roots absorb water from soil. Green leaves make food with sunlight.' },
-            ],
-            status: 'PUBLISHED',
-            estimatedMinutes: 15,
-            version: 1,
-            deviceId: 'hub',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            deletedAt: null,
-          },
-        ];
-        await offlineDb.lessons.bulkPut(defaultLessons);
-        setAllLessons(defaultLessons);
-        setRecentLesson(defaultLessons[0]);
-      }
+      // 1. Ensure initial content seed if never seeded before
+      await ensureContentSeeded();
 
-      // 2. Load Quizzes
+      // 2. Load Lessons from offlineDb
+      const lessons = await offlineDb.lessons.toArray();
+      setAllLessons(lessons);
+      setRecentLesson(lessons.length > 0 ? lessons[0] : null);
+
+      // 3. Load Quizzes
       const quizzes = await offlineDb.quizzes.toArray();
       setAllQuizzes(quizzes);
 
-      // 3. Load or Seed Study Materials / Books
+      // 4. Load Study Materials
       const materials = await offlineDb.studyMaterials.toArray();
-      if (materials.length > 0) {
-        setStudyMaterials(materials);
-      } else {
-        const seedMaterials: StudyMaterial[] = [
-          {
-            id: 'mat-01',
-            schoolId: 'global',
-            title: 'इयत्ता ३ री गणित पाठ्यपुस्तक - बालभारती',
-            type: 'TEXTBOOK',
-            subject: 'MATH',
-            grade: 3,
-            pages: 48,
-            sizeBytes: 4404019,
-            description: 'महाराष्ट्र राज्य पाठ्यपुस्तक मंडळ (बालभारती) अधिकृत गणित पुस्तक - संख्याज्ञान, बेरीज, वजाबाकी व भौमितिक आकृत्या.',
-            content: `इयत्ता ३ री गणित पाठ्यपुस्तक (Mathematics Textbook)\n\nअनुक्रमणिका:\n१. भौमितिक आकृत्यांची ओळख - कोन, कडा व शिरोबिंदू\n२. संख्याज्ञान - तीन अंकी संख्यांचे वाचन व लेखन\n३. बिनहातच्याची व हातच्याची बेरीज\n४. बिनउसन्याची व उसन्याची वजाबाकी\n५. गुणाकार पूर्वतयारी व पाढे तयार करणे\n\nप्रकरण १: तीन अंकी संख्याज्ञान\nउदा. शतक (१००), दशक (१०) आणि एकक (१). १०० + २० + ५ = १२५ (एकशे पंचवीस).`,
-            downloadUrl: '/materials/math_grade3_balbharati.pdf',
-            offlineReady: true,
-            version: 1,
-            deviceId: 'hub',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            deletedAt: null,
-          },
-          {
-            id: 'mat-02',
-            schoolId: 'global',
-            title: 'परिसर अभ्यास व सामान्य विज्ञान हस्तलिखित नोट्स',
-            type: 'NOTES',
-            subject: 'SCIENCE',
-            grade: 3,
-            pages: 18,
-            sizeBytes: 2097152,
-            description: 'शिक्षकांच्या हस्तलिखित स्पष्टीकरणासह जलचक्र, सजीव-निर्जीव आणि वनस्पतींची वाढ यावरील महत्त्वाचे मुद्दे.',
-            content: `परिसर अभ्यास हस्तलिखित नोट्स (Science Teacher Notes)\n\nघटक: जलचक्र आणि वनस्पती\n\n१. वनस्पतींचे अवयव:\n- मुळे: जमिनीतील पाणी व क्षार शोषून घेतात.\n- खोड: झाडाला आधार देते व अन्न पोहोचवते.\n- पाने: सूर्यप्रकाशामध्ये अन्न तयार करतात (प्रकाशसंश्लेषण).\n\n२. पाण्याचे चक्र:\nउष्णता -> पाण्याचे बाष्पीभवन -> आकाशात ढग -> थंड हवा लागल्याने संघनन -> पाऊस!`,
-            downloadUrl: '/materials/science_notes_std3.pdf',
-            offlineReady: true,
-            version: 1,
-            deviceId: 'hub',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            deletedAt: null,
-          },
-          {
-            id: 'mat-03',
-            schoolId: 'global',
-            title: 'मराठी वर्णमाला व ध्वनी स्वाध्याय पत्रिका',
-            type: 'WORKSHEET',
-            subject: 'LANGUAGE',
-            grade: 1,
-            pages: 12,
-            sizeBytes: 1048576,
-            description: 'अक्षर ओळख, चित्र-शब्द जोड्या आणि स्वरचिन्हांचा सराव करण्यासाठी रंगीत कार्यपत्रिका.',
-            content: `मराठी भाषा स्वाध्याय पत्रिका (Vernacular Language Worksheet)\n\nस्वाध्याय १: अक्षराला गोल करा\nक - कमळ, कप, कपाट, करवत\nम - मका, मगर, मासा, मध\n\nस्वाध्याय २: रिकाम्या जागी योग्य शब्द भरा:\n१. आकाशामध्ये _______ चमकतो. (सूर्य / चंद्र)\n२. झाडावर गोड _______ पिकले आहेत. (आंबे / दगड)`,
-            downloadUrl: '/materials/marathi_worksheet_std1.pdf',
-            offlineReady: true,
-            version: 1,
-            deviceId: 'hub',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            deletedAt: null,
-          },
-        ];
-        await offlineDb.studyMaterials.bulkPut(seedMaterials);
-        setStudyMaterials(seedMaterials);
-      }
+      setStudyMaterials(materials);
 
       // 4. Load Student's OWN quiz results
       const results = await offlineDb.quizResults
