@@ -20,7 +20,11 @@ import {
 
 export const BottomNav: React.FC = () => {
   const { t } = useTranslation();
-  const { role, isSimpleMode } = useAuthStore();
+  const { role, isAuthenticated, isSimpleMode } = useAuthStore();
+
+  if (!isAuthenticated || !role) {
+    return null;
+  }
 
   const getLinks = () => {
     switch (role) {

@@ -37,7 +37,7 @@ import {
 export const StudentHome: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentStudent, isSimpleMode, logout } = useAuthStore();
+  const { currentStudent, classMode, isSimpleMode, logout } = useAuthStore();
 
   const [recentLesson, setRecentLesson] = useState<Lesson | null>(null);
   const [allLessons, setAllLessons] = useState<Lesson[]>([]);
@@ -233,22 +233,24 @@ export const StudentHome: React.FC = () => {
       <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
           <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-700 to-indigo-800 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-700/20 ring-2 ring-blue-100">
-            {currentStudent.gender === 'FEMALE' ? '👧' : '👦'}
+            {classMode?.isClassMode ? '🏫' : currentStudent.gender === 'FEMALE' ? '👧' : '👦'}
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
               <h3 className="font-black text-lg text-slate-900 leading-tight">
-                {studentName}
+                {classMode?.isClassMode ? classMode.className : studentName}
               </h3>
               <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                 {t('common.grade')} {gradeNumber}
               </span>
               <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                TaRL {t('common.level')} {assessedLevel}
+                {classMode?.isClassMode ? 'सामूहिक वर्ग तासिका' : `TaRL ${t('common.level')} ${assessedLevel}`}
               </span>
             </div>
             <p className="text-xs text-slate-500 font-medium mt-0.5">
-              PRN: {currentStudent.prn} • {t('session.lockedSession')}
+              {classMode?.isClassMode
+                ? 'Shared Tablet Classroom Session • No individual PIN required'
+                : `PRN: ${currentStudent.prn} • ${t('session.lockedSession')}`}
             </p>
           </div>
         </div>
@@ -256,12 +258,12 @@ export const StudentHome: React.FC = () => {
         <button
           onClick={() => {
             logout();
-            navigate('/student/picker');
+            navigate('/login?role=STUDENT');
           }}
           className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-300 font-black text-xs transition-all min-h-[44px] shadow-sm"
         >
           <LogOut className="w-4 h-4 text-rose-600" />
-          <span>{t('session.switchStudent')}</span>
+          <span>{classMode?.isClassMode ? 'Leave Class (वर्ग सोडा)' : t('session.switchStudent')}</span>
         </button>
       </div>
 

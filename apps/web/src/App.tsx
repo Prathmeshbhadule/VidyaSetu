@@ -1,9 +1,12 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/Header.js';
 import { BottomNav } from './components/BottomNav.js';
+import { RoleGuard } from './components/RoleGuard.js';
 import { useAuthStore } from './store/useAuthStore.js';
+import { LoginScreen } from './screens/auth/LoginScreen.js';
+import { RegisterScreen } from './screens/auth/RegisterScreen.js';
 import { StudentProfilePicker } from './screens/student/StudentProfilePicker.js';
 import { StudentHome } from './screens/student/StudentHome.js';
 import { LessonListScreen } from './screens/student/LessonListScreen.js';
@@ -31,31 +34,25 @@ const queryClient = new QueryClient({
   },
 });
 
-const StudentGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { role, currentStudent } = useAuthStore();
-  if (role === 'STUDENT' && !currentStudent) {
-    return <Navigate to="/student/picker" replace />;
-  }
-  return <>{children}</>;
-};
-
 const AppContent: React.FC = () => {
-  const { role, currentStudent } = useAuthStore();
+  const { role, isAuthenticated, currentStudent } = useAuthStore();
   const location = useLocation();
 
-  const isPicker = location.pathname === '/student/picker';
+  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
 
   return (
-    <div className="min-h-screen flex flex-col bg-amber-50/40 text-slate-900">
+    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100">
       <Header />
 
       <main className="flex-1 pb-36">
         <Routes>
-          {/* Default redirect according to active user role */}
+          {/* Default Route: Direct to appropriate portal based on authentication */}
           <Route
             path="/"
             element={
-              role === 'TEACHER' ? (
+              !isAuthenticated || !role ? (
+                <Navigate to="/login" replace />
+              ) : role === 'TEACHER' ? (
                 <Navigate to="/teacher/attendance" replace />
               ) : role === 'GUARDIAN' ? (
                 <Navigate to="/parent" replace />
@@ -64,105 +61,172 @@ const AppContent: React.FC = () => {
               ) : role === 'CONTENT_ADMIN' ? (
                 <Navigate to="/admin/content" replace />
               ) : !currentStudent ? (
-                <Navigate to="/student/picker" replace />
+                <Navigate to="/login?role=STUDENT" replace />
               ) : (
                 <Navigate to="/student/home" replace />
               )
             }
           />
 
-          {/* Student Routes */}
-          <Route path="/student/picker" element={<StudentProfilePicker />} />
+          {/* Authentication & Registration Routes */}
+          <Route path="/login" element={<LoginScreen />} />
+          <Route path="/register" element={<RegisterScreen />} />
+          <Route path="/student/picker" element={<Navigate to="/login?role=STUDENT" replace />} />
+
+          {/* Protected Student Routes */}
           <Route
             path="/student/home"
             element={
-              <StudentGuard>
+              <RoleGuard allowedRoles={['STUDENT']}>
                 <StudentHome />
-              </StudentGuard>
+              </RoleGuard>
             }
           />
           <Route
             path="/student/lessons"
             element={
-              <StudentGuard>
+              <RoleGuard allowedRoles={['STUDENT']}>
                 <LessonListScreen />
-              </StudentGuard>
+              </RoleGuard>
             }
           />
           <Route
             path="/student/lessons/:id"
             element={
-              <StudentGuard>
+              <RoleGuard allowedRoles={['STUDENT']}>
                 <LessonReaderScreen />
-              </StudentGuard>
+              </RoleGuard>
             }
           />
           <Route
             path="/student/videos"
             element={
-              <StudentGuard>
+              <RoleGuard allowedRoles={['STUDENT']}>
                 <VideoLecturesScreen />
-              </StudentGuard>
+              </RoleGuard>
             }
           />
           <Route
             path="/student/quizzes"
             element={
-              <StudentGuard>
+              <RoleGuard allowedRoles={['STUDENT']}>
                 <QuizResultsScreen />
-              </StudentGuard>
+              </RoleGuard>
             }
           />
           <Route
             path="/student/quizzes/:id"
             element={
-              <StudentGuard>
+              <RoleGuard allowedRoles={['STUDENT']}>
                 <QuizRunnerScreen />
-              </StudentGuard>
+              </RoleGuard>
             }
           />
           <Route
             path="/student/adaptive"
             element={
-              <StudentGuard>
+              <RoleGuard allowedRoles={['STUDENT']}>
                 <AdaptiveAssessmentScreen />
-              </StudentGuard>
+              </RoleGuard>
             }
           />
           <Route
             path="/student/progress"
             element={
-              <StudentGuard>
+              <RoleGuard allowedRoles={['STUDENT']}>
                 <StudentProgressScreen />
-              </StudentGuard>
+              </RoleGuard>
             }
           />
 
-          {/* Schemes & Welfare Routes */}
-          <Route path="/schemes" element={<SchemesBrowserScreen />} />
+          {/* Schemes Portal (Accessible to Student, Teacher, Guardian, Admins) */}
+          <Route
+            path="/schemes"
+            element={
+              <RoleGuard allowedRoles={['STUDENT', 'TEACHER', 'GUARDIAN', 'DISTRICT_ADMIN', 'CONTENT_ADMIN']}>
+                <SchemesBrowserScreen />
+              </RoleGuard>
+            }
+          />
 
-          {/* Teacher Routes */}
-          <Route path="/teacher/attendance" element={<TeacherAttendanceScreen />} />
-          <Route path="/teacher/grouping" element={<TeacherTaRLScreen />} />
-          <Route path="/teacher/at-risk" element={<TeacherAtRiskScreen />} />
-          <Route path="/teacher/hub-status" element={<TeacherHubStatusScreen />} />
+          {/* Protected Teacher Routes */}
+          <Route
+            path="/teacher/attendance"
+            element={
+              <RoleGuard allowedRoles={['TEACHER']}>
+                <TeacherAttendanceScreen />
+              </RoleGuard>
+            }
+          />
+          <Route
+            path="/teacher/grouping"
+            element={
+              <RoleGuard allowedRoles={['TEACHER']}>
+                <TeacherTaRLScreen />
+              </RoleGuard>
+            }
+          />
+          <Route
+            path="/teacher/at-risk"
+            element={
+              <RoleGuard allowedRoles={['TEACHER']}>
+                <TeacherAtRiskScreen />
+              </RoleGuard>
+            }
+          />
+          <Route
+            path="/teacher/hub-status"
+            element={
+              <RoleGuard allowedRoles={['TEACHER']}>
+                <TeacherHubStatusScreen />
+              </RoleGuard>
+            }
+          />
 
-          {/* Parent Portal */}
-          <Route path="/parent" element={<ParentDashboardScreen />} />
-          <Route path="/parent/notifications" element={<ParentDashboardScreen />} />
+          {/* Protected Parent / Guardian Routes */}
+          <Route
+            path="/parent"
+            element={
+              <RoleGuard allowedRoles={['GUARDIAN']}>
+                <ParentDashboardScreen />
+              </RoleGuard>
+            }
+          />
+          <Route
+            path="/parent/notifications"
+            element={
+              <RoleGuard allowedRoles={['GUARDIAN']}>
+                <ParentDashboardScreen />
+              </RoleGuard>
+            }
+          />
 
-          {/* District Admin Portal */}
-          <Route path="/district/dashboard" element={<DistrictDashboardScreen />} />
+          {/* Protected District Admin Routes */}
+          <Route
+            path="/district/dashboard"
+            element={
+              <RoleGuard allowedRoles={['DISTRICT_ADMIN']}>
+                <DistrictDashboardScreen />
+              </RoleGuard>
+            }
+          />
 
-          {/* Content Admin Portal */}
-          <Route path="/admin/content" element={<ContentAdminScreen />} />
+          {/* Protected Content Admin Routes */}
+          <Route
+            path="/admin/content"
+            element={
+              <RoleGuard allowedRoles={['CONTENT_ADMIN', 'TEACHER']}>
+                <ContentAdminScreen />
+              </RoleGuard>
+            }
+          />
 
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
 
-      {!isPicker && <BottomNav />}
+      {!isAuthPage && <BottomNav />}
     </div>
   );
 };
