@@ -202,10 +202,10 @@ export const StudentProfilePicker: React.FC = () => {
                   <button
                     key={student.id}
                     onClick={() => handleSelectStudent(student)}
-                    className="flex flex-col items-center p-5 rounded-3xl bg-slate-900 border border-slate-800 hover:border-blue-500 hover:bg-slate-850 hover:shadow-xl active:scale-95 transition-all text-center min-h-[140px] group"
+                    className="flex flex-col items-center p-5 rounded-3xl bg-slate-900 border border-slate-800 hover:border-blue-500 hover:bg-slate-850 hover:shadow-xl active:scale-95 transition-all text-center min-h-[140px] group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                   >
-                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white text-2xl font-black shadow-md mb-2.5 group-hover:scale-105 transition-transform">
-                      {isFemale ? '👧' : '👦'}
+                    <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-700 flex items-center justify-center text-white text-xl font-black shadow-md mb-2.5 group-hover:scale-105 transition-transform ring-2 ring-white/10">
+                      {student.name.charAt(0)}
                     </div>
                     <span className="font-extrabold text-sm sm:text-base text-white line-clamp-1">
                       {student.name}
@@ -237,8 +237,8 @@ export const StudentProfilePicker: React.FC = () => {
           <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl max-w-sm mx-auto space-y-5">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black flex items-center justify-center text-xl shadow-md">
-                  {selectedStudent.gender === 'FEMALE' ? '👧' : '👦'}
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-700 text-white font-black flex items-center justify-center text-lg shadow-md ring-2 ring-white/10">
+                  {selectedStudent.name.charAt(0)}
                 </div>
                 <div>
                   <h3 className="font-black text-white text-base leading-snug">

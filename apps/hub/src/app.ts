@@ -137,7 +137,7 @@ app.get('/api/v1/attendance/grid', (req, res) => {
 });
 
 // 4. Video Streaming with HTTP Range Support (resumable offline playback)
-app.get('/api/v1/content/videos/:id/stream', (req: Request, res: Response) => {
+app.get('/api/v1/content/videos/:id/stream', (req: any, res: any) => {
   const videoId = req.params.id;
   const videoPath = path.join(env.CONTENT_CACHE_DIR, `${videoId}.mp4`);
 

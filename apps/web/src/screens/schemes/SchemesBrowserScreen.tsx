@@ -186,9 +186,9 @@ export const SchemesBrowserScreen: React.FC = () => {
   });
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-36 space-y-6">
       {/* Disclaimer Banner */}
-      <div className="bg-blue-50 border border-blue-200 rounded-2xl p-3.5 mb-6 flex items-start gap-3 shadow-sm">
+      <div className="bg-blue-50/80 border border-blue-200/90 rounded-2xl p-4 flex items-start gap-3 shadow-sm">
         <AlertTriangle className="w-5 h-5 text-blue-600 min-w-[20px] mt-0.5" />
         <div className="text-xs text-blue-900 leading-relaxed font-medium">
           <strong>Official Notice:</strong> {t('schemes.disclaimer')} Always confirm latest rules and eligibility with issuing government offices.
@@ -196,11 +196,11 @@ export const SchemesBrowserScreen: React.FC = () => {
       </div>
 
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
             <Award className="w-7 h-7 text-blue-600" />
-            {t('schemes.title')}
+            <span>{t('schemes.title')}</span>
           </h2>
           <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
             {t('schemes.subtitle')}
@@ -210,7 +210,7 @@ export const SchemesBrowserScreen: React.FC = () => {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowEligibilityHelper(!showEligibilityHelper)}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-md hover:bg-blue-700 transition-all min-h-[44px]"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-md shadow-blue-600/20 hover:bg-blue-700 active:scale-95 transition-all min-h-[44px]"
           >
             <Sparkles className="w-4 h-4" />
             <span>Eligibility Helper</span>
@@ -221,16 +221,18 @@ export const SchemesBrowserScreen: React.FC = () => {
 
       {/* 3-Question Eligibility Helper Card */}
       {showEligibilityHelper && (
-        <div className="bg-white rounded-3xl p-6 border border-blue-200 shadow-lg mb-6 animate-fade-in">
-          <h3 className="font-extrabold text-slate-900 text-lg mb-2 flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-blue-600" />
-            3-Question Scheme Eligibility Helper
-          </h3>
-          <p className="text-xs text-slate-600 mb-4">
-            Answer 3 simple questions to see which schemes you qualify for:
-          </p>
+        <div className="bg-white rounded-3xl p-6 border border-blue-200/80 shadow-lg space-y-4 animate-fade-in">
+          <div>
+            <h3 className="font-extrabold text-slate-900 text-lg flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-blue-600" />
+              <span>3-Question Scheme Eligibility Helper</span>
+            </h3>
+            <p className="text-xs text-slate-600 mt-0.5">
+              Answer 3 simple questions to see which schemes you qualify for:
+            </p>
+          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <label className="block text-xs font-bold text-slate-800 mb-1">Student Grade</label>
               <select
@@ -272,7 +274,7 @@ export const SchemesBrowserScreen: React.FC = () => {
       )}
 
       {/* Search and Filters */}
-      <div className="flex flex-wrap items-center gap-3 mb-6">
+      <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
@@ -325,7 +327,7 @@ export const SchemesBrowserScreen: React.FC = () => {
             <div
               key={scheme.id}
               className={`bg-white rounded-3xl border-2 transition-all p-5 sm:p-6 shadow-sm ${
-                isSelected ? 'border-orange-500 shadow-md' : 'border-amber-200 hover:border-amber-300'
+                isSelected ? 'border-blue-500 shadow-md ring-2 ring-blue-400/20' : 'border-slate-200/90 hover:border-blue-300 hover:shadow-md'
               }`}
             >
               <div
@@ -335,25 +337,25 @@ export const SchemesBrowserScreen: React.FC = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                     {scheme.girlSpecific && (
-                      <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 font-extrabold text-[11px] uppercase tracking-wider">
+                      <span className="px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-800 font-extrabold text-[11px] uppercase tracking-wider">
                         {t('schemes.girlSpecificBadge')}
                       </span>
                     )}
                     <span
-                      className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] ${
+                      className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] border ${
                         eligibility.eligible
-                          ? 'bg-emerald-100 text-emerald-800'
-                          : 'bg-amber-100 text-amber-800'
+                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                          : 'bg-amber-50 text-amber-800 border-amber-200'
                       }`}
                     >
                       {eligibility.eligible ? '✓ Eligible for you' : 'Criteria pending'}
                     </span>
                   </div>
 
-                  <h3 className="font-black text-lg sm:text-xl text-amber-950">
+                  <h3 className="font-black text-lg sm:text-xl text-slate-900">
                     {scheme.name}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-700 mt-1 leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 mt-1 leading-relaxed">
                     {scheme.description}
                   </p>
                 </div>

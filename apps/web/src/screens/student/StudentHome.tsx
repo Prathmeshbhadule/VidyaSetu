@@ -28,6 +28,10 @@ import {
   LogOut,
   X,
   Volume2,
+  Calculator,
+  Atom,
+  BookMarked,
+  GraduationCap,
 } from 'lucide-react';
 
 export const StudentHome: React.FC = () => {
@@ -226,9 +230,9 @@ export const StudentHome: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-6 pb-36 space-y-6">
       {/* Student Session & Privacy Top Bar */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200 shadow-sm flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-600/20">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-700 to-indigo-800 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-700/20 ring-2 ring-blue-100">
             {currentStudent.gender === 'FEMALE' ? '👧' : '👦'}
           </div>
           <div>
@@ -236,10 +240,10 @@ export const StudentHome: React.FC = () => {
               <h3 className="font-black text-lg text-slate-900 leading-tight">
                 {studentName}
               </h3>
-              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+              <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
                 {t('common.grade')} {gradeNumber}
               </span>
-              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+              <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
                 TaRL {t('common.level')} {assessedLevel}
               </span>
             </div>
@@ -254,54 +258,57 @@ export const StudentHome: React.FC = () => {
             logout();
             navigate('/student/picker');
           }}
-          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-300 font-black text-xs transition-all min-h-[40px]"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-300 font-black text-xs transition-all min-h-[44px] shadow-sm"
         >
-          <LogOut className="w-3.5 h-3.5 text-rose-600" />
+          <LogOut className="w-4 h-4 text-rose-600" />
           <span>{t('session.switchStudent')}</span>
         </button>
       </div>
 
-      {/* Hero Batch Banner Carousel */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 border border-slate-800 text-white shadow-2xl p-6 sm:p-8">
-        <div className="absolute right-0 top-0 bottom-0 w-1/2 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-400 via-indigo-500 to-transparent pointer-events-none" />
+      {/* Hero Batch Banner: Warm, Inspiring, High-Contrast Educational Design */}
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border border-indigo-800/60 text-white shadow-xl p-6 sm:p-8">
+        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute right-0 bottom-0 w-1/3 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-400 via-indigo-400 to-transparent pointer-events-none" />
 
         <div className="flex flex-wrap items-center justify-between gap-6 relative z-10">
-          <div className="space-y-3 max-w-xl">
+          <div className="space-y-3.5 max-w-xl">
             {/* Batch Tag */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                🎯 {t('batch.targetBatch')}
+              <span className="bg-amber-400 text-slate-950 text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>{t('batch.targetBatch')}</span>
               </span>
-              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[11px] font-bold px-2.5 py-1 rounded-full">
                 ● {t('batch.offlineReady')}
               </span>
             </div>
 
             {/* Title & Teacher */}
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
                 {t('batch.foundationCourse', { grade: gradeNumber })}
               </h2>
-              <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1">
+              <p className="text-xs sm:text-sm text-blue-100 font-medium mt-1">
                 Language Phonics • Vedic Math • Basic Science • TaRL Level {assessedLevel}
               </p>
-              <p className="text-[11px] text-blue-300 font-bold mt-1">
-                {t('batch.faculty')}
-              </p>
+              <div className="flex items-center gap-1.5 mt-2 text-xs font-semibold text-blue-200">
+                <GraduationCap className="w-4 h-4 text-amber-300" />
+                <span>{t('batch.faculty')}</span>
+              </div>
             </div>
 
             {/* Features Row */}
-            <div className="flex items-center gap-4 text-xs font-semibold text-slate-300 pt-1 flex-wrap">
-              <div className="flex items-center gap-1.5">
-                <VideoIcon className="w-4 h-4 text-amber-400" />
+            <div className="flex items-center gap-3 sm:gap-4 text-xs font-semibold text-slate-200 pt-1 flex-wrap">
+              <div className="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm">
+                <VideoIcon className="w-4 h-4 text-amber-300" />
                 <span>{t('batch.videoCount', { count: videoCount })}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <CheckSquare className="w-4 h-4 text-emerald-400" />
+              <div className="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm">
+                <CheckSquare className="w-4 h-4 text-emerald-300" />
                 <span>{t('batch.dppCount', { count: quizCount })}</span>
               </div>
-              <div className="flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-sky-400" />
+              <div className="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm">
+                <FileText className="w-4 h-4 text-sky-300" />
                 <span>{t('batch.notesCount', { count: materialCount })}</span>
               </div>
             </div>
@@ -310,24 +317,24 @@ export const StudentHome: React.FC = () => {
             <div className="flex items-center gap-3 pt-2">
               <button
                 onClick={() => navigate('/student/videos')}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-lg shadow-blue-600/30 transition-all min-h-[44px]"
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg shadow-blue-600/40 transition-all min-h-[48px]"
               >
-                <PlayCircle className="w-4 h-4" />
+                <PlayCircle className="w-5 h-5" />
                 <span>{t('batch.resumeLecture')}</span>
               </button>
               <button
                 onClick={() => navigate('/student/lessons')}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs border border-white/20 transition-all min-h-[44px]"
+                className="inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold text-xs sm:text-sm border border-white/20 transition-all min-h-[48px]"
               >
                 <span>{t('batch.exploreBatch')}</span>
               </button>
             </div>
           </div>
 
-          {/* Right Banner Badge */}
-          <div className="bg-slate-800/90 border border-slate-700 p-5 rounded-3xl text-center space-y-2 min-w-[200px]">
-            <div className="flex items-center justify-center gap-1.5 text-amber-400 font-black text-xs uppercase">
-              <Flame className="w-4 h-4 fill-amber-400 text-amber-400" />
+          {/* Right Banner Badge: Study Streak */}
+          <div className="bg-slate-800/90 border border-slate-700/80 p-5 rounded-3xl text-center space-y-2.5 min-w-[210px] shadow-lg">
+            <div className="flex items-center justify-center gap-1.5 text-amber-400 font-black text-xs uppercase tracking-wider">
+              <Flame className="w-4 h-4 fill-amber-400 text-amber-400 animate-pulse" />
               <span>{t('streak.studyStreak')}</span>
             </div>
             <div className="text-3xl font-black text-white">{t('streak.daysCount', { days: 4 })}</div>
@@ -342,14 +349,14 @@ export const StudentHome: React.FC = () => {
         </div>
       </div>
 
-      {/* Quick Category Bar */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
+      {/* Quick Category Bar: Modern Pill Navigation with Lucide Icons */}
+      <div className="flex items-center gap-2.5 overflow-x-auto pb-1 no-scrollbar">
         {[
-          { id: 'ALL', label: t('category.all'), icon: '📚' },
-          { id: 'LANGUAGE', label: t('category.language'), icon: '📖' },
-          { id: 'MATH', label: t('category.math'), icon: '🔢' },
-          { id: 'SCIENCE', label: t('category.science'), icon: '🔬' },
-          { id: 'TESTS', label: t('category.tests'), icon: '🎯' },
+          { id: 'ALL', label: t('category.all'), icon: <Layers className="w-4 h-4" /> },
+          { id: 'LANGUAGE', label: t('category.language'), icon: <BookOpen className="w-4 h-4" /> },
+          { id: 'MATH', label: t('category.math'), icon: <Calculator className="w-4 h-4" /> },
+          { id: 'SCIENCE', label: t('category.science'), icon: <Atom className="w-4 h-4" /> },
+          { id: 'TESTS', label: t('category.tests'), icon: <Award className="w-4 h-4" /> },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -360,13 +367,15 @@ export const StudentHome: React.FC = () => {
                 setActiveSubjectTab(tab.id);
               }
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all border ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all border min-h-[44px] ${
               activeSubjectTab === tab.id
                 ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
-                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50 hover:border-slate-300'
+                : 'bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 hover:border-slate-300'
             }`}
           >
-            <span>{tab.icon}</span>
+            <span className={activeSubjectTab === tab.id ? 'text-white' : 'text-blue-600'}>
+              {tab.icon}
+            </span>
             <span>{tab.label}</span>
           </button>
         ))}
@@ -374,7 +383,7 @@ export const StudentHome: React.FC = () => {
 
       {/* Section: Continue Watching / Recent Lecture */}
       {recentLesson && (
-        <div className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
+        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-4 w-full md:w-auto">
             {/* 16:9 Thumbnail Box */}
             <div
@@ -382,19 +391,19 @@ export const StudentHome: React.FC = () => {
               className="relative w-28 h-20 sm:w-36 sm:h-24 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center cursor-pointer group flex-shrink-0 overflow-hidden shadow-inner"
             >
               <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 to-indigo-950 flex items-center justify-center">
-                <span className="text-3xl">🎬</span>
+                <VideoIcon className="w-8 h-8 text-slate-500 group-hover:scale-110 transition-transform" />
               </div>
               <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-mono font-bold px-1.5 py-0.5 rounded">
                 ~{recentLesson.estimatedMinutes || 12}:00
               </div>
-              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+              <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
                 <PlayCircle className="w-5 h-5 fill-white text-blue-600" />
               </div>
             </div>
 
-            <div className="space-y-1">
+            <div className="space-y-1.5">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="bg-blue-100 text-blue-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
                   {recentLesson.subject}
                 </span>
                 <span className="text-xs font-semibold text-slate-500">
@@ -414,7 +423,7 @@ export const StudentHome: React.FC = () => {
               </p>
 
               {/* Progress Bar */}
-              <div className="w-48 sm:w-64 bg-slate-100 rounded-full h-1.5 overflow-hidden mt-2">
+              <div className="w-48 sm:w-64 bg-slate-100 rounded-full h-2 overflow-hidden mt-2">
                 <div className="bg-blue-600 h-full rounded-full w-[65%]" />
               </div>
             </div>
@@ -423,7 +432,7 @@ export const StudentHome: React.FC = () => {
           <div className="flex items-center gap-2 w-full md:w-auto justify-end">
             <button
               onClick={() => navigate(`/student/lessons/${recentLesson.id}`)}
-              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md transition-all min-h-[44px]"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs shadow-md shadow-blue-600/20 transition-all min-h-[44px]"
             >
               <span>{t('student.resumeLesson')}</span>
               <ArrowRight className="w-4 h-4" />
@@ -433,7 +442,7 @@ export const StudentHome: React.FC = () => {
       )}
 
       {/* Section: My Batches & Subject Classrooms */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
@@ -447,7 +456,7 @@ export const StudentHome: React.FC = () => {
 
           <button
             onClick={() => navigate('/student/lessons')}
-            className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
+            className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1 min-h-[36px]"
           >
             <span>{t('classrooms.viewAll')}</span>
             <ChevronRight className="w-4 h-4" />
@@ -458,25 +467,27 @@ export const StudentHome: React.FC = () => {
           {/* Card 1: Language */}
           <div
             onClick={() => navigate('/student/lessons')}
-            className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer group"
+            className="bg-white rounded-3xl p-5 border border-slate-200/90 hover:border-amber-400 hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center text-2xl font-black group-hover:scale-105 transition-transform">
-                📖
-              </span>
-              <span className="bg-amber-50 text-amber-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'LANGUAGE').length || 1 })}
-              </span>
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <BookOpen className="w-6 h-6" />
+                </div>
+                <span className="bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
+                  {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'LANGUAGE').length || 1 })}
+                </span>
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-base group-hover:text-amber-700 transition-colors">
+                {t('category.language')}
+              </h4>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Phonics, letter recognition, vocabulary building & storytelling
+              </p>
             </div>
-            <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">
-              {t('category.language')}
-            </h4>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              Phonics, letter recognition, vocabulary building & storytelling
-            </p>
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
               <span>{t('common.grade')} {gradeNumber} • {t('common.level')} 1-2</span>
-              <span className="text-blue-600 flex items-center gap-0.5">
+              <span className="text-amber-600 font-black flex items-center gap-0.5">
                 {t('classrooms.open')} <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
@@ -485,25 +496,27 @@ export const StudentHome: React.FC = () => {
           {/* Card 2: Math */}
           <div
             onClick={() => navigate('/student/lessons')}
-            className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer group"
+            className="bg-white rounded-3xl p-5 border border-slate-200/90 hover:border-blue-400 hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center text-2xl font-black group-hover:scale-105 transition-transform">
-                🔢
-              </span>
-              <span className="bg-blue-50 text-blue-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'MATH').length || 1 })}
-              </span>
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Calculator className="w-6 h-6" />
+                </div>
+                <span className="bg-blue-50 text-blue-800 border border-blue-200 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
+                  {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'MATH').length || 1 })}
+                </span>
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-700 transition-colors">
+                {t('category.math')}
+              </h4>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Counting, 2-digit addition, subtraction, visual mental math
+              </p>
             </div>
-            <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">
-              {t('category.math')}
-            </h4>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              Counting, 2-digit addition, subtraction, visual mental math
-            </p>
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
               <span>{t('common.grade')} {gradeNumber} • {t('common.level')} 2-3</span>
-              <span className="text-blue-600 flex items-center gap-0.5">
+              <span className="text-blue-600 font-black flex items-center gap-0.5">
                 {t('classrooms.open')} <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
@@ -512,25 +525,27 @@ export const StudentHome: React.FC = () => {
           {/* Card 3: Science */}
           <div
             onClick={() => navigate('/student/lessons')}
-            className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-blue-500 hover:shadow-xl transition-all cursor-pointer group"
+            className="bg-white rounded-3xl p-5 border border-slate-200/90 hover:border-emerald-400 hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
           >
-            <div className="flex items-center justify-between mb-3">
-              <span className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-2xl font-black group-hover:scale-105 transition-transform">
-                🔬
-              </span>
-              <span className="bg-emerald-50 text-emerald-800 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'SCIENCE').length || 1 })}
-              </span>
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Atom className="w-6 h-6" />
+                </div>
+                <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
+                  {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'SCIENCE').length || 1 })}
+                </span>
+              </div>
+              <h4 className="font-extrabold text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
+                {t('category.science')}
+              </h4>
+              <p className="text-xs text-slate-500 font-medium mt-1">
+                Plants, water cycle, animals, environment & basic science
+              </p>
             </div>
-            <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-600 transition-colors">
-              {t('category.science')}
-            </h4>
-            <p className="text-xs text-slate-500 font-medium mt-1">
-              Plants, water cycle, animals, environment & basic science
-            </p>
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
               <span>{t('common.grade')} {gradeNumber} • {t('common.level')} 3</span>
-              <span className="text-blue-600 flex items-center gap-0.5">
+              <span className="text-emerald-600 font-black flex items-center gap-0.5">
                 {t('classrooms.open')} <ChevronRight className="w-3.5 h-3.5" />
               </span>
             </div>
@@ -541,11 +556,11 @@ export const StudentHome: React.FC = () => {
       {/* ========================================================================= */}
       {/* SECTION: OFFLINE BOOKS, STUDY MATERIALS & NOTES */}
       {/* ========================================================================= */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-purple-600" />
+              <BookMarked className="w-5 h-5 text-indigo-600" />
               <span>{t('materials.title')}</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">
@@ -567,17 +582,17 @@ export const StudentHome: React.FC = () => {
               <div
                 key={mat.id}
                 onClick={() => setSelectedMaterial(mat)}
-                className="bg-white rounded-3xl p-5 border border-slate-200 hover:border-purple-400 hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+                className="bg-white rounded-3xl p-5 border border-slate-200/90 hover:border-indigo-400 hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-2.5">
                     <span
-                      className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                      className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
                         isTextbook
-                          ? 'bg-purple-100 text-purple-800'
+                          ? 'bg-purple-50 text-purple-800 border-purple-200'
                           : isNotes
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-emerald-100 text-emerald-800'
+                          ? 'bg-blue-50 text-blue-800 border-blue-200'
+                          : 'bg-emerald-50 text-emerald-800 border-emerald-200'
                       }`}
                     >
                       {isTextbook ? t('materials.textbook') : isNotes ? t('materials.notes') : t('materials.worksheet')}
@@ -597,12 +612,12 @@ export const StudentHome: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
-                  <span className="text-[11px] text-slate-500 font-semibold flex items-center gap-1">
+                  <span className="text-[11px] text-slate-500 font-semibold flex items-center gap-1.5">
                     <Download className="w-3.5 h-3.5 text-slate-400" />
                     {t('materials.offlineAvailable')}
                   </span>
 
-                  <button className="inline-flex items-center gap-1 text-xs font-black text-purple-600 hover:underline">
+                  <button className="inline-flex items-center gap-1 text-xs font-black text-indigo-600 hover:underline min-h-[36px]">
                     <span>{t('materials.read')}</span>
                     <ChevronRight className="w-3.5 h-3.5" />
                   </button>
@@ -614,7 +629,7 @@ export const StudentHome: React.FC = () => {
       </div>
 
       {/* Section: Daily Practice Problems (DPP) & Test Series */}
-      <div className="space-y-3">
+      <div className="space-y-3.5">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
@@ -628,7 +643,7 @@ export const StudentHome: React.FC = () => {
 
           <button
             onClick={() => navigate('/student/quizzes')}
-            className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1"
+            className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1 min-h-[36px]"
           >
             <span>{t('dpp.allTests')}</span>
             <ChevronRight className="w-4 h-4" />
@@ -639,11 +654,11 @@ export const StudentHome: React.FC = () => {
           {allQuizzes.slice(0, 2).map((q, idx) => (
             <div
               key={q.id}
-              className="bg-white rounded-3xl p-5 border border-slate-200 shadow-sm flex items-center justify-between gap-4"
+              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm flex items-center justify-between gap-4 hover:border-blue-400 transition-colors"
             >
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="bg-blue-100 text-blue-800 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                  <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
                     DPP 0{idx + 1} • {q.subject}
                   </span>
                   <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
@@ -661,7 +676,7 @@ export const StudentHome: React.FC = () => {
 
               <button
                 onClick={() => navigate(`/student/quizzes/${q.id}`)}
-                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-black text-xs shadow-md whitespace-nowrap min-h-[40px]"
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs shadow-md shadow-blue-600/20 whitespace-nowrap min-h-[44px]"
               >
                 {t('dpp.startDpp')}
               </button>
@@ -673,17 +688,17 @@ export const StudentHome: React.FC = () => {
       {/* Welfare Portal Shortcut */}
       <div
         onClick={() => navigate('/schemes')}
-        className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl p-5 border border-amber-200 hover:border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
+        className="bg-gradient-to-br from-amber-50/80 via-orange-50/40 to-white rounded-3xl p-5 sm:p-6 border border-amber-200/90 hover:border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
       >
-        <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-2xl shadow-md">
-            🏛️
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-md shadow-amber-500/20">
+            <Award className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800">
+            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
               {t('nav.schemes')}
             </span>
-            <h4 className="font-black text-slate-900 text-base">
+            <h4 className="font-black text-slate-900 text-base sm:text-lg mt-1">
               {t('schemes.title')}
             </h4>
             <p className="text-xs text-slate-600 font-medium">
@@ -692,7 +707,7 @@ export const StudentHome: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-xs font-black text-amber-900 bg-white/80 px-3 py-1.5 rounded-xl border border-amber-300">
+        <div className="flex items-center gap-1 text-xs font-black text-amber-900 bg-white px-4 py-2 rounded-xl border border-amber-300 shadow-sm min-h-[40px]">
           <span>{t('schemes.eligibilityCheck')}</span>
           <ChevronRight className="w-4 h-4" />
         </div>
@@ -707,14 +722,14 @@ export const StudentHome: React.FC = () => {
             {/* Modal Header */}
             <div className="bg-slate-900 text-white p-5 flex items-center justify-between gap-3">
               <div>
-                <span className="text-[10px] uppercase font-bold text-purple-400">
+                <span className="text-[10px] uppercase font-bold text-indigo-400">
                   {selectedMaterial.type} • {t('common.grade')} {selectedMaterial.grade}
                 </span>
                 <h3 className="text-lg font-black">{selectedMaterial.title}</h3>
               </div>
               <button
                 onClick={() => setSelectedMaterial(null)}
-                className="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center"
+                className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -727,13 +742,13 @@ export const StudentHome: React.FC = () => {
                 <span className="text-emerald-600 font-bold">● {t('materials.offlineAvailable')}</span>
               </div>
 
-              <div className="prose max-w-none text-slate-800 text-sm whitespace-pre-line leading-relaxed font-medium bg-slate-50 p-4 rounded-2xl border border-slate-200">
+              <div className="prose max-w-none text-slate-800 text-sm whitespace-pre-line leading-relaxed font-medium bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
                 {selectedMaterial.content}
               </div>
             </div>
 
             {/* Modal Footer */}
-            <div className="p-4 bg-slate-100 border-t border-slate-200 flex items-center justify-between">
+            <div className="p-4 bg-slate-100/80 border-t border-slate-200 flex items-center justify-between">
               <button
                 onClick={() => {
                   if ('speechSynthesis' in window && selectedMaterial.content) {
@@ -743,7 +758,7 @@ export const StudentHome: React.FC = () => {
                     window.speechSynthesis.speak(u);
                   }
                 }}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold text-xs hover:bg-slate-50"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold text-xs hover:bg-slate-50 min-h-[44px]"
               >
                 <Volume2 className="w-4 h-4 text-blue-600" />
                 <span>{t('materials.readAloud')}</span>
@@ -751,7 +766,7 @@ export const StudentHome: React.FC = () => {
 
               <button
                 onClick={() => setSelectedMaterial(null)}
-                className="px-5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs"
+                className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs min-h-[44px]"
               >
                 {t('materials.closeReader')}
               </button>

@@ -63,23 +63,29 @@ export const BottomNav: React.FC = () => {
   const links = getLinks();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 px-3 py-1.5 shadow-2xl">
-      <div className="max-w-md mx-auto flex items-center justify-around">
+    <nav
+      role="navigation"
+      aria-label="Bottom Navigation"
+      className="fixed bottom-0 left-0 right-0 z-40 bg-slate-900/95 backdrop-blur-lg border-t border-slate-800/80 px-2 sm:px-4 py-2 shadow-2xl safe-area-bottom"
+    >
+      <div className="max-w-lg mx-auto flex items-center justify-around gap-1">
         {links.map((link) => (
           <NavLink
             key={link.to}
             to={link.to}
             className={({ isActive }) =>
-              `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-2 py-1 rounded-xl transition-all ${
+              `flex flex-col items-center justify-center min-h-[48px] min-w-[56px] px-2.5 py-1.5 rounded-2xl transition-all duration-200 select-none active:scale-95 ${
                 isActive
-                  ? 'text-blue-400 font-black scale-105 bg-slate-800/80 shadow-inner'
-                  : 'text-slate-400 hover:text-slate-200'
+                  ? 'bg-blue-600/20 text-blue-400 font-black shadow-inner ring-1 ring-blue-500/30'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
               }`
             }
           >
-            {link.icon}
+            <div className="relative">
+              {link.icon}
+            </div>
             <span
-              className={`text-[10px] mt-1 font-bold tracking-tight text-center ${
+              className={`text-[11px] mt-1 font-bold tracking-tight text-center truncate max-w-[70px] ${
                 isSimpleMode ? 'text-xs' : ''
               }`}
             >

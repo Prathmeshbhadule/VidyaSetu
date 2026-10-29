@@ -249,20 +249,20 @@ export const AdaptiveAssessmentScreen: React.FC = () => {
 
   if (isCompleted) {
     return (
-      <div className="max-w-md mx-auto p-4 sm:p-6 pb-28 text-center animate-fade-in">
-        <div className="bg-white rounded-3xl p-8 border-2 border-emerald-300 shadow-xl">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-400 to-teal-500 text-white mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/30 mb-4 animate-bounce">
+      <div className="max-w-md mx-auto p-4 sm:p-6 pb-36 text-center animate-fade-in">
+        <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-xl">
+          <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-600 text-white mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/20 mb-4 animate-bounce">
             <GraduationCap className="w-10 h-10" />
           </div>
 
-          <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 mb-1">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mb-1">
             {t('adaptive.resultTitle')}
           </h2>
-          <p className="text-sm font-semibold text-emerald-800 mb-6">
+          <p className="text-sm font-semibold text-slate-600 mb-6">
             Teaching at the Right Level (TaRL) Assessment
           </p>
 
-          <div className="p-6 rounded-2xl bg-emerald-50 border-2 border-emerald-200 mb-6">
+          <div className="p-6 rounded-xl bg-emerald-50 border border-emerald-200 mb-6">
             <span className="text-xs uppercase font-extrabold text-emerald-800 tracking-wider">
               Assessed Learning Level
             </span>
@@ -276,7 +276,7 @@ export const AdaptiveAssessmentScreen: React.FC = () => {
 
           <button
             onClick={() => navigate('/student/home')}
-            className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-2xl bg-emerald-600 text-white font-black text-base shadow-lg shadow-emerald-600/30 hover:bg-emerald-700 transition-all min-h-[48px]"
+            className="w-full inline-flex items-center justify-center gap-2 py-3.5 rounded-xl bg-blue-600 text-white font-bold text-base shadow-md hover:bg-blue-700 transition-all min-h-[48px]"
           >
             <Home className="w-5 h-5" />
             <span>Go to My Dashboard</span>
@@ -287,15 +287,15 @@ export const AdaptiveAssessmentScreen: React.FC = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-28">
+    <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-36">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div>
-          <span className="text-xs font-black uppercase text-amber-800 tracking-wider">
+          <span className="text-xs font-bold uppercase text-slate-500 tracking-wider">
             {t('adaptive.questionOutOf', { current: history.length + 1, max: MAX_ADAPTIVE_QUESTIONS })}
           </span>
           <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-xs font-bold text-orange-700">
+            <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200">
               Difficulty: Level {currentLevel} of 5
             </span>
           </div>
@@ -309,7 +309,7 @@ export const AdaptiveAssessmentScreen: React.FC = () => {
             className={`p-2.5 rounded-full border shadow-sm transition-all min-h-[40px] min-w-[40px] ${
               isListening
                 ? 'bg-rose-500 text-white animate-pulse border-rose-600'
-                : 'bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200'
+                : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
             }`}
           >
             {isListening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
@@ -319,16 +319,16 @@ export const AdaptiveAssessmentScreen: React.FC = () => {
       </div>
 
       {/* Progress Bar */}
-      <div className="w-full bg-amber-200/60 rounded-full h-2.5 mb-6">
+      <div className="w-full bg-slate-200 rounded-full h-2 mb-6">
         <div
-          className="bg-emerald-500 h-2.5 rounded-full transition-all duration-300"
+          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
           style={{ width: `${((history.length + 1) / MAX_ADAPTIVE_QUESTIONS) * 100}%` }}
         />
       </div>
 
       {/* Question Card */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-emerald-200 shadow-md">
-        <h3 className="text-xl sm:text-2xl font-black text-amber-950 mb-6 leading-relaxed">
+      <div className="bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/90 shadow-sm">
+        <h3 className="text-xl sm:text-2xl font-bold text-slate-900 mb-6 leading-relaxed">
           {currentQuestion.prompt}
         </h3>
 
@@ -338,12 +338,12 @@ export const AdaptiveAssessmentScreen: React.FC = () => {
             const isSelected = selectedOption === opt.id;
             const isCorrect = opt.id === currentQuestion.correctOptionId;
 
-            let bg = 'bg-amber-50 hover:bg-emerald-50 border-amber-200 text-amber-950';
+            let bg = 'bg-white hover:bg-slate-50 border-slate-200 text-slate-900';
             if (isRevealed) {
               if (isCorrect) {
-                bg = 'bg-emerald-100 border-emerald-500 text-emerald-950 shadow-md';
+                bg = 'bg-emerald-50 border-emerald-500 text-emerald-950 shadow-sm';
               } else if (isSelected) {
-                bg = 'bg-rose-100 border-rose-500 text-rose-950 shadow-md';
+                bg = 'bg-rose-50 border-rose-500 text-rose-950 shadow-sm';
               }
             }
 
@@ -352,13 +352,13 @@ export const AdaptiveAssessmentScreen: React.FC = () => {
                 key={opt.id}
                 onClick={() => handleSelectOption(opt.id)}
                 disabled={isRevealed}
-                className={`w-full flex items-center justify-between p-4 sm:p-5 rounded-2xl border-2 font-extrabold text-base sm:text-lg transition-all text-left min-h-[56px] ${bg}`}
+                className={`w-full flex items-center justify-between p-4 sm:p-5 rounded-xl border font-bold text-base sm:text-lg transition-all text-left min-h-[56px] ${bg}`}
               >
                 <span>{opt.text}</span>
                 {isRevealed && (
                   <div>
-                    {isCorrect && <Check className="w-6 h-6 text-emerald-600" />}
-                    {isSelected && !isCorrect && <X className="w-6 h-6 text-rose-600" />}
+                    {isCorrect && <Check className="w-6 h-6 text-emerald-600 stroke-[3]" />}
+                    {isSelected && !isCorrect && <X className="w-6 h-6 text-rose-600 stroke-[3]" />}
                   </div>
                 )}
               </button>

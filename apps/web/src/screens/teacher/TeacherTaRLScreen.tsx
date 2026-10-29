@@ -42,15 +42,15 @@ export const TeacherTaRLScreen: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-36 space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-amber-950 flex items-center gap-2">
-            <Layers className="w-7 h-7 text-orange-600" />
-            {t('teacher.tarlGrouping')}
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
+            <Layers className="w-7 h-7 text-blue-600" />
+            <span>{t('teacher.tarlGrouping')}</span>
           </h2>
-          <p className="text-xs sm:text-sm text-amber-800 font-medium mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
             Grouping by learning competence rather than chronological age (Pratham TaRL)
           </p>
         </div>
@@ -59,21 +59,21 @@ export const TeacherTaRLScreen: React.FC = () => {
       </div>
 
       {/* Level Tabs */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-2 mb-6">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
         {groups.map((g) => (
           <button
             key={g.level}
             onClick={() => setActiveLevel(g.level)}
-            className={`px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap min-h-[44px] ${
+            className={`px-4 py-2.5 rounded-2xl text-xs font-black transition-all flex items-center gap-2 whitespace-nowrap min-h-[44px] border ${
               activeLevel === g.level
-                ? 'bg-orange-600 text-white shadow-md shadow-orange-600/30 scale-105'
-                : 'bg-white text-amber-950 border border-amber-200 hover:bg-amber-100/60'
+                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
+                : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
             }`}
           >
             <span>Level {g.level}</span>
             <span
               className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                activeLevel === g.level ? 'bg-white/20 text-white' : 'bg-amber-100 text-amber-800'
+                activeLevel === g.level ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-700'
               }`}
             >
               {g.students.length}
@@ -83,17 +83,17 @@ export const TeacherTaRLScreen: React.FC = () => {
       </div>
 
       {/* Active Group Card */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200 shadow-md mb-8">
-        <div className="flex items-start justify-between gap-4 mb-6">
+      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-sm space-y-6">
+        <div className="flex items-start justify-between gap-4">
           <div>
-            <h3 className="text-xl sm:text-2xl font-black text-amber-950">
+            <h3 className="text-xl sm:text-2xl font-black text-slate-900">
               {currentGroup.groupName}
             </h3>
-            <p className="text-xs sm:text-sm text-slate-700 mt-1 font-medium">
+            <p className="text-xs sm:text-sm text-slate-600 mt-1 font-medium">
               {currentGroup.description}
             </p>
           </div>
-          <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-800 font-black text-xs">
+          <span className="px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 font-black text-xs">
             {currentGroup.students.length} Students
           </span>
         </div>

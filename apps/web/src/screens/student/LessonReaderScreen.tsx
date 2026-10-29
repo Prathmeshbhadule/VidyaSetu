@@ -88,7 +88,7 @@ export const LessonReaderScreen: React.FC = () => {
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-3 sm:p-6 pb-28 space-y-5">
+    <div className="max-w-5xl mx-auto p-3 sm:p-6 pb-36 space-y-5">
       {/* Lecture Top Bar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <button

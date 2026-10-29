@@ -67,22 +67,26 @@ export const DistrictDashboardScreen: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-6 pb-28">
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 pb-36">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-amber-950 flex items-center gap-2">
-            <BarChart3 className="w-7 h-7 text-orange-600" />
-            District Administrator Portal
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[11px] font-bold text-blue-700 mb-2">
+            <School className="w-3.5 h-3.5 text-blue-600" />
+            <span>District Administration Portal</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2.5">
+            <BarChart3 className="w-7 h-7 text-blue-600" />
+            Pune Rural District Hub
           </h2>
-          <p className="text-xs sm:text-sm text-amber-800 font-medium mt-1">
-            Pune Rural District • Real-Time Aggregated School Analytics
+          <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
+            Real-Time Aggregated School Analytics, Learning Progress & Offline Sync Staleness
           </p>
         </div>
 
         <button
           onClick={handleExportCsv}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-black text-xs shadow-md transition-all min-h-[44px]"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs shadow-sm hover:shadow transition-all min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
           <Download className="w-4 h-4" />
           <span>Export CSV Report</span>
@@ -91,97 +95,110 @@ export const DistrictDashboardScreen: React.FC = () => {
 
       {/* District KPI Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white rounded-3xl p-5 border-2 border-amber-200 shadow-sm text-center">
-          <span className="text-xs uppercase font-extrabold text-amber-800">Total Enrolled</span>
-          <div className="text-3xl font-black text-amber-950 mt-1">{dashboardData.totalStudents}</div>
-          <p className="text-[11px] text-amber-700 font-medium mt-0.5">Across 2 schools</p>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm">
+          <span className="text-[11px] uppercase font-bold tracking-wider text-slate-500">Total Enrolled</span>
+          <div className="text-3xl font-black text-slate-900 mt-1">{dashboardData.totalStudents}</div>
+          <p className="text-[11px] text-slate-500 font-medium mt-1">Across 2 schools</p>
         </div>
 
-        <div className="bg-white rounded-3xl p-5 border-2 border-amber-200 shadow-sm text-center">
-          <span className="text-xs uppercase font-extrabold text-amber-800">District Attendance</span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm">
+          <span className="text-[11px] uppercase font-bold tracking-wider text-slate-500">District Attendance</span>
           <div className="text-3xl font-black text-emerald-600 mt-1">{dashboardData.attendancePercentage}%</div>
-          <p className="text-[11px] text-amber-700 font-medium mt-0.5">Target: 75%+</p>
+          <p className="text-[11px] text-emerald-700 font-medium mt-1">Target: 75%+</p>
         </div>
 
-        <div className="bg-white rounded-3xl p-5 border-2 border-amber-200 shadow-sm text-center">
-          <span className="text-xs uppercase font-extrabold text-amber-800">At-Risk Students</span>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm">
+          <span className="text-[11px] uppercase font-bold tracking-wider text-slate-500">At-Risk Students</span>
           <div className="text-3xl font-black text-rose-600 mt-1">{dashboardData.activeAtRiskCount}</div>
-          <p className="text-[11px] text-amber-700 font-medium mt-0.5">Action required</p>
+          <p className="text-[11px] text-rose-700 font-medium mt-1">Intervention required</p>
         </div>
 
-        <div className="bg-white rounded-3xl p-5 border-2 border-amber-200 shadow-sm text-center">
-          <span className="text-xs uppercase font-extrabold text-amber-800">Schemes Ready</span>
-          <div className="text-3xl font-black text-indigo-600 mt-1">{dashboardData.completedChecklistsCount}</div>
-          <p className="text-[11px] text-amber-700 font-medium mt-0.5">Verified checklists</p>
+        <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm">
+          <span className="text-[11px] uppercase font-bold tracking-wider text-slate-500">Schemes Ready</span>
+          <div className="text-3xl font-black text-blue-600 mt-1">{dashboardData.completedChecklistsCount}</div>
+          <p className="text-[11px] text-blue-700 font-medium mt-1">Verified checklists</p>
         </div>
       </div>
 
       {/* Learning Level Distribution (Recharts) */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200 shadow-md mb-6">
-        <h3 className="font-extrabold text-lg text-amber-950 mb-1">
-          Learning Competency Distribution (TaRL Levels 1-5)
-        </h3>
-        <p className="text-xs text-amber-800 font-medium mb-6">
-          Distribution of student foundational literacy and numeracy across rural schools
-        </p>
+      <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-sm mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-6">
+          <div>
+            <h3 className="font-extrabold text-base sm:text-lg text-slate-900">
+              Learning Competency Distribution (TaRL Levels 1-5)
+            </h3>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              Distribution of student foundational literacy and numeracy across rural school batches
+            </p>
+          </div>
+          <span className="self-start sm:self-auto px-2.5 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-semibold">
+            Pratham TaRL Standard
+          </span>
+        </div>
 
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#fde68a" />
-              <XAxis dataKey="level" tick={{ fontSize: 11, fill: '#78350f' }} />
-              <YAxis tick={{ fontSize: 11, fill: '#78350f' }} allowDecimals={false} />
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+              <XAxis dataKey="level" tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#cbd5e1' }} />
+              <YAxis tick={{ fontSize: 11, fill: '#64748b' }} axisLine={{ stroke: '#cbd5e1' }} allowDecimals={false} />
               <Tooltip
                 contentStyle={{
-                  backgroundColor: '#fff',
-                  borderRadius: '12px',
-                  border: '2px solid #f97316',
-                  fontWeight: 'bold',
+                  backgroundColor: '#0f172a',
+                  color: '#ffffff',
+                  borderRadius: '10px',
+                  border: 'none',
+                  fontSize: '12px',
+                  boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
                 }}
+                itemStyle={{ color: '#93c5fd', fontWeight: 600 }}
               />
-              <Bar dataKey="count" fill="#ea580c" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="count" fill="#2563eb" radius={[6, 6, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
       {/* Schools Table with Staleness Badges */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border-2 border-amber-200 shadow-md">
-        <h3 className="font-extrabold text-lg text-amber-950 mb-4 flex items-center gap-2">
-          <School className="w-5 h-5 text-orange-600" />
-          Participating Schools & Sync Staleness
-        </h3>
+      <div className="bg-white rounded-2xl p-6 sm:p-7 border border-slate-200/90 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-extrabold text-base sm:text-lg text-slate-900 flex items-center gap-2">
+            <School className="w-5 h-5 text-blue-600" />
+            Participating Schools & Sync Staleness
+          </h3>
+          <span className="text-xs text-slate-500 font-medium">Auto-syncs via Hub Wi-Fi mesh</span>
+        </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-amber-950">
-            <thead className="bg-amber-50 uppercase font-black text-amber-800 text-[11px] border-b border-amber-200">
+        <div className="overflow-x-auto border border-slate-200 rounded-xl">
+          <table className="w-full text-left text-xs text-slate-800">
+            <thead className="bg-slate-50 font-bold text-slate-700 text-[11px] border-b border-slate-200 uppercase tracking-wider">
               <tr>
-                <th className="p-3">School Name</th>
-                <th className="p-3">Register No</th>
-                <th className="p-3">Students</th>
-                <th className="p-3">Teachers</th>
-                <th className="p-3">Last Sync</th>
-                <th className="p-3">Sync Status</th>
+                <th className="p-3.5">School Name</th>
+                <th className="p-3.5">Register No</th>
+                <th className="p-3.5">Students</th>
+                <th className="p-3.5">Teachers</th>
+                <th className="p-3.5">Last Sync</th>
+                <th className="p-3.5">Sync Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-amber-100 font-medium">
+            <tbody className="divide-y divide-slate-100 font-medium">
               {dashboardData.schools.map((school: any) => (
-                <tr key={school.id} className="hover:bg-amber-50/50 transition-all">
-                  <td className="p-3 font-bold">{school.name}</td>
-                  <td className="p-3 text-amber-800">{school.registerNo}</td>
-                  <td className="p-3 font-bold">{school.studentCount}</td>
-                  <td className="p-3">{school.teacherCount}</td>
-                  <td className="p-3 text-slate-600">
+                <tr key={school.id} className="hover:bg-slate-50/75 transition-colors">
+                  <td className="p-3.5 font-bold text-slate-900">{school.name}</td>
+                  <td className="p-3.5 text-slate-600 font-mono text-[11px]">{school.registerNo}</td>
+                  <td className="p-3.5 font-bold text-slate-900">{school.studentCount}</td>
+                  <td className="p-3.5 text-slate-600">{school.teacherCount}</td>
+                  <td className="p-3.5 text-slate-500 font-mono text-[11px]">
                     {school.lastSyncTime ? new Date(school.lastSyncTime).toLocaleDateString() : 'Never'}
                   </td>
-                  <td className="p-3">
+                  <td className="p-3.5">
                     <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-extrabold uppercase ${
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                         school.stalenessBadge === 'FRESH'
-                          ? 'bg-emerald-100 text-emerald-800'
+                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                           : school.stalenessBadge === 'STALE'
-                          ? 'bg-amber-100 text-amber-800'
-                          : 'bg-rose-100 text-rose-800'
+                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
+                          : 'bg-rose-50 text-rose-700 border border-rose-200'
                       }`}
                     >
                       {school.stalenessBadge === 'FRESH' ? (

@@ -346,7 +346,7 @@ export class HubSyncService {
         }));
 
         const pushUrl = `${env.CLOUD_SYNC_URL}/push`;
-        const pushRes = await fetch(pushUrl, {
+        const pushRes: any = await fetch(pushUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -386,7 +386,7 @@ export class HubSyncService {
       const lastSeq = lastSeqRow ? parseInt(lastSeqRow.value, 10) : 0;
 
       const pullUrl = `${env.CLOUD_SYNC_URL}/pull?since=${lastSeq}&limit=100&schoolId=${env.SCHOOL_ID}`;
-      const pullRes = await fetch(pullUrl, {
+      const pullRes: any = await fetch(pullUrl, {
         headers: {
           'X-Device-Token': env.DEVICE_TOKEN,
           'X-Device-Id': env.HUB_DEVICE_ID,

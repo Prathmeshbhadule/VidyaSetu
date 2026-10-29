@@ -99,15 +99,15 @@ export const TeacherAtRiskScreen: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-36 space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl sm:text-3xl font-black text-amber-950 flex items-center gap-2">
+          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
             <HeartHandshake className="w-7 h-7 text-rose-600" />
-            {t('teacher.atRiskTitle')}
+            <span>{t('teacher.atRiskTitle')}</span>
           </h2>
-          <p className="text-xs sm:text-sm text-amber-800 font-medium mt-1">
+          <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1">
             {t('teacher.atRiskSubtitle')}
           </p>
         </div>
@@ -117,10 +117,10 @@ export const TeacherAtRiskScreen: React.FC = () => {
 
       {/* Flag List */}
       {flags.length === 0 ? (
-        <div className="bg-white rounded-3xl p-8 border border-emerald-300 text-center shadow-sm">
-          <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto mb-2" />
-          <h3 className="font-black text-emerald-950 text-lg">No Students Currently At-Risk</h3>
-          <p className="text-xs text-emerald-800 mt-1 font-medium">
+        <div className="bg-white rounded-3xl p-8 border border-emerald-200 text-center shadow-sm space-y-2">
+          <CheckCircle2 className="w-12 h-12 text-emerald-600 mx-auto" />
+          <h3 className="font-black text-slate-900 text-lg">No Students Currently At-Risk</h3>
+          <p className="text-xs text-slate-600 font-medium max-w-md mx-auto">
             All students meet attendance and retention targets.
           </p>
         </div>
@@ -131,12 +131,12 @@ export const TeacherAtRiskScreen: React.FC = () => {
             return (
               <div
                 key={flag.id}
-                className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-rose-200 shadow-sm hover:border-rose-300 transition-all"
+                className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/90 shadow-sm hover:border-rose-300 transition-all space-y-4"
               >
-                <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 font-extrabold text-[11px] uppercase tracking-wider">
+                    <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+                      <span className="px-2.5 py-0.5 rounded-full bg-rose-50 border border-rose-200 text-rose-800 font-extrabold text-[11px] uppercase tracking-wider">
                         {flag.ruleId === 'RULE_GIRL_CHILD_RETENTION'
                           ? 'Girl-Child Retention Alert'
                           : flag.ruleId === 'RULE_CONSECUTIVE_ABSENCE'
@@ -144,38 +144,38 @@ export const TeacherAtRiskScreen: React.FC = () => {
                           : 'Low Attendance Alert'}
                       </span>
                       {isGirl && (
-                        <span className="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 font-extrabold text-[11px]">
+                        <span className="px-2.5 py-0.5 rounded-full bg-amber-50 border border-amber-200 text-amber-800 font-extrabold text-[11px]">
                           Girl Student
                         </span>
                       )}
                     </div>
-                    <h3 className="font-black text-xl text-amber-950">
+                    <h3 className="font-black text-xl text-slate-900">
                       {flag.studentName}
                     </h3>
-                    <p className="text-xs text-amber-800 font-bold">
+                    <p className="text-xs text-slate-500 font-bold mt-0.5">
                       Grade {flag.grade} • Current Attendance: {flag.attendancePercent}%
                     </p>
                   </div>
 
                   <button
                     onClick={() => setSelectedFlag(flag)}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs shadow-md transition-all min-h-[44px]"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold text-xs shadow-md shadow-blue-600/20 transition-all min-h-[44px]"
                   >
                     <CheckCircle2 className="w-4 h-4" />
                     <span>{t('teacher.resolveAction')}</span>
                   </button>
                 </div>
 
-                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium bg-amber-50/60 p-3 rounded-xl border border-amber-200 mb-4">
+                <p className="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
                   {flag.reason}
                 </p>
 
                 {/* Suggested Support Schemes */}
                 {flag.suggestedSchemeIds && flag.suggestedSchemeIds.length > 0 && (
                   <div>
-                    <h4 className="text-xs font-extrabold uppercase text-amber-800 tracking-wider mb-2 flex items-center gap-1.5">
-                      <Award className="w-4 h-4 text-rose-600" />
-                      {t('teacher.suggestedSchemes')}
+                    <h4 className="text-xs font-extrabold uppercase text-slate-700 tracking-wider mb-2 flex items-center gap-1.5">
+                      <Award className="w-4 h-4 text-blue-600" />
+                      <span>{t('teacher.suggestedSchemes')}</span>
                     </h4>
                     <div className="flex flex-wrap gap-2">
                       {flag.suggestedSchemeIds.map((sId: string) => {
@@ -183,7 +183,7 @@ export const TeacherAtRiskScreen: React.FC = () => {
                         return (
                           <span
                             key={sId}
-                            className="px-3 py-1.5 rounded-xl bg-orange-50 border border-orange-200 text-orange-950 text-xs font-bold"
+                            className="px-3 py-1.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-xs font-bold"
                           >
                             {s ? s.name : 'Savitribai Phule Scholarship for Girls'}
                           </span>

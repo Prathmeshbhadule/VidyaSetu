@@ -56,9 +56,9 @@ export const ParentDashboardScreen: React.FC = () => {
   }, []);
 
   return (
-    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-28">
+    <div className="max-w-4xl mx-auto p-4 sm:p-6 pb-36 space-y-6">
       {/* Header */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h2 className="text-2xl sm:text-3xl font-black text-slate-900 flex items-center gap-2">
             <Users className="w-7 h-7 text-blue-600" />

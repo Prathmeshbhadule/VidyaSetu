@@ -38,7 +38,7 @@ export const LessonListScreen: React.FC = () => {
     : lessons.filter((l) => l.subject === selectedSubject);
 
   return (
-    <div className="max-w-5xl mx-auto p-4 sm:p-6 pb-28 space-y-5">
+    <div className="max-w-5xl mx-auto p-4 sm:p-6 pb-36 space-y-5">
       {/* Top Header */}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>

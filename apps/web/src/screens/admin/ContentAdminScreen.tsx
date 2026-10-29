@@ -407,20 +407,20 @@ export const ContentAdminScreen: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto p-3 sm:p-6 pb-36 space-y-6">
       {/* Studio Top Banner */}
-      <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-blue-950 rounded-3xl p-6 sm:p-8 text-white border border-slate-800 shadow-xl flex flex-wrap items-center justify-between gap-6">
+      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white border border-indigo-800/60 shadow-xl flex flex-wrap items-center justify-between gap-6">
         <div>
           <div className="flex items-center gap-2 mb-2">
             <span className="bg-blue-600 text-white text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full tracking-wider">
               {t('studio.title', 'Curriculum Studio')}
             </span>
-            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
+            <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[10px] font-bold px-2 py-0.5 rounded-full">
               ● Live Sync to Student Portal
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
             {t('studio.title', 'अभ्यासक्रम व साहित्य व्यवस्थापन स्टुडिओ')}
           </h1>
-          <p className="text-xs sm:text-sm text-slate-300 font-medium mt-1 max-w-xl">
+          <p className="text-xs sm:text-sm text-blue-100 font-medium mt-1 max-w-xl">
             {t(
               'studio.subtitle',
               'येथे स्थानिक संगणकावरून प्रत्यक्ष व्हिडिओ तासिका अपलोड करा, सराव चाचण्या स्वतः तयार करा आणि पुस्तके जोडा. सर्व बदल तत्काळ विद्यार्थ्यांच्या पोर्टलवर दिसतील.'
@@ -460,10 +460,10 @@ export const ContentAdminScreen: React.FC = () => {
       {/* Studio Navigation Tabs */}
       <div className="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto no-scrollbar">
         {[
-          { id: 'videos', label: t('studio.tabVideos', '🎬 व्हिडिओ तासिका जोडा (Add Video)'), icon: VideoIcon, count: videos.length },
-          { id: 'quizzes', label: t('studio.tabQuizzes', '📝 सराव चाचणी तयार करा (Create DPP)'), icon: CheckSquare, count: quizzes.length },
-          { id: 'materials', label: t('studio.tabMaterials', '📚 पुस्तके व नोट्स अपलोड करा (Upload Books)'), icon: FileText, count: materials.length },
-          { id: 'catalog', label: t('studio.tabCatalog', '📋 सर्व साहित्य यादी (Live Catalog)'), icon: Layers, count: lessons.length + quizzes.length + materials.length },
+          { id: 'videos', label: t('studio.tabVideos', 'व्हिडिओ तासिका जोडा (Add Video)'), icon: VideoIcon, count: videos.length },
+          { id: 'quizzes', label: t('studio.tabQuizzes', 'सराव चाचणी तयार करा (Create DPP)'), icon: CheckSquare, count: quizzes.length },
+          { id: 'materials', label: t('studio.tabMaterials', 'पुस्तके व नोट्स अपलोड करा (Upload Books)'), icon: FileText, count: materials.length },
+          { id: 'catalog', label: t('studio.tabCatalog', 'सर्व साहित्य यादी (Live Catalog)'), icon: Layers, count: lessons.length + quizzes.length + materials.length },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -471,7 +471,7 @@ export const ContentAdminScreen: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all border ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all border min-h-[44px] ${
                 isActive
                   ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
                   : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
@@ -479,7 +479,7 @@ export const ContentAdminScreen: React.FC = () => {
             >
               <Icon className="w-4 h-4" />
               <span>{tab.label}</span>
-              <span className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold ${
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
                 isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-600'
               }`}>
                 {tab.count}

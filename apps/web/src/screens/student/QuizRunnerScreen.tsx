@@ -174,7 +174,7 @@ export const QuizRunnerScreen: React.FC = () => {
     const isPassed = pct >= 60;
 
     return (
-      <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-28 text-center animate-fade-in space-y-6">
+      <div className="max-w-2xl mx-auto p-4 sm:p-6 pb-36 text-center animate-fade-in space-y-6">
         <div className="bg-white rounded-3xl p-6 sm:p-10 border border-slate-200 shadow-xl space-y-6">
           {/* Header Badge */}
           <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-purple-600 text-white mx-auto flex items-center justify-center shadow-lg shadow-blue-600/30">
@@ -262,7 +262,7 @@ export const QuizRunnerScreen: React.FC = () => {
 
   // Test Series Question Stage
   return (
-    <div className="max-w-4xl mx-auto p-3 sm:p-6 pb-28 space-y-4">
+    <div className="max-w-4xl mx-auto p-3 sm:p-6 pb-36 space-y-4">
       {/* Top Test Bar */}
       <div className="bg-slate-900 rounded-2xl p-4 text-white flex flex-wrap items-center justify-between gap-3 shadow-md">
         <div>
