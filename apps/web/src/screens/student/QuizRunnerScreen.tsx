@@ -186,7 +186,7 @@ export const QuizRunnerScreen: React.FC = () => {
               चाचणी निकाल (Test Series Result)
             </span>
             <h2 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1">
-              {isPassed ? 'Shabash! Test Completed 🎉' : 'Test Submitted! Keep Practicing 💪'}
+              {isPassed ? 'Shabash! Test Completed' : 'Test Submitted! Keep Practicing'}
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 font-medium mt-1">
               {quiz.title} • Time Taken: {formatTimer(secondsElapsed)}

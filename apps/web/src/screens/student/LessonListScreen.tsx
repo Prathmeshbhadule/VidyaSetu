@@ -149,7 +149,7 @@ export const LessonListScreen: React.FC = () => {
 
             <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
               <span className="text-xs text-blue-600 font-black">
-                Start Chapter ▶
+                Start Chapter
               </span>
 
               <div className="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-blue-600 group-hover:text-white flex items-center justify-center transition-colors">

@@ -158,10 +158,10 @@ export const LessonReaderScreen: React.FC = () => {
         {/* Classroom Sub-Tabs */}
         <div className="flex items-center gap-2 border-b border-slate-200 pt-2 overflow-x-auto no-scrollbar">
           {[
-            { id: 'video', label: '🎬 Lecture Overview', count: null },
-            { id: 'notes', label: '📄 Class Notes & Reading', count: 'PDF' },
-            { id: 'dpp', label: '📝 Attached DPP / Quiz', count: associatedQuiz ? '1 Test' : 'None' },
-            { id: 'doubt', label: '❓ Ask a Doubt', count: null },
+            { id: 'video', label: 'Lecture Overview', count: null },
+            { id: 'notes', label: 'Class Notes & Reading', count: 'PDF' },
+            { id: 'dpp', label: 'Attached DPP / Quiz', count: associatedQuiz ? '1 Test' : 'None' },
+            { id: 'doubt', label: 'Ask a Doubt', count: null },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -207,7 +207,7 @@ export const LessonReaderScreen: React.FC = () => {
                   {associatedQuiz?.title || 'Lecture Practice Test 01'}
                 </h5>
                 <p className="text-xs text-slate-600 font-medium">
-                  {associatedQuiz?.questions.length || 2} Questions • 10 Marks • ⭐⭐⭐ 3 Stars Reward
+                  {associatedQuiz?.questions.length || 2} Questions • 10 Marks • 3 Stars Reward
                 </p>
               </div>
 
@@ -259,7 +259,7 @@ export const LessonReaderScreen: React.FC = () => {
                 if (block.type === 'CALLOUT') {
                   return (
                     <div key={idx} className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 font-bold text-xs sm:text-sm">
-                      💡 {block.content}
+                      {block.content}
                     </div>
                   );
                 }
@@ -328,9 +328,10 @@ export const LessonReaderScreen: React.FC = () => {
               </p>
               <button
                 onClick={() => speechService.speak(lesson.title, language)}
-                className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-sm"
+                className="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold text-xs shadow-sm flex items-center gap-1.5 mx-auto"
               >
-                🔊 Listen to Voice Explanation
+                <Volume2 className="w-3.5 h-3.5" />
+                <span>Listen to Voice Explanation</span>
               </button>
             </div>
           </div>

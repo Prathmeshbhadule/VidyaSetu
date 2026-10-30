@@ -5,13 +5,10 @@ import { useAuthStore } from '../store/useAuthStore.js';
 import { SyncStatusChip } from './SyncStatusChip.js';
 import { SupportedLanguage } from '@vidya-setu/shared';
 import {
-  Globe,
-  Accessibility,
   Flame,
   Target,
   LogOut,
   LogIn,
-  UserPlus,
   School,
   GraduationCap,
   Users,
@@ -30,8 +27,6 @@ export const Header: React.FC = () => {
     isAuthenticated,
     language,
     setLanguage,
-    isSimpleMode,
-    toggleSimpleMode,
     theme,
     toggleTheme,
     currentStudent,
@@ -74,7 +69,6 @@ export const Header: React.FC = () => {
     navigate('/login');
   };
 
-  // Build active user badge label
   const getUserBadge = () => {
     if (!role) return null;
 
@@ -83,19 +77,15 @@ export const Header: React.FC = () => {
         return {
           icon: <School className="w-3.5 h-3.5 text-amber-500" />,
           title: `Class ${classMode.grade} Mode`,
-          subtitle: 'सामूहिक वर्ग अभ्यास',
-          color: isDark
-            ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-            : 'bg-amber-50 text-amber-800 border-amber-200',
+          subtitle: 'Classroom',
+          color: 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/20',
         };
       }
       return {
         icon: <GraduationCap className="w-3.5 h-3.5 text-blue-500" />,
         title: currentStudent ? currentStudent.name.split(' ')[0] : 'Student',
         subtitle: currentStudent ? `Grade ${currentStudent.grade}` : 'Student',
-        color: isDark
-          ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-          : 'bg-blue-50 text-blue-800 border-blue-200',
+        color: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20',
       };
     }
 
@@ -103,10 +93,8 @@ export const Header: React.FC = () => {
       return {
         icon: <Users className="w-3.5 h-3.5 text-blue-500" />,
         title: teacherProfile?.name.split(' ')[0] || 'Teacher',
-        subtitle: 'शिक्षक (Teacher)',
-        color: isDark
-          ? 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-          : 'bg-blue-50 text-blue-800 border-blue-200',
+        subtitle: 'Educator',
+        color: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20',
       };
     }
 
@@ -114,21 +102,17 @@ export const Header: React.FC = () => {
       return {
         icon: <HeartHandshake className="w-3.5 h-3.5 text-emerald-500" />,
         title: guardianProfile?.name.split(' ')[0] || 'Parent',
-        subtitle: 'पालक (Parent)',
-        color: isDark
-          ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30'
-          : 'bg-emerald-50 text-emerald-800 border-emerald-200',
+        subtitle: 'Guardian',
+        color: 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
       };
     }
 
     if (role === 'DISTRICT_ADMIN') {
       return {
-        icon: <Building2 className="w-3.5 h-3.5 text-amber-500" />,
+        icon: <Building2 className="w-3.5 h-3.5 text-blue-500" />,
         title: 'District Admin',
-        subtitle: 'जिल्हा प्रशासन',
-        color: isDark
-          ? 'bg-amber-500/20 text-amber-300 border-amber-500/30'
-          : 'bg-amber-50 text-amber-800 border-amber-200',
+        subtitle: 'DEO Pune',
+        color: 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20',
       };
     }
 
@@ -136,10 +120,8 @@ export const Header: React.FC = () => {
       return {
         icon: <BookOpen className="w-3.5 h-3.5 text-purple-500" />,
         title: 'Studio Admin',
-        subtitle: 'कंटेंट व्यवस्थापक',
-        color: isDark
-          ? 'bg-purple-500/20 text-purple-300 border-purple-500/30'
-          : 'bg-purple-50 text-purple-800 border-purple-200',
+        subtitle: 'Curriculum',
+        color: 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20',
       };
     }
 
@@ -149,191 +131,113 @@ export const Header: React.FC = () => {
   const userBadge = getUserBadge();
 
   return (
-    <header
-      className={`sticky top-0 z-50 backdrop-blur-md px-3 sm:px-6 py-2.5 transition-colors ${
-        isDark
-          ? 'bg-slate-900/95 border-b border-slate-800 text-white shadow-md'
-          : 'bg-white/95 border-b border-slate-200 text-slate-900 shadow-sm'
-      }`}
-    >
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Brand Logo & Title */}
+    <header className="sticky top-0 z-50 apple-glass transition-all duration-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-3">
+        {/* Left: Brand Name Only - Symbol Removed */}
         <div className="flex items-center gap-3">
           <div
             onClick={handleBrandClick}
-            className="flex items-center gap-2.5 cursor-pointer group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-xl p-1"
+            className="cursor-pointer group focus:outline-none"
           >
-            {/* Bold Logo Mark */}
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 via-indigo-600 to-violet-700 flex items-center justify-center font-black text-lg text-white shadow-md shadow-blue-600/30 ring-1 ring-white/20 group-hover:scale-105 transition-transform">
-              VS
+            <div className="flex items-center gap-2">
+              <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                Vidya Setu
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                Offline
+              </span>
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span
-                  className={`font-black text-base sm:text-lg tracking-tight transition-colors ${
-                    isDark ? 'text-white group-hover:text-blue-300' : 'text-slate-900 group-hover:text-blue-600'
-                  }`}
-                >
-                  VIDYA SETU
-                </span>
-                <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-slate-950 text-[10px] font-black px-1.5 py-0.5 rounded font-mono uppercase tracking-wide">
-                  OFFLINE
-                </span>
-              </div>
-              <p className={`text-[10px] font-medium hidden sm:block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                Bharat's Offline Learning Platform
-              </p>
-            </div>
+            <p className="text-[11px] text-slate-400 font-normal hidden sm:block leading-none mt-0.5">
+              Bharat's Rural Digital Learning Mesh
+            </p>
           </div>
 
-          {/* Target Batch / Class Indicator (when logged in as student) */}
+          {/* Active Batch Indicator (Student) */}
           {role === 'STUDENT' && currentStudent && (
-            <div
-              className={`hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold ${
-                isDark
-                  ? 'bg-slate-800/90 border border-slate-700 text-slate-200'
-                  : 'bg-slate-100 border border-slate-200 text-slate-700'
-              }`}
-            >
-              <Target className="w-3.5 h-3.5 text-blue-500" />
+            <div className="hidden lg:flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
+              <Target className="w-3 h-3 text-blue-500" />
               <span>
                 {classMode?.isClassMode
-                  ? `Class ${classMode.grade} Shared Classroom`
-                  : `Class ${currentStudent.grade} • Target Batch`}
+                  ? `Class ${classMode.grade} Mode`
+                  : `Class ${currentStudent.grade} Cohort`}
               </span>
             </div>
           )}
         </div>
 
-        {/* Center: Offline Sync & Study Streak */}
-        <div className="flex items-center gap-2.5">
-          {/* Daily Streak Pill (Active Student) */}
+        {/* Center: Sync & Streak */}
+        <div className="flex items-center gap-2">
           {role === 'STUDENT' && (
             <div
               title={t('streak.studyStreak', 'Daily Study Streak')}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-black shadow-sm ${
-                isDark
-                  ? 'bg-amber-500/15 border border-amber-500/40 text-amber-300'
-                  : 'bg-amber-50 border border-amber-300 text-amber-800'
-              }`}
+              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400"
             >
-              <Flame className="w-4 h-4 text-amber-500 fill-amber-500 animate-pulse" />
+              <Flame className="w-3.5 h-3.5 text-amber-500 fill-amber-500 animate-pulse" />
               <span>{t('streak.daysCount', { days: 4 })}</span>
             </div>
           )}
 
-          {/* Sync Status Chip */}
           <SyncStatusChip />
         </div>
 
-        {/* Right: Actions, Language, Theme & Authenticated User Capsule */}
-        <div className="flex items-center gap-2 flex-wrap">
-          {/* Theme Switcher Button (Light / Dark Option) */}
+        {/* Right: Controls & User Profile */}
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Theme Toggle Button */}
           <button
             onClick={toggleTheme}
-            title={isDark ? 'Switch to Light Theme (लाइट थीम)' : 'Switch to Dark Theme (डार्क थीम)'}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all min-h-[34px] ${
-              isDark
-                ? 'bg-slate-800 text-amber-300 border-slate-700 hover:bg-slate-700'
-                : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200 shadow-sm'
-            }`}
-            aria-label="Toggle Light/Dark Theme"
+            title={isDark ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
+            className="apple-press p-2 rounded-full text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Toggle Theme"
           >
-            {isDark ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5 text-blue-600" />}
-            <span className="hidden sm:inline">{isDark ? 'Light' : 'Dark'}</span>
-          </button>
-
-          {/* Accessibility Simple Mode Toggle */}
-          <button
-            onClick={toggleSimpleMode}
-            title={t('common.simpleMode', 'Toggle Accessibility Mode')}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold border transition-all min-h-[34px] ${
-              isSimpleMode
-                ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
-                : isDark
-                ? 'bg-slate-800 text-slate-300 border-slate-700 hover:bg-slate-700'
-                : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
-            }`}
-          >
-            <Accessibility className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isSimpleMode ? 'Simple' : 'Standard'}</span>
+            {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
           </button>
 
           {/* Language Switcher */}
-          <div
-            className={`inline-flex items-center rounded-xl border p-0.5 shadow-inner ${
-              isDark ? 'border-slate-700 bg-slate-800' : 'border-slate-300 bg-slate-100'
-            }`}
-          >
-            <Globe className={`w-3.5 h-3.5 ml-1.5 mr-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} />
+          <div className="inline-flex p-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700/60">
             {(['hi', 'mr', 'en'] as SupportedLanguage[]).map((lang) => (
               <button
                 key={lang}
                 onClick={() => setLanguage(lang)}
-                className={`px-2 py-0.5 text-xs font-bold rounded-lg transition-all min-h-[28px] ${
+                className={`apple-segment-item px-2 py-0.5 text-[11px] font-semibold rounded-full transition-all ${
                   language === lang
-                    ? 'bg-blue-600 text-white shadow-sm font-black'
-                    : isDark
-                    ? 'text-slate-300 hover:text-white hover:bg-slate-700/50'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >
-                {lang === 'hi' ? 'हिन्दी' : lang === 'mr' ? 'मराठी' : 'EN'}
+                {lang === 'hi' ? 'हि' : lang === 'mr' ? 'म' : 'EN'}
               </button>
             ))}
           </div>
 
-          {/* ========================================================================= */}
-          {/* AUTHENTICATED USER CAPSULE */}
-          {/* ========================================================================= */}
+          {/* User Profile Capsule / Login Buttons */}
           {isAuthenticated && userBadge ? (
-            <div className={`flex items-center gap-2 pl-1 border-l ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
-              {/* User Profile Capsule */}
+            <div className="flex items-center gap-1.5 pl-1.5 border-l border-slate-200/60 dark:border-slate-800">
               <div
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-xl border shadow-sm ${userBadge.color}`}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium ${userBadge.color}`}
               >
                 {userBadge.icon}
-                <div className="text-left">
-                  <span className="text-xs font-black block leading-none max-w-[100px] truncate">
-                    {userBadge.title}
-                  </span>
-                  <span className="text-[10px] font-semibold opacity-85 block leading-tight">
-                    {userBadge.subtitle}
-                  </span>
-                </div>
+                <span className="font-semibold max-w-[80px] sm:max-w-[110px] truncate">
+                  {userBadge.title}
+                </span>
               </div>
 
-              {/* Secure Log Out Button */}
               <button
                 onClick={handleLogout}
-                title="Log Out (सुरक्षित बाहेर पडा)"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-rose-600/15 hover:bg-rose-600 text-rose-600 dark:text-rose-300 hover:text-white text-xs font-black border border-rose-500/30 transition-all min-h-[34px]"
+                title="Log Out"
+                className="apple-press p-1.5 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-500/10 transition-colors"
+                aria-label="Logout"
               >
-                <LogOut className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Logout</span>
+                <LogOut className="w-4 h-4" />
               </button>
             </div>
           ) : (
-            /* Logged Out Buttons */
-            <div className={`flex items-center gap-1.5 pl-1 border-l ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
+            <div className="flex items-center gap-1.5 pl-1.5 border-l border-slate-200/60 dark:border-slate-800">
               <button
                 onClick={() => navigate('/login')}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow-sm transition-all min-h-[34px]"
+                className="apple-press inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-xs font-medium shadow-sm transition-all"
               >
                 <LogIn className="w-3.5 h-3.5" />
                 <span>Login</span>
-              </button>
-
-              <button
-                onClick={() => navigate('/register')}
-                className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all min-h-[34px] ${
-                  isDark
-                    ? 'bg-slate-800 hover:bg-slate-750 text-slate-200 border-slate-700'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-                }`}
-              >
-                <UserPlus className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Register</span>
               </button>
             </div>
           )}

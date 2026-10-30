@@ -29,10 +29,16 @@ import {
   Film,
   HelpCircle,
   FileVideo,
+  FileUp,
+  FileCheck,
+  Eye,
+  Download,
+  ExternalLink,
+  X,
 } from 'lucide-react';
 
 export const ContentAdminScreen: React.FC = () => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { schoolId } = useAuthStore();
   const [activeTab, setActiveTab] = useState<'videos' | 'quizzes' | 'materials' | 'catalog'>('videos');
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -111,6 +117,41 @@ export const ContentAdminScreen: React.FC = () => {
   const [matSizeBytes, setMatSizeBytes] = useState(3670016);
   const [matDescription, setMatDescription] = useState('');
   const [matContent, setMatContent] = useState('');
+  const [pdfFile, setPdfFile] = useState<File | null>(null);
+  const [pdfDataUrl, setPdfDataUrl] = useState<string | null>(null);
+  const [pdfFileName, setPdfFileName] = useState<string>('');
+  const [showPdfPreview, setShowPdfPreview] = useState(false);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+
+  const handlePdfUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
+      alert('कृपया फक्त PDF फाइल निवडा (Please choose a valid PDF file)');
+      return;
+    }
+    setPdfFile(file);
+    setPdfFileName(file.name);
+    setMatSizeBytes(file.size);
+    if (!matTitle.trim()) {
+      setMatTitle(file.name.replace(/\.pdf$/i, ''));
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPdfDataUrl(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleRemovePdf = () => {
+    setPdfFile(null);
+    setPdfDataUrl(null);
+    setPdfFileName('');
+    setShowPdfPreview(false);
+    if (pdfInputRef.current) {
+      pdfInputRef.current.value = '';
+    }
+  };
 
   const notifySuccess = (msg: string) => {
     setSuccessMessage(msg);
@@ -141,9 +182,14 @@ export const ContentAdminScreen: React.FC = () => {
 
   // Delete Handlers for Curriculum Assets
   const handleDeleteLesson = async (lessonId: string, title: string) => {
-    const confirmed = window.confirm(
-      `व्हिडिओ तासिका "${title}" कायमस्वरूपी हटवायची आहे का?\n\nही तासिका विद्यार्थ्यांच्या व्हिडिओ यादीतून व होमस्क्रीनवरून पूर्णपणे काढली जाईल.`
-    );
+    const confirmMessage =
+      i18n.language === 'en'
+        ? `Are you sure you want to permanently delete video lecture "${title}"?\n\nThis will remove it from the student lecture list and home screen.`
+        : i18n.language === 'hi'
+        ? `क्या आप वीडियो पाठ "${title}" को हमेशा के लिए हटाना चाहते हैं?\n\nयह पाठ विद्यार्थियों की सूची से हटा दिया जाएगा।`
+        : `व्हिडिओ तासिका "${title}" कायमस्वरूपी हटवायची आहे का?\n\nही तासिका विद्यार्थ्यांच्या व्हिडिओ यादीतून व होमस्क्रीनवरून पूर्णपणे काढली जाईल.`;
+
+    const confirmed = window.confirm(confirmMessage);
     if (!confirmed) return;
 
     try {
@@ -159,28 +205,65 @@ export const ContentAdminScreen: React.FC = () => {
         await offlineDb.quizzes.delete(q.id);
       }
 
-      notifySuccess(`🗑️ व्हिडिओ तासिका "${title}" यशस्वीरित्या हटवली गेली! (Video deleted successfully)`);
+      const successNotice =
+        i18n.language === 'en'
+          ? `Video lecture "${title}" was successfully deleted.`
+          : i18n.language === 'hi'
+          ? `वीडियो पाठ "${title}" सफलतापूर्वक हटा दिया गया।`
+          : `व्हिडिओ तासिका "${title}" यशस्वीरित्या हटवली गेली.`;
+
+      notifySuccess(successNotice);
       await loadAllContent();
     } catch (err: any) {
-      alert(`हटवताना त्रुटी: ${err?.message || 'Error deleting video'}`);
+      alert(
+        i18n.language === 'en'
+          ? `Error deleting video: ${err?.message || 'Unknown error'}`
+          : `हटवताना त्रुटी: ${err?.message || 'Error deleting video'}`
+      );
     }
   };
 
   const handleDeleteQuiz = async (quizId: string, title: string) => {
-    const confirmed = window.confirm(`सराव चाचणी "${title}" हटवायची आहे का?`);
+    const confirmMessage =
+      i18n.language === 'en'
+        ? `Are you sure you want to delete quiz "${title}"?`
+        : i18n.language === 'hi'
+        ? `क्या आप अभ्यास टेस्ट "${title}" को हटाना चाहते हैं?`
+        : `सराव चाचणी "${title}" हटवायची आहे का?`;
+
+    const confirmed = window.confirm(confirmMessage);
     if (!confirmed) return;
 
     await offlineDb.quizzes.delete(quizId);
-    notifySuccess(`🗑️ सराव चाचणी "${title}" हटवली गेली.`);
+    notifySuccess(
+      i18n.language === 'en'
+        ? `Quiz "${title}" was successfully deleted.`
+        : i18n.language === 'hi'
+        ? `अभ्यास टेस्ट "${title}" सफलतापूर्वक हटा दिया गया।`
+        : `सराव चाचणी "${title}" हटवली गेली.`
+    );
     await loadAllContent();
   };
 
   const handleDeleteMaterial = async (matId: string, title: string) => {
-    const confirmed = window.confirm(`अभ्यास साहित्य "${title}" हटवायचे आहे का?`);
+    const confirmMessage =
+      i18n.language === 'en'
+        ? `Are you sure you want to delete study material "${title}"?`
+        : i18n.language === 'hi'
+        ? `क्या आप अध्ययन सामग्री "${title}" को हटाना चाहते हैं?`
+        : `अभ्यास साहित्य "${title}" हटवायचे आहे का?`;
+
+    const confirmed = window.confirm(confirmMessage);
     if (!confirmed) return;
 
     await offlineDb.studyMaterials.delete(matId);
-    notifySuccess(`🗑️ अभ्यास साहित्य "${title}" हटवले गेले.`);
+    notifySuccess(
+      i18n.language === 'en'
+        ? `Study material "${title}" was successfully deleted.`
+        : i18n.language === 'hi'
+        ? `अध्ययन सामग्री "${title}" सफलतापूर्वक हटा दी गई।`
+        : `अभ्यास साहित्य "${title}" हटवले गेले.`
+    );
     await loadAllContent();
   };
 
@@ -333,7 +416,7 @@ export const ContentAdminScreen: React.FC = () => {
     }
 
     notifySuccess(
-      `🎉 व्हिडिओ तासिका "${videoTitle}" यशस्वीरित्या जोडली गेली! हे आता विद्यार्थ्यांच्या व्हिडिओ यादीत आणि डॅशबोर्डवर उपलब्ध आहे.`
+      `व्हिडिओ तासिका "${videoTitle}" जोडली गेली! हे आता विद्यार्थ्यांच्या व्हिडिओ यादीत आणि डॅशबोर्डवर उपलब्ध आहे.`
     );
     setVideoTitle('');
     setVideoDescription('');
@@ -386,7 +469,7 @@ export const ContentAdminScreen: React.FC = () => {
 
     await offlineDb.quizzes.put(newQuiz);
     notifySuccess(
-      `🎉 सराव चाचणी "${quizTitle}" यशस्वीरित्या तयार झाली! (${formattedQuestions.length} प्रश्न जोडले गेले). हे आता विद्यार्थ्यांच्या टेस्ट सिरीज व DPP मध्ये उपलब्ध आहे.`
+      `सराव चाचणी "${quizTitle}" तयार झाली! (${formattedQuestions.length} प्रश्न जोडले गेले).`
     );
     setQuizTitle('');
     loadAllContent();
@@ -401,19 +484,21 @@ export const ContentAdminScreen: React.FC = () => {
     const newMaterial: StudyMaterial = {
       id: matId,
       schoolId: schoolId || 'global',
-      title: matTitle,
+      title: matTitle.trim(),
       type: matType,
       subject: matSubject,
       grade: Number(matGrade),
       pages: Number(matPages),
-      sizeBytes: Number(matSizeBytes),
+      sizeBytes: pdfFile ? pdfFile.size : Number(matSizeBytes),
       description:
         matDescription ||
-        'अधिकृत अभ्यास साहित्य व स्वाध्याय.',
+        (pdfFile ? `PDF दस्तऐवज: ${pdfFileName} (${(pdfFile.size / (1024 * 1024)).toFixed(1)} MB)` : 'अधिकृत अभ्यास साहित्य व स्वाध्याय.'),
       content:
         matContent ||
-        `${matTitle}\n\nप्रकरण १: परिचय व पूर्वतयारी\nया पाठ्यपुस्तकात विद्यार्थ्यांसाठी सोप्या भाषेत रंगीत चित्रे आणि कृतियुक्त स्वाध्याय समाविष्ट केलेले आहेत.\n\nप्रकरण २: मुख्य संकल्पना व उदाहरणे\n१. प्रत्येक घटकाचे सविस्तर स्पष्टीकरण.\n२. दैनंदिन व्यवहारातील उदाहरणे व गमतीशीर कोडी.\n३. मूल्यमापन स्वाध्याय.`,
-      downloadUrl: `/materials/${matTitle.toLowerCase().replace(/\s+/g, '_')}.pdf`,
+        (pdfFile
+          ? `${matTitle}\n\n[उपकरणावरून जोडलेला PDF दस्तऐवज]\nफाइलचे नाव: ${pdfFileName}\nआकार: ${(pdfFile.size / (1024 * 1024)).toFixed(1)} MB`
+          : `${matTitle}\n\nप्रकरण १: परिचय व पूर्वतयारी\nया पाठ्यपुस्तकात विद्यार्थ्यांसाठी सोप्या भाषेत रंगीत चित्रे आणि कृतियुक्त स्वाध्याय समाविष्ट केलेले आहेत.\n\nप्रकरण २: मुख्य संकल्पना व उदाहरणे\n१. प्रत्येक घटकाचे सविस्तर स्पष्टीकरण.\n२. दैनंदिन व्यवहारातील उदाहरणे व गमतीशीर कोडी.\n३. मूल्यमापन स्वाध्याय.`),
+      downloadUrl: pdfDataUrl || `/materials/${matTitle.toLowerCase().replace(/\s+/g, '_')}.pdf`,
       offlineReady: true,
       version: 1,
       deviceId: syncManager.getDeviceId(),
@@ -424,11 +509,12 @@ export const ContentAdminScreen: React.FC = () => {
 
     await offlineDb.studyMaterials.put(newMaterial);
     notifySuccess(
-      `🎉 अभ्यास साहित्य "${matTitle}" यशस्वीरित्या जोडले गेले! हे आता विद्यार्थ्यांच्या अभ्यास साहित्य विभागात उपलब्ध आहे.`
+      `अभ्यास साहित्य "${matTitle}" जोडले गेले! हे आता विद्यार्थ्यांच्या अभ्यास साहित्य विभागात उपलब्ध आहे.`
     );
     setMatTitle('');
     setMatDescription('');
     setMatContent('');
+    handleRemovePdf();
     loadAllContent();
   };
 
@@ -600,7 +686,7 @@ export const ContentAdminScreen: React.FC = () => {
               {localVideoPreviewUrl && (
                 <div className="space-y-2 bg-slate-950 p-4 rounded-2xl border border-slate-800 text-white">
                   <span className="text-[10px] font-black uppercase text-blue-400 tracking-wider">
-                    ▶ स्थानिक व्हिडिओ थेट पूर्वावलोकन (Local Video Preview)
+                    स्थानिक व्हिडिओ थेट पूर्वावलोकन (Local Video Preview)
                   </span>
                   <div className="aspect-video w-full rounded-xl overflow-hidden bg-black flex items-center justify-center">
                     <video
@@ -743,20 +829,32 @@ export const ContentAdminScreen: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Film className="w-4 h-4 text-rose-600 dark:text-rose-400" />
                   <h4 className="font-black text-sm text-slate-900 dark:text-white">
-                    व्हिडिओ व्यवस्थापन (Manage & Delete)
+                    {i18n.language === 'en'
+                      ? 'Video Management (Manage & Delete)'
+                      : i18n.language === 'hi'
+                      ? 'वीडियो प्रबंधन (प्रबंधन एवं हटाएं)'
+                      : 'व्हिडिओ व्यवस्थापन (व्यवस्थापन व हटवा)'}
                   </h4>
                 </div>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                  {lessons.length} तासिका
+                  {lessons.length} {i18n.language === 'en' ? 'Lectures' : i18n.language === 'hi' ? 'पाठ' : 'तासिका'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                खाली उपलब्ध व्हिडिओ तासिकांची यादी आहे. नको असलेली तासिका कायमस्वरूपी हटवण्यासाठी <strong>"हटवा (Delete)"</strong> बटनावर क्लिक करा.
+                {i18n.language === 'en'
+                  ? 'List of available video lectures. Click the "Delete" button to permanently remove any lecture.'
+                  : i18n.language === 'hi'
+                  ? 'उपलब्ध वीडियो पाठों की सूची। किसी भी पाठ को हटाने के लिए "हटाएं" बटन पर क्लिक करें।'
+                  : 'खाली उपलब्ध व्हिडिओ तासिकांची यादी आहे. नको असलेली तासिका कायमस्वरूपी हटवण्यासाठी "हटवा" बटनावर क्लिक करा.'}
               </p>
 
               {lessons.length === 0 ? (
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 text-center text-xs text-slate-400 font-medium">
-                  कोणतीही व्हिडिओ तासिका उपलब्ध नाही.
+                  {i18n.language === 'en'
+                    ? 'No video lectures available.'
+                    : i18n.language === 'hi'
+                    ? 'कोई वीडियो पाठ उपलब्ध नहीं है।'
+                    : 'कोणतीही व्हिडिओ तासिका उपलब्ध नाही.'}
                 </div>
               ) : (
                 <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
@@ -774,7 +872,7 @@ export const ContentAdminScreen: React.FC = () => {
                               {l.subject}
                             </span>
                             <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">
-                              इ. {l.grade} • ~{l.estimatedMinutes || 10} min
+                              {t('common.grade')} {l.grade} • ~{l.estimatedMinutes || 10} {i18n.language === 'en' ? 'min' : i18n.language === 'hi' ? 'मिनट' : 'मि.'}
                             </span>
                             {isLocal && (
                               <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300">
@@ -790,11 +888,11 @@ export const ContentAdminScreen: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleDeleteLesson(l.id, l.title)}
-                          className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 shrink-0 min-h-[32px]"
-                          title={`"${l.title}" व्हिडिओ तासिका हटवा`}
+                          className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 shrink-0 min-h-[32px] cursor-pointer"
+                          title={`${t('common.delete')} "${l.title}"`}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
-                          <span>हटवा</span>
+                          <span>{t('common.delete')}</span>
                         </button>
                       </div>
                     );
@@ -1128,6 +1226,109 @@ export const ContentAdminScreen: React.FC = () => {
             </div>
 
             <form onSubmit={handleAddStudyMaterial} className="space-y-4">
+              {/* PDF Document Upload Area from Device */}
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+                  उपकरणावरून PDF जोडा (Add PDF from Device)
+                </label>
+                <input
+                  ref={pdfInputRef}
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  onChange={handlePdfUpload}
+                  className="hidden"
+                  id="pdf-upload-input"
+                />
+
+                {!pdfFile ? (
+                  <div
+                    onClick={() => pdfInputRef.current?.click()}
+                    className="apple-press border-2 border-dashed border-purple-200 dark:border-purple-800/60 hover:border-purple-400 dark:hover:border-purple-500 rounded-2xl p-6 bg-purple-50/40 dark:bg-purple-950/20 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 group"
+                  >
+                    <div className="w-12 h-12 rounded-2xl bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-105 transition-transform shadow-sm">
+                      <FileUp className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <span className="font-bold text-sm text-slate-900 dark:text-white block">
+                        PDF फाइल निवडा (Choose PDF Document from Device)
+                      </span>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        शासकीय पुस्तके, शिक्षकांच्या हस्तलिखित नोट्स किंवा प्रश्नपत्रिका PDF स्वरूपात जोडा (कमाल ५० MB)
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        pdfInputRef.current?.click();
+                      }}
+                      className="apple-press mt-1 px-4 py-2 rounded-full bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs shadow-sm flex items-center gap-1.5"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>संगणक / फोनवरून PDF निवडा</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="rounded-2xl p-4 bg-purple-50/70 dark:bg-purple-950/30 border border-purple-200 dark:border-purple-800 space-y-3">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-10 h-10 rounded-xl bg-purple-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                          <FileText className="w-5 h-5" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-bold text-sm text-slate-900 dark:text-white truncate block">
+                              {pdfFileName}
+                            </span>
+                            <span className="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center gap-1">
+                              <CheckCircle2 className="w-3 h-3" />
+                              <span>जोडले गेले</span>
+                            </span>
+                          </div>
+                          <span className="text-xs text-slate-500 font-medium">
+                            {(pdfFile.size / (1024 * 1024)).toFixed(2)} MB • ऑफलाइन साठवले जाईल
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => setShowPdfPreview(!showPdfPreview)}
+                          className="apple-press px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold flex items-center gap-1"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-purple-600" />
+                          <span>{showPdfPreview ? 'पूर्वावलोकन लपवा' : 'पूर्वावलोकन'}</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleRemovePdf}
+                          className="apple-press p-1.5 rounded-full text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                          title="PDF काढून टाका"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {showPdfPreview && pdfDataUrl && (
+                      <div className="pt-2 border-t border-purple-100 dark:border-purple-900/60">
+                        <span className="text-[11px] font-bold text-purple-800 dark:text-purple-300 block mb-2">
+                          PDF थेट पूर्वावलोकन (Live PDF Preview):
+                        </span>
+                        <div className="h-72 w-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-white shadow-inner">
+                          <iframe
+                            src={pdfDataUrl}
+                            title="PDF Preview"
+                            className="w-full h-full border-0"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-700 mb-1">
                   पुस्तकाचे किंवा साहित्याचे नाव (Title) *
@@ -1150,9 +1351,9 @@ export const ContentAdminScreen: React.FC = () => {
                     onChange={(e) => setMatType(e.target.value as StudyMaterialType)}
                     className="w-full p-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 font-bold text-xs"
                   >
-                    <option value="TEXTBOOK">📖 शासकीय पुस्तक (Textbook)</option>
-                    <option value="NOTES">📝 हस्तलिखित नोट्स (Notes)</option>
-                    <option value="WORKSHEET">📑 स्वाध्याय पत्रिका (Worksheet)</option>
+                    <option value="TEXTBOOK">शासकीय पुस्तक (Textbook)</option>
+                    <option value="NOTES">हस्तलिखित नोट्स (Notes)</option>
+                    <option value="WORKSHEET">स्वाध्याय पत्रिका (Worksheet)</option>
                   </select>
                 </div>
 
@@ -1238,8 +1439,8 @@ export const ContentAdminScreen: React.FC = () => {
 
           <div className="space-y-4">
             <div className="bg-purple-50 border border-purple-200 rounded-3xl p-6 text-purple-950 space-y-3">
-              <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-xl shadow-md">
-                📚
+              <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-md">
+                <BookOpen className="w-6 h-6 text-white" />
               </div>
               <h3 className="font-black text-base">ऑफलाइन पाठ्यपुस्तके व स्वाध्याय</h3>
               <p className="text-xs text-purple-900 font-medium leading-relaxed">
@@ -1258,13 +1459,24 @@ export const ContentAdminScreen: React.FC = () => {
           <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
             <h3 className="font-black text-lg text-slate-900 flex items-center gap-2">
               <Layers className="w-5 h-5 text-blue-600" />
-              <span>स्थानिक अभ्यासक्रम कॅटलॉग (Local Curriculum & Assets)</span>
+              <span>
+                {i18n.language === 'en'
+                  ? 'Local Curriculum & Catalog'
+                  : i18n.language === 'hi'
+                  ? 'स्थानीय पाठ्यक्रम एवं सामग्री सूची'
+                  : 'स्थानिक अभ्यासक्रम कॅटलॉग'}
+              </span>
             </h3>
 
             {/* Video Lectures Sub-list */}
             <div className="space-y-2">
               <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
-                व्हिडिओ तासिका ({lessons.length})
+                {i18n.language === 'en'
+                  ? 'Video Lectures'
+                  : i18n.language === 'hi'
+                  ? 'वीडियो पाठ'
+                  : 'व्हिडिओ तासिका'}{' '}
+                ({lessons.length})
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {lessons.map((l) => (
@@ -1278,7 +1490,7 @@ export const ContentAdminScreen: React.FC = () => {
                           {l.subject}
                         </span>
                         <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                          Grade {l.grade} • ~{l.estimatedMinutes || 10} min
+                          {t('common.grade')} {l.grade} • ~{l.estimatedMinutes || 10} {i18n.language === 'en' ? 'min' : i18n.language === 'hi' ? 'मिनट' : 'मि.'}
                         </span>
                       </div>
                       <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate" title={l.title}>
@@ -1292,11 +1504,11 @@ export const ContentAdminScreen: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleDeleteLesson(l.id, l.title)}
-                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 min-h-[32px]"
-                        title="ही व्हिडिओ तासिका हटवा"
+                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 min-h-[32px] cursor-pointer"
+                        title={`${t('common.delete')} "${l.title}"`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span>हटवा</span>
+                        <span>{t('common.delete')}</span>
                       </button>
                     </div>
                   </div>
@@ -1307,7 +1519,12 @@ export const ContentAdminScreen: React.FC = () => {
             {/* Quizzes Sub-list */}
             <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
               <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
-                सराव चाचण्या / DPP ({quizzes.length})
+                {i18n.language === 'en'
+                  ? 'Practice Quizzes / DPP'
+                  : i18n.language === 'hi'
+                  ? 'अभ्यास टेस्ट / DPP'
+                  : 'सराव चाचण्या / DPP'}{' '}
+                ({quizzes.length})
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {quizzes.map((q) => (
@@ -1321,7 +1538,7 @@ export const ContentAdminScreen: React.FC = () => {
                           {q.subject}
                         </span>
                         <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                          Grade {q.grade} • {q.questions?.length || 2} Qs
+                          {t('common.grade')} {q.grade} • {q.questions?.length || 2} Qs
                         </span>
                       </div>
                       <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate" title={q.title}>
@@ -1335,11 +1552,11 @@ export const ContentAdminScreen: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => handleDeleteQuiz(q.id, q.title)}
-                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 min-h-[32px]"
-                        title="ही सराव चाचणी हटवा"
+                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 min-h-[32px] cursor-pointer"
+                        title={`${t('common.delete')} "${q.title}"`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span>हटवा</span>
+                        <span>{t('common.delete')}</span>
                       </button>
                     </div>
                   </div>
@@ -1350,7 +1567,12 @@ export const ContentAdminScreen: React.FC = () => {
             {/* Study Materials Sub-list */}
             <div className="space-y-2 pt-3 border-t border-slate-100 dark:border-slate-800">
               <span className="text-xs font-black uppercase text-slate-500 tracking-wider">
-                पुस्तके व अभ्यास साहित्य ({materials.length})
+                {i18n.language === 'en'
+                  ? 'Books & Study Material'
+                  : i18n.language === 'hi'
+                  ? 'पुस्तकें एवं अध्ययन सामग्री'
+                  : 'पुस्तके व अभ्यास साहित्य'}{' '}
+                ({materials.length})
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {materials.map((m) => (
@@ -1363,8 +1585,13 @@ export const ContentAdminScreen: React.FC = () => {
                         <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-800 dark:text-purple-300">
                           {m.type}
                         </span>
+                        {m.downloadUrl?.startsWith('data:application/pdf') && (
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300">
+                            PDF File
+                          </span>
+                        )}
                         <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
-                          Grade {m.grade} • {m.pages || 24} Pages
+                          {t('common.grade')} {m.grade} • {m.pages || 24} Pages
                         </span>
                       </div>
                       <h4 className="font-bold text-slate-900 dark:text-slate-100 text-sm truncate" title={m.title}>
@@ -1372,17 +1599,29 @@ export const ContentAdminScreen: React.FC = () => {
                       </h4>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
+                      {m.downloadUrl?.startsWith('data:application/pdf') && (
+                        <a
+                          href={m.downloadUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:hover:bg-purple-900/60 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold transition-all flex items-center gap-1 min-h-[32px]"
+                          title={i18n.language === 'en' ? 'View PDF' : i18n.language === 'hi' ? 'PDF देखें' : 'PDF पहा'}
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>{i18n.language === 'en' ? 'View' : i18n.language === 'hi' ? 'देखें' : 'पहा'}</span>
+                        </a>
+                      )}
                       <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/40 px-2.5 py-1 rounded-full">
                         Offline Ready
                       </span>
                       <button
                         type="button"
                         onClick={() => handleDeleteMaterial(m.id, m.title)}
-                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 min-h-[32px]"
-                        title="हे अभ्यास साहित्य हटवा"
+                        className="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 dark:bg-rose-950/40 dark:hover:bg-rose-900/60 dark:text-rose-300 border border-rose-200 dark:border-rose-800 text-xs font-black transition-all flex items-center gap-1 min-h-[32px] cursor-pointer"
+                        title={`${t('common.delete')} "${m.title}"`}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
-                        <span>हटवा</span>
+                        <span>{t('common.delete')}</span>
                       </button>
                     </div>
                   </div>

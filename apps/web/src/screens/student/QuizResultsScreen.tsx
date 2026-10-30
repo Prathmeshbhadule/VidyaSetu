@@ -240,8 +240,8 @@ export const QuizResultsScreen: React.FC = () => {
 
         <div className="flex flex-wrap items-center justify-between gap-6 relative z-10">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-blue-600/30 border border-blue-500/40 flex items-center justify-center text-4xl shadow-inner">
-              ⭐
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-blue-600/30 border border-blue-500/40 flex items-center justify-center shadow-inner">
+              <Star className="w-8 h-8 fill-amber-400 text-amber-400" />
             </div>
             <div>
               <span className="text-xs font-bold uppercase tracking-wider text-blue-400">
@@ -418,7 +418,7 @@ export const QuizResultsScreen: React.FC = () => {
                                   </p>
                                   {qObj?.explanation && (
                                     <p className="text-[11px] font-semibold text-emerald-800 mt-1">
-                                      💡 Note: {qObj.explanation}
+                                      Note: {qObj.explanation}
                                     </p>
                                   )}
                                 </div>
@@ -483,7 +483,8 @@ export const QuizResultsScreen: React.FC = () => {
 
               <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
                 <span className="text-xs font-bold text-amber-600 flex items-center gap-1">
-                  ⭐⭐⭐ 3 Stars Reward
+                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400 inline" />
+                  <span>3 Stars Reward</span>
                 </span>
 
                 <button

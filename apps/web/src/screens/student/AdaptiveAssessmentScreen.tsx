@@ -34,7 +34,7 @@ const ADAPTIVE_QUESTION_BANK: Record<number, Question[]> = {
     {
       id: 'ad-q1-2',
       type: 'MCQ',
-      prompt: 'Count the stars: ⭐ ⭐ ⭐ ⭐',
+      prompt: 'Count the items: [Star] [Star] [Star] [Star]',
       options: [
         { id: 'opt1', text: '4' },
         { id: 'opt2', text: '3' },

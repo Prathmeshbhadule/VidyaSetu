@@ -161,23 +161,24 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         ctx.font = 'bold 22px sans-serif';
         ctx.fillStyle = '#60a5fa';
         ctx.textAlign = 'center';
-        ctx.fillText('🔢 संख्याज्ञान व गणिताची मजेदार ओळख', canvas.width / 2, 60);
+        ctx.fillText('संख्याज्ञान व गणिताची ओळख', canvas.width / 2, 60);
 
         const count = Math.min(10, Math.floor(localTime / 2) + 1);
-        ctx.font = '36px sans-serif';
         for (let i = 0; i < count; i++) {
           const x = 80 + (i % 5) * 110;
           const y = 140 + Math.floor(i / 5) * 90;
-          ctx.fillText('🍎', x, y);
+          ctx.beginPath();
+          ctx.arc(x + 15, y - 10, 18, 0, Math.PI * 2);
+          ctx.fillStyle = '#ef4444';
+          ctx.fill();
           ctx.font = 'bold 16px sans-serif';
           ctx.fillStyle = '#f8fafc';
-          ctx.fillText(`${i + 1}`, x + 5, y + 30);
-          ctx.font = '36px sans-serif';
+          ctx.fillText(`${i + 1}`, x + 15, y - 5);
         }
 
         ctx.font = 'bold 20px sans-serif';
         ctx.fillStyle = '#fbbf24';
-        ctx.fillText(`मोजलेले सफरचंद: ${count} / १०`, canvas.width / 2, 310);
+        ctx.fillText(`मोजलेले घटक: ${count} / १०`, canvas.width / 2, 310);
       } else if (subject === 'SCIENCE') {
         const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
         gradient.addColorStop(0, '#0284c7');
@@ -187,22 +188,15 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
         const sunX = 100 + cycle * 440;
-        ctx.font = '48px sans-serif';
-        ctx.fillText('☀️', sunX, 70);
-
-        ctx.font = '40px sans-serif';
-        ctx.fillText('☁️', 200, 110);
-        ctx.fillText('☁️', 420, 95);
-
-        ctx.font = '54px sans-serif';
-        ctx.fillText('🌳', 150, 290);
-        ctx.fillText('🌿', 260, 310);
-        ctx.fillText('🌲', 480, 290);
+        ctx.beginPath();
+        ctx.arc(sunX, 70, 24, 0, Math.PI * 2);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fill();
 
         ctx.font = 'bold 20px sans-serif';
         ctx.fillStyle = '#ffffff';
         ctx.textAlign = 'center';
-        ctx.fillText('🌱 जलचक्र: सूर्यप्रकाश + पाणी = हिरवी झाडे व पाऊस', canvas.width / 2, 340);
+        ctx.fillText('जलचक्र: सूर्यप्रकाश + पाणी = झाडे व पाऊस', canvas.width / 2, 340);
       } else {
         ctx.fillStyle = '#1e1b4b';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -210,7 +204,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
         ctx.font = 'bold 24px sans-serif';
         ctx.fillStyle = '#e0e7ff';
         ctx.textAlign = 'center';
-        ctx.fillText('📖 मराठी व इंग्रजी वर्णमाला वाचन', canvas.width / 2, 60);
+        ctx.fillText('मराठी व इंग्रजी वर्णमाला वाचन', canvas.width / 2, 60);
 
         const letters = ['क', 'ख', 'ग', 'घ', 'च', 'छ', 'ज', 'झ'];
         const activeIdx = Math.floor(localTime / 2) % letters.length;

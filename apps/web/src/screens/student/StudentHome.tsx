@@ -21,7 +21,6 @@ import {
   FileText,
   Clock,
   CheckSquare,
-  HelpCircle,
   ChevronRight,
   TrendingUp,
   Download,
@@ -33,12 +32,14 @@ import {
   Atom,
   BookMarked,
   GraduationCap,
+  School,
+  ExternalLink,
 } from 'lucide-react';
 
 export const StudentHome: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { currentStudent, classMode, isSimpleMode, logout } = useAuthStore();
+  const { currentStudent, classMode, logout } = useAuthStore();
 
   const [recentLesson, setRecentLesson] = useState<Lesson | null>(null);
   const [allLessons, setAllLessons] = useState<Lesson[]>([]);
@@ -46,38 +47,30 @@ export const StudentHome: React.FC = () => {
   const [studyMaterials, setStudyMaterials] = useState<StudyMaterial[]>([]);
   const [studentResults, setStudentResults] = useState<QuizResult[]>([]);
   const [activeSubjectTab, setActiveSubjectTab] = useState<string>('ALL');
-
-  // Modal state for reading books / notes
   const [selectedMaterial, setSelectedMaterial] = useState<StudyMaterial | null>(null);
+  const [readerTab, setReaderTab] = useState<'pdf' | 'text'>('pdf');
 
-  // Enforce Student Privacy / Session Guard
   useEffect(() => {
     if (!currentStudent) {
-      navigate('/student/picker', { replace: true });
+      navigate('/login?role=STUDENT', { replace: true });
     }
   }, [currentStudent, navigate]);
 
   useEffect(() => {
     async function loadContent() {
       if (!currentStudent) return;
-
-      // 1. Ensure initial content seed if never seeded before
       await ensureContentSeeded();
 
-      // 2. Load Lessons from offlineDb
       const lessons = await offlineDb.lessons.toArray();
       setAllLessons(lessons);
       setRecentLesson(lessons.length > 0 ? lessons[0] : null);
 
-      // 3. Load Quizzes
       const quizzes = await offlineDb.quizzes.toArray();
       setAllQuizzes(quizzes);
 
-      // 4. Load Study Materials
       const materials = await offlineDb.studyMaterials.toArray();
       setStudyMaterials(materials);
 
-      // 4. Load Student's OWN quiz results
       const results = await offlineDb.quizResults
         .where('studentId')
         .equals(currentStudent.id)
@@ -96,35 +89,34 @@ export const StudentHome: React.FC = () => {
   const assessedLevel = currentStudent.assessedLevel;
   const gradeNumber = currentStudent.grade;
 
-  // Counts
   const videoCount = allLessons.length;
   const quizCount = allQuizzes.length;
   const materialCount = studyMaterials.length;
 
   return (
-    <div className="max-w-6xl mx-auto p-3 sm:p-6 pb-36 space-y-6">
-      {/* Student Session & Privacy Top Bar */}
-      <div className="bg-white rounded-3xl p-4 sm:p-5 border border-slate-200/90 shadow-sm flex flex-wrap items-center justify-between gap-4">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 pb-36 space-y-6 animate-chart-enter">
+      {/* Student Session & Identity Bar */}
+      <div className="apple-card rounded-[24px] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3.5">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-blue-700 via-indigo-700 to-indigo-800 text-white font-black text-xl flex items-center justify-center shadow-md shadow-blue-700/20 ring-2 ring-blue-100">
-            {classMode?.isClassMode ? '🏫' : currentStudent.gender === 'FEMALE' ? '👧' : '👦'}
+          <div className="w-12 h-12 rounded-[16px] bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-extrabold text-xl flex items-center justify-center shadow-md shadow-blue-500/20">
+            {classMode?.isClassMode ? <School className="w-6 h-6 text-white" /> : <GraduationCap className="w-6 h-6 text-white" />}
           </div>
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-black text-lg text-slate-900 leading-tight">
+              <h2 className="font-extrabold text-lg text-slate-900 dark:text-white tracking-tight">
                 {classMode?.isClassMode ? classMode.className : studentName}
-              </h3>
-              <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-50 text-blue-800 border border-blue-200">
-                {t('common.grade')} {gradeNumber}
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                Grade {gradeNumber}
               </span>
-              <span className="text-[11px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">
-                {classMode?.isClassMode ? 'सामूहिक वर्ग तासिका' : `TaRL ${t('common.level')} ${assessedLevel}`}
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                TaRL Level {assessedLevel}
               </span>
             </div>
-            <p className="text-xs text-slate-500 font-medium mt-0.5">
+            <p className="text-xs text-slate-500 dark:text-slate-400 font-normal mt-0.5">
               {classMode?.isClassMode
-                ? 'Shared Tablet Classroom Session • No individual PIN required'
-                : `PRN: ${currentStudent.prn} • ${t('session.lockedSession')}`}
+                ? 'Shared Tablet Classroom Session'
+                : `PRN: ${currentStudent.prn} • Verified Offline Profile`}
             </p>
           </div>
         </div>
@@ -134,105 +126,97 @@ export const StudentHome: React.FC = () => {
             logout();
             navigate('/login?role=STUDENT');
           }}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-rose-700 border border-slate-200 hover:border-rose-300 font-black text-xs transition-all min-h-[44px] shadow-sm"
+          className="apple-press self-start sm:self-auto inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-rose-500/10 hover:text-rose-600 text-slate-600 dark:text-slate-300 font-medium text-xs transition-colors"
         >
-          <LogOut className="w-4 h-4 text-rose-600" />
-          <span>{classMode?.isClassMode ? 'Leave Class (वर्ग सोडा)' : t('session.switchStudent')}</span>
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Switch Profile</span>
         </button>
       </div>
 
-      {/* Hero Batch Banner: Warm, Inspiring, High-Contrast Educational Design */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-900 border border-indigo-800/60 text-white shadow-xl p-6 sm:p-8">
-        <div className="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-        <div className="absolute right-0 bottom-0 w-1/3 opacity-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-400 via-indigo-400 to-transparent pointer-events-none" />
+      {/* Apple-style Hero Showcase Banner */}
+      <div className="rounded-[32px] p-6 sm:p-8 relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-blue-50/60 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950 border border-slate-200/90 dark:border-slate-800 shadow-xl dark:shadow-2xl">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 dark:bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="flex flex-wrap items-center justify-between gap-6 relative z-10">
-          <div className="space-y-3.5 max-w-xl">
-            {/* Batch Tag */}
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-3 max-w-xl">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="bg-amber-400 text-slate-950 text-[11px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>{t('batch.targetBatch')}</span>
+              <span className="px-3 py-1 rounded-full text-[11px] font-semibold bg-amber-500/10 dark:bg-amber-400/20 text-amber-800 dark:text-amber-300 border border-amber-500/20 dark:border-amber-400/30 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                <span>Maharashtra State Board Curriculum</span>
               </span>
-              <span className="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[11px] font-bold px-2.5 py-1 rounded-full">
-                ● {t('batch.offlineReady')}
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-500/20 dark:border-emerald-500/30">
+                100% Offline
               </span>
             </div>
 
-            {/* Title & Teacher */}
             <div>
-              <h2 className="text-2xl sm:text-3xl font-black text-white tracking-tight leading-tight">
-                {t('batch.foundationCourse', { grade: gradeNumber })}
-              </h2>
-              <p className="text-xs sm:text-sm text-blue-100 font-medium mt-1">
-                Language Phonics • Vedic Math • Basic Science • TaRL Level {assessedLevel}
+              <h1 className="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+                Grade {gradeNumber} Foundational Learning Hub
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 font-normal mt-1 leading-relaxed">
+                Vernacular Marathi & Hindi lessons, Vedic math drills, and daily practice problem quizzes.
               </p>
-              <div className="flex items-center gap-1.5 mt-2 text-xs font-semibold text-blue-200">
-                <GraduationCap className="w-4 h-4 text-amber-300" />
-                <span>{t('batch.faculty')}</span>
-              </div>
             </div>
 
-            {/* Features Row */}
-            <div className="flex items-center gap-3 sm:gap-4 text-xs font-semibold text-slate-200 pt-1 flex-wrap">
-              <div className="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm">
-                <VideoIcon className="w-4 h-4 text-amber-300" />
-                <span>{t('batch.videoCount', { count: videoCount })}</span>
+            {/* Badges */}
+            <div className="flex items-center gap-3 text-xs font-semibold text-slate-700 dark:text-slate-300 pt-1 flex-wrap">
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/90 dark:bg-white/10 border border-slate-200/80 dark:border-white/10 shadow-sm backdrop-blur-sm">
+                <VideoIcon className="w-3.5 h-3.5 text-blue-600 dark:text-amber-300" />
+                <span>{videoCount} Lectures</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm">
-                <CheckSquare className="w-4 h-4 text-emerald-300" />
-                <span>{t('batch.dppCount', { count: quizCount })}</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/90 dark:bg-white/10 border border-slate-200/80 dark:border-white/10 shadow-sm backdrop-blur-sm">
+                <CheckSquare className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-300" />
+                <span>{quizCount} Practice DPPs</span>
               </div>
-              <div className="flex items-center gap-1.5 bg-white/10 px-2.5 py-1 rounded-lg backdrop-blur-sm">
-                <FileText className="w-4 h-4 text-sky-300" />
-                <span>{t('batch.notesCount', { count: materialCount })}</span>
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100/90 dark:bg-white/10 border border-slate-200/80 dark:border-white/10 shadow-sm backdrop-blur-sm">
+                <FileText className="w-3.5 h-3.5 text-purple-600 dark:text-sky-300" />
+                <span>{materialCount} Textbooks</span>
               </div>
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex items-center gap-3 pt-2">
+            <div className="flex items-center gap-3 pt-2 flex-wrap">
               <button
                 onClick={() => navigate('/student/videos')}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-black text-xs sm:text-sm shadow-lg shadow-blue-600/40 transition-all min-h-[48px]"
+                className="apple-press inline-flex items-center gap-2 px-5 py-3 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs sm:text-sm shadow-md shadow-blue-600/30 transition-all cursor-pointer"
               >
-                <PlayCircle className="w-5 h-5" />
-                <span>{t('batch.resumeLecture')}</span>
+                <PlayCircle className="w-4 h-4" />
+                <span>Resume Latest Video</span>
               </button>
               <button
-                onClick={() => navigate('/student/lessons')}
-                className="inline-flex items-center gap-1.5 px-4 py-3 rounded-2xl bg-white/10 hover:bg-white/20 active:scale-95 text-white font-bold text-xs sm:text-sm border border-white/20 transition-all min-h-[48px]"
+                onClick={() => navigate('/student/progress')}
+                className="apple-press inline-flex items-center gap-1.5 px-4 py-3 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-white/10 dark:hover:bg-white/20 text-slate-800 dark:text-white font-semibold text-xs sm:text-sm border border-slate-200/90 dark:border-white/20 transition-all shadow-sm cursor-pointer"
               >
-                <span>{t('batch.exploreBatch')}</span>
+                <span>View My Stars</span>
+                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
               </button>
             </div>
           </div>
 
-          {/* Right Banner Badge: Study Streak */}
-          <div className="bg-slate-800/90 border border-slate-700/80 p-5 rounded-3xl text-center space-y-2.5 min-w-[210px] shadow-lg">
-            <div className="flex items-center justify-center gap-1.5 text-amber-400 font-black text-xs uppercase tracking-wider">
-              <Flame className="w-4 h-4 fill-amber-400 text-amber-400 animate-pulse" />
-              <span>{t('streak.studyStreak')}</span>
+          {/* Right Card: Streak & Accuracy */}
+          <div className="rounded-[24px] p-5 text-center min-w-[210px] space-y-2 self-start lg:self-auto bg-white/95 dark:bg-slate-800/80 border border-slate-200/90 dark:border-white/10 shadow-lg shadow-slate-200/50 dark:shadow-none backdrop-blur-md">
+            <div className="flex items-center justify-center gap-1.5 text-amber-600 dark:text-amber-400 font-bold text-xs uppercase tracking-wider">
+              <Flame className="w-4 h-4 fill-amber-500 text-amber-500 animate-pulse" />
+              <span>Study Streak</span>
             </div>
-            <div className="text-3xl font-black text-white">{t('streak.daysCount', { days: 4 })}</div>
-            <p className="text-[11px] text-slate-300">
-              {t('streak.streakDays')}
-            </p>
-            <div className="pt-2 border-t border-slate-700/80">
-              <span className="text-[10px] uppercase font-bold text-slate-400 block">{t('streak.accuracyTitle')}</span>
-              <span className="text-base font-black text-emerald-400">{t('streak.accuracyValue')}</span>
+            <div className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">4 Days</div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Continuous daily practice</p>
+            <div className="pt-2 border-t border-slate-100 dark:border-white/10">
+              <span className="text-[10px] uppercase font-bold text-slate-400 dark:text-slate-400 block tracking-wider">Overall Accuracy</span>
+              <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400">88% Passing Rate</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Quick Category Bar: Modern Pill Navigation with Lucide Icons */}
-      <div className="flex items-center gap-2.5 overflow-x-auto pb-1 no-scrollbar">
+      {/* Subject Filter Pills */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
         {[
-          { id: 'ALL', label: t('category.all'), icon: <Layers className="w-4 h-4" /> },
-          { id: 'LANGUAGE', label: t('category.language'), icon: <BookOpen className="w-4 h-4" /> },
-          { id: 'MATH', label: t('category.math'), icon: <Calculator className="w-4 h-4" /> },
-          { id: 'SCIENCE', label: t('category.science'), icon: <Atom className="w-4 h-4" /> },
-          { id: 'TESTS', label: t('category.tests'), icon: <Award className="w-4 h-4" /> },
+          { id: 'ALL', label: 'All Subjects', icon: <Layers className="w-3.5 h-3.5" /> },
+          { id: 'LANGUAGE', label: 'Marathi (भाषा)', icon: <BookOpen className="w-3.5 h-3.5" /> },
+          { id: 'MATH', label: 'Math (गणित)', icon: <Calculator className="w-3.5 h-3.5" /> },
+          { id: 'SCIENCE', label: 'Science (विज्ञान)', icon: <Atom className="w-3.5 h-3.5" /> },
+          { id: 'TESTS', label: 'Quizzes & Stars', icon: <Award className="w-3.5 h-3.5" /> },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -243,260 +227,234 @@ export const StudentHome: React.FC = () => {
                 setActiveSubjectTab(tab.id);
               }
             }}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl text-xs font-black whitespace-nowrap transition-all border min-h-[44px] ${
+            className={`apple-press flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold whitespace-nowrap transition-all border ${
               activeSubjectTab === tab.id
-                ? 'bg-blue-600 text-white border-blue-600 shadow-md shadow-blue-600/20'
-                : 'bg-white text-slate-700 border-slate-200/90 hover:bg-slate-50 hover:border-slate-300'
+                ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-sm'
+                : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200/80 dark:border-slate-700/80 hover:bg-slate-50'
             }`}
           >
-            <span className={activeSubjectTab === tab.id ? 'text-white' : 'text-blue-600'}>
-              {tab.icon}
-            </span>
+            <span>{tab.icon}</span>
             <span>{tab.label}</span>
           </button>
         ))}
       </div>
 
-      {/* Section: Continue Watching / Recent Lecture */}
+      {/* Recent Lesson Continue Card */}
       {recentLesson && (
-        <div className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm flex flex-col md:flex-row items-center justify-between gap-5">
+        <div className="apple-card rounded-[28px] p-5 flex flex-col md:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-4 w-full md:w-auto">
-            {/* 16:9 Thumbnail Box */}
             <div
               onClick={() => navigate(`/student/lessons/${recentLesson.id}`)}
-              className="relative w-28 h-20 sm:w-36 sm:h-24 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-center cursor-pointer group flex-shrink-0 overflow-hidden shadow-inner"
+              className="relative w-28 h-20 sm:w-32 sm:h-20 rounded-[18px] bg-slate-900 border border-slate-800 flex items-center justify-center cursor-pointer group flex-shrink-0 overflow-hidden shadow-inner"
             >
-              <div className="absolute inset-0 bg-gradient-to-tr from-slate-950 to-indigo-950 flex items-center justify-center">
-                <VideoIcon className="w-8 h-8 text-slate-500 group-hover:scale-110 transition-transform" />
-              </div>
-              <div className="absolute bottom-1 right-1 bg-black/80 text-white text-[10px] font-mono font-bold px-1.5 py-0.5 rounded">
-                ~{recentLesson.estimatedMinutes || 12}:00
-              </div>
-              <div className="w-9 h-9 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                <PlayCircle className="w-5 h-5 fill-white text-blue-600" />
+              <VideoIcon className="w-7 h-7 text-slate-500 group-hover:scale-110 transition-transform" />
+              <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center absolute shadow-lg group-hover:scale-110 transition-transform">
+                <PlayCircle className="w-4 h-4 fill-white text-blue-600" />
               </div>
             </div>
 
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-black px-2 py-0.5 rounded-full uppercase">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 uppercase">
                   {recentLesson.subject}
                 </span>
-                <span className="text-xs font-semibold text-slate-500">
-                  {t('common.grade')} {recentLesson.grade} • {t('common.level')} {recentLesson.level}
+                <span className="text-xs text-slate-400">
+                  Grade {recentLesson.grade} • Level {recentLesson.level}
                 </span>
-                <span className="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  ● 65% {t('student.completed')}
+                <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                  ● 65% Completed
                 </span>
               </div>
 
-              <h4 className="font-extrabold text-slate-900 text-base sm:text-lg leading-tight line-clamp-1">
+              <h3 className="font-bold text-slate-900 dark:text-white text-base leading-tight line-clamp-1">
                 {recentLesson.title}
-              </h4>
+              </h3>
 
-              <p className="text-xs text-slate-500 font-medium line-clamp-1">
-                {t('batch.faculty')}
-              </p>
-
-              {/* Progress Bar */}
-              <div className="w-48 sm:w-64 bg-slate-100 rounded-full h-2 overflow-hidden mt-2">
+              <div className="w-44 sm:w-56 bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden mt-1.5">
                 <div className="bg-blue-600 h-full rounded-full w-[65%]" />
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 w-full md:w-auto justify-end">
-            <button
-              onClick={() => navigate(`/student/lessons/${recentLesson.id}`)}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs shadow-md shadow-blue-600/20 transition-all min-h-[44px]"
-            >
-              <span>{t('student.resumeLesson')}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
+          <button
+            onClick={() => navigate(`/student/lessons/${recentLesson.id}`)}
+            className="apple-press inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow-sm transition-all self-end md:self-auto"
+          >
+            <span>Resume Lesson</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
         </div>
       )}
 
-      {/* Section: My Batches & Subject Classrooms */}
-      <div className="space-y-3.5">
-        <div className="flex items-center justify-between">
+      {/* Curriculum Subject Classrooms */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-blue-600" />
-              <span>{t('classrooms.title')}</span>
-            </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              {t('classrooms.subtitle')}
-            </p>
+            <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-blue-500" />
+              Classrooms & Curriculum Units
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">Explore grade-mapped learning modules and visual storytelling</p>
           </div>
 
           <button
             onClick={() => navigate('/student/lessons')}
-            className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1 min-h-[36px]"
+            className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-0.5"
           >
-            <span>{t('classrooms.viewAll')}</span>
-            <ChevronRight className="w-4 h-4" />
+            <span>View All</span>
+            <ChevronRight className="w-3.5 h-3.5" />
           </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Card 1: Language */}
+          {/* Marathi */}
           <div
             onClick={() => navigate('/student/lessons')}
-            className="bg-white rounded-3xl p-5 border border-slate-200/90 hover:border-amber-400 hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
+            className="apple-card rounded-[24px] p-5 hover:border-amber-500/40 transition-all cursor-pointer group flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <BookOpen className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-[14px] bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <BookOpen className="w-5 h-5" />
                 </div>
-                <span className="bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                  {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'LANGUAGE').length || 1 })}
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-500/10 text-amber-700 dark:text-amber-300">
+                  {allLessons.filter((l) => l.subject === 'LANGUAGE').length || 1} Lessons
                 </span>
               </div>
-              <h4 className="font-extrabold text-slate-900 text-base group-hover:text-amber-700 transition-colors">
-                {t('category.language')}
-              </h4>
-              <p className="text-xs text-slate-500 font-medium mt-1">
-                Phonics, letter recognition, vocabulary building & storytelling
+              <h3 className="font-bold text-slate-900 dark:text-white text-base group-hover:text-amber-600 transition-colors">
+                Marathi (भाषा व वाचन)
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Phonics, word decoding, paragraph reading, and rural folk narratives.
               </p>
             </div>
-            <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
-              <span>{t('common.grade')} {gradeNumber} • {t('common.level')} 1-2</span>
-              <span className="text-amber-600 font-black flex items-center gap-0.5">
-                {t('classrooms.open')} <ChevronRight className="w-3.5 h-3.5" />
+            <div className="flex items-center justify-between pt-3 mt-4 border-t border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <span>Grade {gradeNumber} • Level 1-2</span>
+              <span className="text-amber-600 font-bold flex items-center gap-0.5">
+                Open <ChevronRight className="w-3 h-3" />
               </span>
             </div>
           </div>
 
-          {/* Card 2: Math */}
+          {/* Math */}
           <div
             onClick={() => navigate('/student/lessons')}
-            className="bg-white rounded-3xl p-5 border border-slate-200/90 hover:border-blue-400 hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
+            className="apple-card rounded-[24px] p-5 hover:border-blue-500/40 transition-all cursor-pointer group flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <Calculator className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-[14px] bg-blue-500/10 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Calculator className="w-5 h-5" />
                 </div>
-                <span className="bg-blue-50 text-blue-800 border border-blue-200 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                  {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'MATH').length || 1 })}
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-500/10 text-blue-700 dark:text-blue-300">
+                  {allLessons.filter((l) => l.subject === 'MATH').length || 1} Lessons
                 </span>
               </div>
-              <h4 className="font-extrabold text-slate-900 text-base group-hover:text-blue-700 transition-colors">
-                {t('category.math')}
-              </h4>
-              <p className="text-xs text-slate-500 font-medium mt-1">
-                Counting, 2-digit addition, subtraction, visual mental math
+              <h3 className="font-bold text-slate-900 dark:text-white text-base group-hover:text-blue-600 transition-colors">
+                Mathematics (गणित व अंकज्ञान)
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                2-digit operations, mental math, place value, and visual counting.
               </p>
             </div>
-            <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
-              <span>{t('common.grade')} {gradeNumber} • {t('common.level')} 2-3</span>
-              <span className="text-blue-600 font-black flex items-center gap-0.5">
-                {t('classrooms.open')} <ChevronRight className="w-3.5 h-3.5" />
+            <div className="flex items-center justify-between pt-3 mt-4 border-t border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <span>Grade {gradeNumber} • Level 2-3</span>
+              <span className="text-blue-600 font-bold flex items-center gap-0.5">
+                Open <ChevronRight className="w-3 h-3" />
               </span>
             </div>
           </div>
 
-          {/* Card 3: Science */}
+          {/* Science */}
           <div
             onClick={() => navigate('/student/lessons')}
-            className="bg-white rounded-3xl p-5 border border-slate-200/90 hover:border-emerald-400 hover:shadow-xl transition-all cursor-pointer group flex flex-col justify-between"
+            className="apple-card rounded-[24px] p-5 hover:border-emerald-500/40 transition-all cursor-pointer group flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between mb-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-                  <Atom className="w-6 h-6" />
+                <div className="w-10 h-10 rounded-[14px] bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+                  <Atom className="w-5 h-5" />
                 </div>
-                <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-black px-2.5 py-1 rounded-full uppercase">
-                  {t('classrooms.lecturesCount', { count: allLessons.filter((l) => l.subject === 'SCIENCE').length || 1 })}
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                  {allLessons.filter((l) => l.subject === 'SCIENCE').length || 1} Lessons
                 </span>
               </div>
-              <h4 className="font-extrabold text-slate-900 text-base group-hover:text-emerald-700 transition-colors">
-                {t('category.science')}
-              </h4>
-              <p className="text-xs text-slate-500 font-medium mt-1">
-                Plants, water cycle, animals, environment & basic science
+              <h3 className="font-bold text-slate-900 dark:text-white text-base group-hover:text-emerald-600 transition-colors">
+                Science & Environment (परिसर अभ्यास)
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                Water conservation, flora and fauna, seasonal cycles, and agricultural science.
               </p>
             </div>
-            <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100 text-xs font-bold text-slate-600">
-              <span>{t('common.grade')} {gradeNumber} • {t('common.level')} 3</span>
-              <span className="text-emerald-600 font-black flex items-center gap-0.5">
-                {t('classrooms.open')} <ChevronRight className="w-3.5 h-3.5" />
+            <div className="flex items-center justify-between pt-3 mt-4 border-t border-slate-100 dark:border-slate-800 text-xs font-semibold text-slate-500 dark:text-slate-400">
+              <span>Grade {gradeNumber} • Level 3</span>
+              <span className="text-emerald-600 font-bold flex items-center gap-0.5">
+                Open <ChevronRight className="w-3 h-3" />
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* ========================================================================= */}
-      {/* SECTION: OFFLINE BOOKS, STUDY MATERIALS & NOTES */}
-      {/* ========================================================================= */}
-      <div className="space-y-3.5">
-        <div className="flex items-center justify-between">
+      {/* Offline Balbharati Textbooks & Materials */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
           <div>
-            <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
-              <BookMarked className="w-5 h-5 text-indigo-600" />
-              <span>{t('materials.title')}</span>
-            </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              {t('materials.subtitle')}
-            </p>
+            <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2">
+              <BookMarked className="w-4 h-4 text-indigo-500" />
+              E-Library & Balbharati Readers
+            </h2>
+            <p className="text-xs text-slate-400 mt-0.5">Instant offline text-to-speech reading in regional Marathi & Hindi</p>
           </div>
-
-          <span className="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full">
-            ● {t('materials.availableCount', { count: studyMaterials.length })}
+          <span className="px-3 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            {studyMaterials.length} Stored Locally
           </span>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {studyMaterials.map((mat) => {
-            const isTextbook = mat.type === 'TEXTBOOK';
-            const isNotes = mat.type === 'NOTES';
+            const isPdf = Boolean(mat.downloadUrl?.startsWith('data:application/pdf') || mat.downloadUrl?.toLowerCase().endsWith('.pdf'));
 
             return (
               <div
                 key={mat.id}
-                onClick={() => setSelectedMaterial(mat)}
-                className="bg-white rounded-3xl p-5 border border-slate-200/90 hover:border-indigo-400 hover:shadow-lg transition-all cursor-pointer flex flex-col justify-between"
+                onClick={() => {
+                  setSelectedMaterial(mat);
+                  setReaderTab(isPdf ? 'pdf' : 'text');
+                }}
+                className="apple-card rounded-[24px] p-5 hover:border-indigo-500/40 transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div>
-                  <div className="flex items-center justify-between gap-2 mb-2.5">
-                    <span
-                      className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full border ${
-                        isTextbook
-                          ? 'bg-purple-50 text-purple-800 border-purple-200'
-                          : isNotes
-                          ? 'bg-blue-50 text-blue-800 border-blue-200'
-                          : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                      }`}
-                    >
-                      {isTextbook ? t('materials.textbook') : isNotes ? t('materials.notes') : t('materials.worksheet')}
+                  <div className="flex items-center justify-between gap-2 mb-2 flex-wrap">
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-500/10 text-purple-700 dark:text-purple-300 uppercase">
+                      {mat.type}
                     </span>
-                    <span className="text-xs font-bold text-slate-500">
-                      {t('materials.pages', { count: mat.pages || 24 })}
+                    {isPdf && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-500/10 text-rose-600 dark:text-rose-400 uppercase">
+                        PDF Document
+                      </span>
+                    )}
+                    <span className="text-xs text-slate-400 font-medium ml-auto">
+                      {mat.sizeBytes ? `${(mat.sizeBytes / (1024 * 1024)).toFixed(1)} MB` : `${mat.pages || 24} Pages`}
                     </span>
                   </div>
 
-                  <h4 className="font-extrabold text-slate-900 text-base leading-snug line-clamp-2">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-base leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
                     {mat.title}
-                  </h4>
-
-                  <p className="text-xs text-slate-500 line-clamp-2 mt-1.5 font-medium">
+                  </h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 leading-relaxed">
                     {mat.description}
                   </p>
                 </div>
 
-                <div className="flex items-center justify-between pt-4 mt-4 border-t border-slate-100">
-                  <span className="text-[11px] text-slate-500 font-semibold flex items-center gap-1.5">
-                    <Download className="w-3.5 h-3.5 text-slate-400" />
-                    {t('materials.offlineAvailable')}
+                <div className="flex items-center justify-between pt-3 mt-4 border-t border-slate-100 dark:border-slate-800">
+                  <span className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1 font-medium">
+                    <Download className="w-3.5 h-3.5" />
+                    Offline Ready
                   </span>
-
-                  <button className="inline-flex items-center gap-1 text-xs font-black text-indigo-600 hover:underline min-h-[36px]">
-                    <span>{t('materials.read')}</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
+                  <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 flex items-center gap-0.5">
+                    {isPdf ? 'Open PDF' : 'Read'} <ChevronRight className="w-3 h-3" />
+                  </span>
                 </div>
               </div>
             );
@@ -504,152 +462,162 @@ export const StudentHome: React.FC = () => {
         </div>
       </div>
 
-      {/* Section: Daily Practice Problems (DPP) & Test Series */}
-      <div className="space-y-3.5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg sm:text-xl font-black text-slate-900 flex items-center gap-2">
-              <CheckSquare className="w-5 h-5 text-emerald-600" />
-              <span>{t('dpp.title')}</span>
-            </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              {t('dpp.subtitle')}
-            </p>
-          </div>
-
-          <button
-            onClick={() => navigate('/student/quizzes')}
-            className="text-xs font-black text-blue-600 hover:text-blue-700 inline-flex items-center gap-1 min-h-[36px]"
-          >
-            <span>{t('dpp.allTests')}</span>
-            <ChevronRight className="w-4 h-4" />
-          </button>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {allQuizzes.slice(0, 2).map((q, idx) => (
-            <div
-              key={q.id}
-              className="bg-white rounded-3xl p-5 border border-slate-200/90 shadow-sm flex items-center justify-between gap-4 hover:border-blue-400 transition-colors"
-            >
-              <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="bg-blue-50 text-blue-700 border border-blue-200 text-[10px] font-black px-2.5 py-0.5 rounded-full uppercase">
-                    DPP 0{idx + 1} • {q.subject}
-                  </span>
-                  <span className="text-xs font-bold text-emerald-600 flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    {t('dpp.marksTotal', { marks: q.totalMarks })}
-                  </span>
-                </div>
-                <h4 className="font-extrabold text-slate-900 text-base line-clamp-1">
-                  {q.title}
-                </h4>
-                <p className="text-xs text-slate-500 font-medium">
-                  {t('dpp.questionsCount', { count: q.questions?.length || 2 })} • {t('dpp.passingMarks', { marks: q.passingMarks })}
-                </p>
-              </div>
-
-              <button
-                onClick={() => navigate(`/student/quizzes/${q.id}`)}
-                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-black text-xs shadow-md shadow-blue-600/20 whitespace-nowrap min-h-[44px]"
-              >
-                {t('dpp.startDpp')}
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Welfare Portal Shortcut */}
+      {/* Welfare Schemes Shortcut */}
       <div
         onClick={() => navigate('/schemes')}
-        className="bg-gradient-to-br from-amber-50/80 via-orange-50/40 to-white rounded-3xl p-5 sm:p-6 border border-amber-200/90 hover:border-amber-400 shadow-sm hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
+        className="apple-card rounded-[28px] p-5 sm:p-6 hover:border-amber-500/40 transition-all cursor-pointer flex items-center justify-between group"
       >
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl shadow-md shadow-amber-500/20">
+          <div className="w-12 h-12 rounded-[16px] bg-amber-500/10 text-amber-600 flex items-center justify-center text-xl group-hover:scale-105 transition-transform">
             <Award className="w-6 h-6" />
           </div>
           <div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-              {t('nav.schemes')}
+            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+              Government Schemes
             </span>
-            <h4 className="font-black text-slate-900 text-base sm:text-lg mt-1">
-              {t('schemes.title')}
-            </h4>
-            <p className="text-xs text-slate-600 font-medium">
-              {t('schemes.subtitle')}
+            <h3 className="font-bold text-slate-900 dark:text-white text-base sm:text-lg mt-1">
+              Check Student Scholarship & DBT Eligibility
+            </h3>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Savitribai Phule scholarship, uniform grants, and nutrition benefits
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-1 text-xs font-black text-amber-900 bg-white px-4 py-2 rounded-xl border border-amber-300 shadow-sm min-h-[40px]">
-          <span>{t('schemes.eligibilityCheck')}</span>
-          <ChevronRight className="w-4 h-4" />
-        </div>
+        <ChevronRight className="w-5 h-5 text-slate-400 group-hover:translate-x-1 transition-transform" />
       </div>
 
-      {/* ========================================================================= */}
-      {/* READING MODAL: BOOK / NOTES VIEWER */}
-      {/* ========================================================================= */}
-      {selectedMaterial && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fade-in">
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl border border-slate-200 overflow-hidden">
-            {/* Modal Header */}
-            <div className="bg-slate-900 text-white p-5 flex items-center justify-between gap-3">
-              <div>
-                <span className="text-[10px] uppercase font-bold text-indigo-400">
-                  {selectedMaterial.type} • {t('common.grade')} {selectedMaterial.grade}
-                </span>
-                <h3 className="text-lg font-black">{selectedMaterial.title}</h3>
+      {/* Modal: Balbharati Reader & PDF Viewer */}
+      {selectedMaterial && (() => {
+        const isPdf = Boolean(
+          selectedMaterial.downloadUrl?.startsWith('data:application/pdf') ||
+          selectedMaterial.downloadUrl?.toLowerCase().endsWith('.pdf')
+        );
+
+        return (
+          <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-4">
+            <div
+              className={`apple-card rounded-[32px] w-full flex flex-col overflow-hidden shadow-2xl transition-all duration-300 ${
+                isPdf ? 'max-w-4xl h-[90vh]' : 'max-w-2xl max-h-[85vh]'
+              }`}
+            >
+              {/* Modal Header */}
+              <div className="p-4 sm:p-5 flex items-center justify-between border-b border-slate-100 dark:border-slate-800 gap-3">
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    <span className="text-[10px] font-bold text-indigo-500 uppercase tracking-wider">
+                      {selectedMaterial.type} • Grade {selectedMaterial.grade}
+                    </span>
+                    {isPdf && (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 uppercase">
+                        PDF Document
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white truncate">
+                    {selectedMaterial.title}
+                  </h2>
+                </div>
+
+                <div className="flex items-center gap-2 shrink-0">
+                  {isPdf && (
+                    <a
+                      href={selectedMaterial.downloadUrl}
+                      download={`${selectedMaterial.title}.pdf`}
+                      className="apple-press inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-semibold transition-all shadow-sm"
+                      title="Download PDF"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Download PDF</span>
+                    </a>
+                  )}
+                  <button
+                    onClick={() => setSelectedMaterial(null)}
+                    className="apple-press p-2 rounded-full text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
-              <button
-                onClick={() => setSelectedMaterial(null)}
-                className="w-10 h-10 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
 
-            {/* Modal Content / Reader */}
-            <div className="p-6 overflow-y-auto space-y-4 flex-1">
-              <div className="flex items-center justify-between text-xs text-slate-500 border-b border-slate-100 pb-3">
-                <span>{t('materials.pages', { count: selectedMaterial.pages || 24 })}</span>
-                <span className="text-emerald-600 font-bold">● {t('materials.offlineAvailable')}</span>
+              {/* Tab Switcher if PDF */}
+              {isPdf && (
+                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 flex items-center justify-between">
+                  <div className="inline-flex p-0.5 rounded-full bg-slate-200/70 dark:bg-slate-800 border border-slate-300/40 dark:border-slate-700">
+                    <button
+                      onClick={() => setReaderTab('pdf')}
+                      className={`apple-segment-item px-3 py-1 rounded-full text-xs font-semibold ${
+                        readerTab === 'pdf'
+                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
+                      }`}
+                    >
+                      PDF Reader View
+                    </button>
+                    <button
+                      onClick={() => setReaderTab('text')}
+                      className={`apple-segment-item px-3 py-1 rounded-full text-xs font-semibold ${
+                        readerTab === 'text'
+                          ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
+                          : 'text-slate-500 hover:text-slate-900 dark:text-slate-400'
+                      }`}
+                    >
+                      Text & Speech Notes
+                    </button>
+                  </div>
+                  <span className="text-[11px] text-slate-400 hidden sm:inline font-medium">
+                    {selectedMaterial.sizeBytes ? `${(selectedMaterial.sizeBytes / (1024 * 1024)).toFixed(1)} MB` : 'Offline Stored'}
+                  </span>
+                </div>
+              )}
+
+              {/* Modal Body */}
+              <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+                {isPdf && readerTab === 'pdf' ? (
+                  <div className="flex-1 min-h-[480px] w-full bg-slate-100 dark:bg-slate-950 p-2 sm:p-3 flex flex-col">
+                    <iframe
+                      src={selectedMaterial.downloadUrl}
+                      title={selectedMaterial.title}
+                      className="w-full flex-1 rounded-[18px] border border-slate-200/80 dark:border-slate-800 bg-white shadow-inner"
+                    />
+                  </div>
+                ) : (
+                  <div className="p-6 overflow-y-auto space-y-4 flex-1">
+                    <div className="prose max-w-none text-slate-800 dark:text-slate-200 text-sm whitespace-pre-line leading-relaxed p-5 rounded-[20px] bg-slate-50 dark:bg-slate-800/50">
+                      {selectedMaterial.content}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="prose max-w-none text-slate-800 text-sm whitespace-pre-line leading-relaxed font-medium bg-slate-50 p-5 rounded-2xl border border-slate-200/80">
-                {selectedMaterial.content}
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+                <button
+                  onClick={() => {
+                    if ('speechSynthesis' in window && selectedMaterial.content) {
+                      window.speechSynthesis.cancel();
+                      const u = new SpeechSynthesisUtterance(selectedMaterial.content.slice(0, 200));
+                      u.lang = 'mr-IN';
+                      window.speechSynthesis.speak(u);
+                    }
+                  }}
+                  className="apple-press inline-flex items-center gap-2 px-4 py-2 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 font-semibold text-xs"
+                >
+                  <Volume2 className="w-4 h-4 text-blue-500" />
+                  <span>Listen in Vernacular Speech</span>
+                </button>
+
+                <button
+                  onClick={() => setSelectedMaterial(null)}
+                  className="apple-press px-5 py-2 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-semibold text-xs"
+                >
+                  Close
+                </button>
               </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 bg-slate-100/80 border-t border-slate-200 flex items-center justify-between">
-              <button
-                onClick={() => {
-                  if ('speechSynthesis' in window && selectedMaterial.content) {
-                    window.speechSynthesis.cancel();
-                    const u = new SpeechSynthesisUtterance(selectedMaterial.content.slice(0, 200));
-                    u.lang = 'mr-IN';
-                    window.speechSynthesis.speak(u);
-                  }
-                }}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-slate-300 text-slate-800 font-bold text-xs hover:bg-slate-50 min-h-[44px]"
-              >
-                <Volume2 className="w-4 h-4 text-blue-600" />
-                <span>{t('materials.readAloud')}</span>
-              </button>
-
-              <button
-                onClick={() => setSelectedMaterial(null)}
-                className="px-5 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs min-h-[44px]"
-              >
-                {t('materials.closeReader')}
-              </button>
             </div>
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };

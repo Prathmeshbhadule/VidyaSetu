@@ -85,7 +85,7 @@ export const RoleGuard: React.FC<RoleGuardProps> = ({ allowedRoles, children }) 
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 text-left text-xs text-slate-600 space-y-1">
-            <p className="font-semibold text-slate-700">🔒 Account Isolation Security Rule:</p>
+            <p className="font-semibold text-slate-700">Account Isolation Security Rule:</p>
             <p className="text-[11px]">
               Direct account switching is disabled for data integrity. Please log out first before signing in as a different user.
             </p>
